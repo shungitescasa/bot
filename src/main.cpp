@@ -1,6 +1,7 @@
 #include <iostream>
 #include <optional>
 
+#include "commands/command.hpp"
 #include "config.hpp"
 #include "irc/client.hpp"
 
@@ -22,6 +23,7 @@ int main(int argc, char *argv[]) {
   }
 
   bot::irc::Client client(cfg.bot_username, cfg.bot_password);
+  bot::command::CommandLoader command_loader;
 
   client.run();
 
