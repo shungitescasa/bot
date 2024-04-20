@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <optional>
 #include <sstream>
 #include <string>
@@ -93,6 +94,14 @@ namespace RedpilledBot {
 
       return std::nullopt;
     }
+
+    template <MessageType T>
+    struct MessageHandler;
+
+    template <>
+    struct MessageHandler<MessageType::Privmsg> {
+        using fn = std::function<void(Message<Privmsg> message)>;
+    };
 
   }
 }
