@@ -7,5 +7,7 @@ int main(int argc, char *argv[]) {
 
   RedpilledBot::IRC::Client client("", "");
 
+  client.run();
+
   return 0;
 }

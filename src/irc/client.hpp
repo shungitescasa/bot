@@ -11,6 +11,8 @@ namespace RedpilledBot {
         Client(std::string username, std::string password);
         ~Client() = default;
 
+        void run();
+
       private:
         std::string username;
         std::string password;
