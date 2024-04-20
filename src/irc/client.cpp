@@ -3,8 +3,13 @@
 #include <ixwebsocket/IXWebSocketMessage.h>
 #include <ixwebsocket/IXWebSocketMessageType.h>
 
+#include <algorithm>
 #include <iostream>
+#include <optional>
 #include <string>
+#include <vector>
+
+#include "message.hpp"
 
 using namespace RedpilledBot::IRC;
 
@@ -24,6 +29,35 @@ void Client::run() {
         switch (msg->type) {
           case ix::WebSocketMessageType::Message: {
             std::cout << "Got a message: " << msg->str << std::endl;
+
+            std::vector<std::string> lines = split_text(msg->str, '\n');
+
+            for (std::string &line : lines) {
+              line.erase(std::remove_if(line.begin(), line.end(),
+                                        [](char c) {
+                                          return c == '\n' || c == '\r' ||
+                                                 c == '\t';
+                                        }),
+                         line.end());
+
+              std::optional<MessageType> type = define_message_type(line);
+
+              if (!type.has_value()) {
+                break;
+              }
+
+              MessageType m_type = type.value();
+
+              if (m_type == MessageType::Privmsg) {
+                std::optional<Message<MessageType::Privmsg>> message =
+                    parse_message<MessageType::Privmsg>(line);
+
+                if (message.has_value()) {
+                  this->onPrivmsg(message.value());
+                }
+              }
+            }
+
             break;
           }
           case ix::WebSocketMessageType::Open: {
