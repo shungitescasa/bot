@@ -14,6 +14,8 @@ namespace RedpilledBot {
         void run();
 
       private:
+        void authorize();
+
         std::string username;
         std::string password;
 

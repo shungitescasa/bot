@@ -28,6 +28,7 @@ void Client::run() {
           }
           case ix::WebSocketMessageType::Open: {
             std::cout << "Connected to Twitch IRC!\n";
+            this->authorize();
             break;
           }
           case ix::WebSocketMessageType::Close: {
@@ -41,4 +42,19 @@ void Client::run() {
       });
 
   this->websocket.run();
+}
+
+void Client::authorize() {
+  if (this->username.empty() || this->password.empty()) {
+    std::cout << "Bot username and password must be set!\n";
+    return;
+  }
+
+  std::cout << "Authorizing on Twitch IRC servers...\n";
+
+  this->websocket.send("PASS " + this->password + "\r\n");
+  this->websocket.send("NICK " + this->username + "\r\n");
+  this->websocket.send("CAP REQ :twitch.tv/membership\r\n");
+  this->websocket.send("CAP REQ :twitch.tv/commands\r\n");
+  this->websocket.send("CAP REQ :twitch.tv/tags\r\n");
 }
