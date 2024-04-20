@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ixwebsocket/IXWebSocket.h>
+
 #include <string>
 
 namespace RedpilledBot {
@@ -12,6 +14,8 @@ namespace RedpilledBot {
       private:
         std::string username;
         std::string password;
+
+        ix::WebSocket websocket;
     };
   }
 }

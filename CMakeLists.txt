@@ -11,12 +11,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 add_executable(Bot)
 
-file(GLOB_RECURSE SRC_FILES "src/*.cpp" "src/*.h" "src/*.hpp")
-
-target_sources(Bot PRIVATE ${SRC_FILES})
-
 set_target_properties(
   Bot PROPERTIES
   DESCRIPTION ${PROJECT_DESCRIPTION}
   OUTPUT_NAME "redpilled-bot_${PROJECT_VERSION}"
 )
+
+file(GLOB_RECURSE SRC_FILES "src/*.cpp" "src/*.h" "src/*.hpp")
+
+target_sources(Bot PRIVATE ${SRC_FILES})
+
+target_link_libraries(Bot PRIVATE ixwebsocket)
