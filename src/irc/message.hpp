@@ -8,8 +8,8 @@
 
 #include "../utils/string.hpp"
 
-namespace RedpilledBot {
-  namespace IRC {
+namespace bot {
+  namespace irc {
     enum MessageType { Privmsg, Notice };
     std::optional<MessageType> define_message_type(const std::string &msg);
 
@@ -38,7 +38,7 @@ namespace RedpilledBot {
 
     template <MessageType T>
     std::optional<Message<T>> parse_message(const std::string &msg) {
-      std::vector<std::string> parts = split_text(msg, ' ');
+      std::vector<std::string> parts = utils::string::split_text(msg, ' ');
 
       if (T == MessageType::Privmsg) {
         MessageSender sender;
@@ -53,7 +53,8 @@ namespace RedpilledBot {
         std::string user = parts[0];
         user = user.substr(1, user.length());
 
-        std::vector<std::string> user_parts = split_text(user, '!');
+        std::vector<std::string> user_parts =
+            utils::string::split_text(user, '!');
 
         sender.login = user_parts[0];
 
@@ -64,10 +65,11 @@ namespace RedpilledBot {
 
         parts.erase(parts.begin());
 
-        std::string chat_message = join_vector(parts, ' ');
+        std::string chat_message = utils::string::join_vector(parts, ' ');
         message.message = chat_message.substr(1, chat_message.length());
 
-        std::vector<std::string> tags_parts = split_text(tags, ';');
+        std::vector<std::string> tags_parts =
+            utils::string::split_text(tags, ';');
 
         for (const std::string &tag : tags_parts) {
           std::istringstream iss(tag);

@@ -6,8 +6,8 @@
 
 #include "message.hpp"
 
-namespace RedpilledBot {
-  namespace IRC {
+namespace bot {
+  namespace irc {
     class Client {
       public:
         Client(std::string username, std::string password);

@@ -5,7 +5,7 @@
 int main(int argc, char *argv[]) {
   std::cout << "hi world\n";
 
-  RedpilledBot::IRC::Client client("", "");
+  bot::irc::Client client("", "");
 
   client.run();
 

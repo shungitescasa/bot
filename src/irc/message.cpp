@@ -4,10 +4,10 @@
 #include <string>
 #include <vector>
 
-namespace RedpilledBot {
-  namespace IRC {
+namespace bot {
+  namespace irc {
     std::optional<MessageType> define_message_type(const std::string &msg) {
-      std::vector<std::string> parts = split_text(msg, ' ');
+      std::vector<std::string> parts = utils::string::split_text(msg, ' ');
       int i;
 
       if (msg[0] == '@') {

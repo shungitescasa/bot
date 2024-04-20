@@ -11,7 +11,7 @@
 
 #include "message.hpp"
 
-using namespace RedpilledBot::IRC;
+using namespace bot::irc;
 
 Client::Client(std::string username, std::string password) {
   this->username = username;
@@ -30,7 +30,8 @@ void Client::run() {
           case ix::WebSocketMessageType::Message: {
             std::cout << "Got a message: " << msg->str << std::endl;
 
-            std::vector<std::string> lines = split_text(msg->str, '\n');
+            std::vector<std::string> lines =
+                utils::string::split_text(msg->str, '\n');
 
             for (std::string &line : lines) {
               line.erase(std::remove_if(line.begin(), line.end(),
