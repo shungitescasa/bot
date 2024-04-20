@@ -15,6 +15,9 @@ namespace RedpilledBot {
         std::string username;
         std::string password;
 
+        std::string host;
+        std::string port;
+
         ix::WebSocket websocket;
     };
   }
