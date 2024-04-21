@@ -26,6 +26,10 @@ namespace bot {
         std::optional<std::variant<std::vector<std::string>, std::string>> run(
             const irc::Message<irc::MessageType::Privmsg> &msg);
 
+        const std::vector<std::unique_ptr<Command>> &get_commands() const {
+          return this->commands;
+        };
+
       private:
         std::vector<std::unique_ptr<Command>> commands;
     };
