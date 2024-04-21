@@ -1,9 +1,12 @@
 #include <iostream>
 #include <optional>
 
+#include "bundle.hpp"
 #include "commands/command.hpp"
 #include "config.hpp"
+#include "handlers.hpp"
 #include "irc/client.hpp"
+#include "irc/message.hpp"
 #include "localization/localization.hpp"
 
 int main(int argc, char *argv[]) {
@@ -28,6 +31,14 @@ int main(int argc, char *argv[]) {
   bot::loc::Localization localization("localization");
 
   client.join(cfg.bot_username);
+
+  client.on<bot::irc::MessageType::Privmsg>(
+      [&client, &command_loader, &localization](
+          const bot::irc::Message<bot::irc::MessageType::Privmsg> &message) {
+        bot::InstanceBundle bundle{client, localization};
+        bot::handlers::handle_private_message(bundle, command_loader, message);
+      });
+
   client.run();
 
   return 0;
