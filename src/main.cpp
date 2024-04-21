@@ -4,6 +4,7 @@
 #include "commands/command.hpp"
 #include "config.hpp"
 #include "irc/client.hpp"
+#include "localization/localization.hpp"
 
 int main(int argc, char *argv[]) {
   std::cout << "hi world\n";
@@ -24,6 +25,7 @@ int main(int argc, char *argv[]) {
 
   bot::irc::Client client(cfg.bot_username, cfg.bot_password);
   bot::command::CommandLoader command_loader;
+  bot::loc::Localization localization("localization");
 
   client.run();
 
