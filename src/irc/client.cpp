@@ -74,6 +74,11 @@ void Client::run() {
           case ix::WebSocketMessageType::Close: {
             std::cout << "Twitch IRC Connection closed!\n";
             this->is_connected = false;
+
+            for (const auto &x : this->joined_channels) {
+              this->raw("JOIN #" + x);
+            }
+
             break;
           }
           default: {
@@ -83,6 +88,19 @@ void Client::run() {
       });
 
   this->websocket.run();
+}
+
+bool Client::join(const std::string &channel_login) {
+  auto already_joined =
+      std::any_of(this->joined_channels.begin(), this->joined_channels.end(),
+                  [&](const auto &x) { return x == channel_login; });
+
+  if (!already_joined) {
+    this->raw("JOIN #" + channel_login);
+    this->joined_channels.push_back(channel_login);
+  }
+
+  return !already_joined;
 }
 
 void Client::raw(const std::string &raw_message) {

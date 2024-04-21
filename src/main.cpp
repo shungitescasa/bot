@@ -27,6 +27,7 @@ int main(int argc, char *argv[]) {
   bot::command::CommandLoader command_loader;
   bot::loc::Localization localization("localization");
 
+  client.join(cfg.bot_username);
   client.run();
 
   return 0;

@@ -16,6 +16,7 @@ namespace bot {
 
         void run();
 
+        bool join(const std::string &channel_login);
         void raw(const std::string &raw_message);
 
         template <MessageType T>
@@ -42,6 +43,8 @@ namespace bot {
 
         bool is_connected = false;
         std::vector<std::string> pool;
+
+        std::vector<std::string> joined_channels;
 
         // Message handlers
         typename MessageHandler<MessageType::Privmsg>::fn onPrivmsg;
