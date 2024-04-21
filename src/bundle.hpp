@@ -5,7 +5,7 @@
 
 namespace bot {
   struct InstanceBundle {
-      const irc::Client &irc_client;
+      irc::Client &irc_client;
       const bot::loc::Localization &localization;
   };
 }
