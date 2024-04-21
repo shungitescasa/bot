@@ -14,7 +14,7 @@ namespace bot {
 
         std::variant<std::vector<std::string>, std::string> run(
             const InstanceBundle &bundle,
-            const irc::Message<irc::MessageType::Privmsg> &msg) const override {
+            const command::Request &request) const override {
           return "pong";
         }
     };

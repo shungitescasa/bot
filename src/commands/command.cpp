@@ -1,11 +1,12 @@
 #include "command.hpp"
 
-#include <iostream>
+#include <algorithm>
 #include <memory>
 #include <optional>
 
 #include "../bundle.hpp"
 #include "../modules/ping.hpp"
+#include "request.hpp"
 
 namespace bot {
   namespace command {
@@ -18,16 +19,17 @@ namespace bot {
     }
 
     std::optional<std::variant<std::vector<std::string>, std::string>>
-    CommandLoader::run(
-        const InstanceBundle &bundle,
-        const irc::Message<irc::MessageType::Privmsg> &msg) const {
-      for (const std::unique_ptr<Command> &command : this->commands) {
-        if (command->get_name() == msg.message) {
-          return command->run(bundle, msg);
-        }
+    CommandLoader::run(const InstanceBundle &bundle,
+                       const Request &request) const {
+      auto command = std::find_if(
+          this->commands.begin(), this->commands.end(),
+          [&](const auto &x) { return x->get_name() == request.command_id; });
+
+      if (command == this->commands.end()) {
+        return std::nullopt;
       }
 
-      return std::nullopt;
+      return (*command)->run(bundle, request);
     }
   }
 }
