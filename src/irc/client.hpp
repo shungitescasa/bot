@@ -16,6 +16,7 @@ namespace bot {
 
         void run();
 
+        void say(const std::string &channel_login, const std::string &message);
         bool join(const std::string &channel_login);
         void raw(const std::string &raw_message);
 

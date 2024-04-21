@@ -90,6 +90,10 @@ void Client::run() {
   this->websocket.run();
 }
 
+void Client::say(const std::string &channel_login, const std::string &message) {
+  this->raw("PRIVMSG #" + channel_login + " :" + message);
+}
+
 bool Client::join(const std::string &channel_login) {
   auto already_joined =
       std::any_of(this->joined_channels.begin(), this->joined_channels.end(),
