@@ -3,6 +3,7 @@
 #include <ixwebsocket/IXWebSocket.h>
 
 #include <string>
+#include <vector>
 
 #include "message.hpp"
 
@@ -14,6 +15,8 @@ namespace bot {
         ~Client() = default;
 
         void run();
+
+        void raw(const std::string &raw_message);
 
         template <MessageType T>
         void on(typename MessageHandler<T>::fn function) {
@@ -36,6 +39,9 @@ namespace bot {
         std::string port;
 
         ix::WebSocket websocket;
+
+        bool is_connected = false;
+        std::vector<std::string> pool;
 
         // Message handlers
         typename MessageHandler<MessageType::Privmsg>::fn onPrivmsg;

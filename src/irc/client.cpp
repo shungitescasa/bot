@@ -63,11 +63,17 @@ void Client::run() {
           }
           case ix::WebSocketMessageType::Open: {
             std::cout << "Connected to Twitch IRC!\n";
+            this->is_connected = true;
             this->authorize();
+            for (const auto &msg : this->pool) {
+              this->websocket.send(msg);
+            }
+            this->pool.clear();
             break;
           }
           case ix::WebSocketMessageType::Close: {
             std::cout << "Twitch IRC Connection closed!\n";
+            this->is_connected = false;
             break;
           }
           default: {
@@ -79,6 +85,15 @@ void Client::run() {
   this->websocket.run();
 }
 
+void Client::raw(const std::string &raw_message) {
+  std::string msg = raw_message + "\r\n";
+  if (this->is_connected) {
+    this->websocket.send(msg);
+  } else {
+    this->pool.push_back(msg);
+  }
+}
+
 void Client::authorize() {
   if (this->username.empty() || this->password.empty()) {
     std::cout << "Bot username and password must be set!\n";
@@ -87,9 +102,9 @@ void Client::authorize() {
 
   std::cout << "Authorizing on Twitch IRC servers...\n";
 
-  this->websocket.send("PASS " + this->password + "\r\n");
-  this->websocket.send("NICK " + this->username + "\r\n");
-  this->websocket.send("CAP REQ :twitch.tv/membership\r\n");
-  this->websocket.send("CAP REQ :twitch.tv/commands\r\n");
-  this->websocket.send("CAP REQ :twitch.tv/tags\r\n");
+  this->raw("PASS " + this->password);
+  this->raw("NICK " + this->username);
+  this->raw("CAP REQ :twitch.tv/membership");
+  this->raw("CAP REQ :twitch.tv/commands");
+  this->raw("CAP REQ :twitch.tv/tags");
 }
