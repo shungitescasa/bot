@@ -4,6 +4,7 @@
 #include <memory>
 #include <optional>
 
+#include "../bundle.hpp"
 #include "../modules/ping.hpp"
 
 namespace bot {
@@ -17,10 +18,12 @@ namespace bot {
     }
 
     std::optional<std::variant<std::vector<std::string>, std::string>>
-    CommandLoader::run(const irc::Message<irc::MessageType::Privmsg> &msg) {
+    CommandLoader::run(
+        const InstanceBundle &bundle,
+        const irc::Message<irc::MessageType::Privmsg> &msg) const {
       for (const std::unique_ptr<Command> &command : this->commands) {
         if (command->get_name() == msg.message) {
-          return command->run(msg);
+          return command->run(bundle, msg);
         }
       }
 
