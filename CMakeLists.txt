@@ -21,4 +21,4 @@ file(GLOB_RECURSE SRC_FILES "src/*.cpp" "src/*.h" "src/*.hpp")
 
 target_sources(Bot PRIVATE ${SRC_FILES})
 
-target_link_libraries(Bot PRIVATE ixwebsocket)
+target_link_libraries(Bot PRIVATE ixwebsocket pqxx)
