@@ -19,6 +19,7 @@ namespace bot {
     }
 
     Configuration cfg;
+    DatabaseConfiguration db_cfg;
 
     std::string line;
     while (std::getline(ifs, line, '\n')) {
@@ -37,8 +38,20 @@ namespace bot {
         cfg.bot_username = value;
       } else if (key == "bot_password") {
         cfg.bot_password = value;
+      } else if (key == "db_name") {
+        db_cfg.name = value;
+      } else if (key == "db_user") {
+        db_cfg.user = value;
+      } else if (key == "db_password") {
+        db_cfg.password = value;
+      } else if (key == "db_host") {
+        db_cfg.host = value;
+      } else if (key == "db_port") {
+        db_cfg.port = value;
       }
     }
+
+    cfg.database = db_cfg;
 
     return cfg;
   }

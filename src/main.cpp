@@ -26,6 +26,14 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
+  if (cfg.database.name.empty() || cfg.database.user.empty() ||
+      cfg.database.password.empty() || cfg.database.host.empty() ||
+      cfg.database.port.empty()) {
+    std::cerr
+        << "*** DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT must be set!\n";
+    return -1;
+  }
+
   bot::irc::Client client(cfg.bot_username, cfg.bot_password);
   bot::command::CommandLoader command_loader;
   bot::loc::Localization localization("localization");
