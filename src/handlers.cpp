@@ -1,6 +1,7 @@
 #include "handlers.hpp"
 
 #include <optional>
+#include <pqxx/pqxx>
 #include <variant>
 #include <vector>
 
@@ -14,7 +15,8 @@ namespace bot::handlers {
   void handle_private_message(
       const InstanceBundle &bundle,
       const command::CommandLoader &command_loader,
-      const irc::Message<irc::MessageType::Privmsg> &message) {
+      const irc::Message<irc::MessageType::Privmsg> &message,
+      const pqxx::work &work) {
     std::optional<command::Request> request =
         command::generate_request(command_loader, message);
 

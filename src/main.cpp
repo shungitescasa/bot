@@ -56,10 +56,18 @@ int main(int argc, char *argv[]) {
   conn.close();
 
   client.on<bot::irc::MessageType::Privmsg>(
-      [&client, &command_loader, &localization](
-          const bot::irc::Message<bot::irc::MessageType::Privmsg> &message) {
+      [&client, &command_loader, &localization,
+       &cfg](const bot::irc::Message<bot::irc::MessageType::Privmsg> &message) {
         bot::InstanceBundle bundle{client, localization};
-        bot::handlers::handle_private_message(bundle, command_loader, message);
+
+        pqxx::connection conn(GET_DATABASE_CONNECTION_URL(cfg));
+        pqxx::work work(conn);
+
+        bot::handlers::handle_private_message(bundle, command_loader, message,
+                                              work);
+
+        work.commit();
+        conn.close();
       });
 
   client.run();
