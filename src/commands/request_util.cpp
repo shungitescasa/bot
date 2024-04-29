@@ -1,6 +1,7 @@
 #include "request_util.hpp"
 
 #include <optional>
+#include <pqxx/pqxx>
 
 #include "../constants.hpp"
 #include "../irc/message.hpp"
@@ -10,7 +11,8 @@
 namespace bot::command {
   std::optional<Request> generate_request(
       const command::CommandLoader &command_loader,
-      const irc::Message<irc::MessageType::Privmsg> &irc_message) {
+      const irc::Message<irc::MessageType::Privmsg> &irc_message,
+      const pqxx::work &work) {
     std::vector<std::string> parts =
         utils::string::split_text(irc_message.message, ' ');
 
@@ -35,7 +37,7 @@ namespace bot::command {
     parts.erase(parts.begin());
 
     if (parts.empty()) {
-      Request req{command_id, std::nullopt, std::nullopt, irc_message};
+      Request req{command_id, std::nullopt, std::nullopt, irc_message, work};
 
       return req;
     }
@@ -52,7 +54,7 @@ namespace bot::command {
       message = std::nullopt;
     }
 
-    Request req{command_id, subcommand_id, message, irc_message};
+    Request req{command_id, subcommand_id, message, irc_message, work};
     return req;
   }
 }

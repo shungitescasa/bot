@@ -1,4 +1,5 @@
 #include <optional>
+#include <pqxx/pqxx>
 
 #include "../irc/message.hpp"
 #include "command.hpp"
@@ -7,5 +8,6 @@
 namespace bot::command {
   std::optional<Request> generate_request(
       const command::CommandLoader &command_loader,
-      const irc::Message<irc::MessageType::Privmsg> &irc_message);
+      const irc::Message<irc::MessageType::Privmsg> &irc_message,
+      const pqxx::work &work);
 }
