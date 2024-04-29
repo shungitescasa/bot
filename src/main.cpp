@@ -1,5 +1,7 @@
 #include <iostream>
 #include <optional>
+#include <pqxx/pqxx>
+#include <string>
 
 #include "bundle.hpp"
 #include "commands/command.hpp"
@@ -39,6 +41,19 @@ int main(int argc, char *argv[]) {
   bot::loc::Localization localization("localization");
 
   client.join(cfg.bot_username);
+
+  pqxx::connection conn(GET_DATABASE_CONNECTION_URL(cfg));
+  pqxx::work work(conn);
+
+  auto rows = work.exec("SELECT alias_name FROM channels");
+
+  for (const auto &row : rows) {
+    auto name = row[0].as<std::string>();
+    client.join(name);
+  }
+
+  work.commit();
+  conn.close();
 
   client.on<bot::irc::MessageType::Privmsg>(
       [&client, &command_loader, &localization](
