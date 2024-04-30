@@ -10,5 +10,5 @@ namespace bot::handlers {
       const InstanceBundle &bundle,
       const command::CommandLoader &command_loader,
       const irc::Message<irc::MessageType::Privmsg> &message,
-      const pqxx::work &work);
+      pqxx::connection &conn);
 }

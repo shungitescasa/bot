@@ -12,6 +12,6 @@ namespace bot::command {
       std::optional<std::string> subcommand_id;
       std::optional<std::string> message;
       const irc::Message<irc::MessageType::Privmsg> &irc_message;
-      const pqxx::work &work;
+      pqxx::connection &conn;
   };
 }

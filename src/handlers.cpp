@@ -16,9 +16,9 @@ namespace bot::handlers {
       const InstanceBundle &bundle,
       const command::CommandLoader &command_loader,
       const irc::Message<irc::MessageType::Privmsg> &message,
-      const pqxx::work &work) {
+      pqxx::connection &conn) {
     std::optional<command::Request> request =
-        command::generate_request(command_loader, message, work);
+        command::generate_request(command_loader, message, conn);
 
     if (request.has_value()) {
       auto o_response = command_loader.run(bundle, request.value());

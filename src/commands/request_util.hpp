@@ -9,5 +9,5 @@ namespace bot::command {
   std::optional<Request> generate_request(
       const command::CommandLoader &command_loader,
       const irc::Message<irc::MessageType::Privmsg> &irc_message,
-      const pqxx::work &work);
+      pqxx::connection &conn);
 }

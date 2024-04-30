@@ -61,12 +61,10 @@ int main(int argc, char *argv[]) {
         bot::InstanceBundle bundle{client, localization};
 
         pqxx::connection conn(GET_DATABASE_CONNECTION_URL(cfg));
-        pqxx::work work(conn);
 
         bot::handlers::handle_private_message(bundle, command_loader, message,
-                                              work);
+                                              conn);
 
-        work.commit();
         conn.close();
       });
 
