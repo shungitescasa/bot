@@ -1,5 +1,6 @@
 #include "request_util.hpp"
 
+#include <algorithm>
 #include <optional>
 #include <pqxx/pqxx>
 #include <string>
@@ -105,14 +106,30 @@ namespace bot::command {
 
     schemas::User user(query[0]);
 
+    schemas::PermissionLevel level = schemas::PermissionLevel::USER;
+    const auto &badges = irc_message.sender.badges;
+
+    if (user.get_alias_id() == channel.get_alias_id()) {
+      level = schemas::PermissionLevel::BROADCASTER;
+    } else if (std::any_of(badges.begin(), badges.end(), [&](const auto &x) {
+                 return x.first == "moderator";
+               })) {
+      level = schemas::PermissionLevel::MODERATOR;
+    } else if (std::any_of(badges.begin(), badges.end(),
+                           [&](const auto &x) { return x.first == "vip"; })) {
+      level = schemas::PermissionLevel::VIP;
+    }
+
     query = work->exec("SELECT * FROM user_rights WHERE user_id = " +
                        std::to_string(user.get_id()) +
                        " AND channel_id = " + std::to_string(channel.get_id()));
 
     if (query.empty()) {
-      work->exec("INSERT INTO user_rights (user_id, channel_id) VALUES (" +
-                 std::to_string(user.get_id()) + ", " +
-                 std::to_string(channel.get_id()) + ")");
+      work->exec(
+          "INSERT INTO user_rights (user_id, channel_id, level) VALUES (" +
+          std::to_string(user.get_id()) + ", " +
+          std::to_string(channel.get_id()) + ", " + std::to_string(level) +
+          ")");
 
       work->commit();
 
@@ -125,6 +142,15 @@ namespace bot::command {
     }
 
     schemas::UserRights user_rights(query[0]);
+
+    if (user_rights.get_level() != level) {
+      work->exec("UPDATE user_rights SET level = " + std::to_string(level) +
+                 " WHERE id = " + std::to_string(query[0][0].as<int>()));
+
+      work->commit();
+
+      user_rights.set_level(level);
+    }
 
     delete work;
 
