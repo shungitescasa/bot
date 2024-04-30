@@ -102,7 +102,7 @@ namespace bot {
               std::getline(iss2, name, '/');
               std::getline(iss2, value);
 
-              map.insert(name, value);
+              map.insert({name, std::stoi(value)});
             }
 
             sender.badges = map;
