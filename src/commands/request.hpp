@@ -16,6 +16,7 @@ namespace bot::command {
       const irc::Message<irc::MessageType::Privmsg> &irc_message;
 
       schemas::Channel channel;
+      schemas::ChannelPreferences channel_preferences;
       schemas::User user;
 
       pqxx::connection &conn;

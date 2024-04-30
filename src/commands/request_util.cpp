@@ -63,6 +63,30 @@ namespace bot::command {
 
     schemas::Channel channel(channel_query[0]);
 
+    pqxx::result channel_pref_query =
+        work->exec("SELECT * FROM channel_preferences WHERE channel_id = " +
+                   std::to_string(channel.get_id()));
+
+    // Create new channel preference data in the database if it didn't exist b4
+    if (channel_pref_query.empty()) {
+      work->exec(
+          "INSERT INTO channel_preferences (channel_id, prefix, locale) VALUES "
+          "(" +
+          std::to_string(channel.get_id()) + ", '" + DEFAULT_PREFIX + "', '" +
+          DEFAULT_LOCALE_ID + "')");
+
+      work->commit();
+
+      delete work;
+      work = new pqxx::work(conn);
+
+      channel_pref_query =
+          work->exec("SELECT * FROM channel_preferences WHERE channel_id = " +
+                     std::to_string(channel.get_id()));
+    }
+
+    schemas::ChannelPreferences channel_preferences(channel_pref_query[0]);
+
     pqxx::result user_query =
         work->exec("SELECT * FROM users WHERE alias_id = " +
                    std::to_string(irc_message.sender.id));
@@ -87,8 +111,8 @@ namespace bot::command {
     delete work;
 
     if (parts.empty()) {
-      Request req{command_id, std::nullopt, std::nullopt, irc_message,
-                  channel,    user,         conn};
+      Request req{command_id, std::nullopt,        std::nullopt, irc_message,
+                  channel,    channel_preferences, user,         conn};
 
       return req;
     }
@@ -105,8 +129,8 @@ namespace bot::command {
       message = std::nullopt;
     }
 
-    Request req{command_id, subcommand_id, message, irc_message,
-                channel,    user,          conn};
+    Request req{command_id, subcommand_id,       message, irc_message,
+                channel,    channel_preferences, user,    conn};
     return req;
   }
 }
