@@ -9,6 +9,8 @@
 #include <stdexcept>
 #include <string>
 
+#include "../constants.hpp"
+
 namespace bot::schemas {
   class Channel {
     public:
@@ -62,5 +64,36 @@ namespace bot::schemas {
       std::string alias_name;
       std::chrono::system_clock::time_point joined_at;
       std::optional<std::chrono::system_clock::time_point> opted_out_at;
+  };
+
+  class ChannelPreference {
+    public:
+      ChannelPreference(const pqxx::row &row) {
+        this->id = row[0].as<int>();
+        this->channel_id = row[1].as<int>();
+
+        if (!row[2].is_null()) {
+          this->prefix = row[2].as<std::string>();
+        } else {
+          this->prefix = DEFAULT_PREFIX;
+        }
+
+        if (!row[3].is_null()) {
+          this->locale = row[3].as<std::string>();
+        } else {
+          this->locale = DEFAULT_LOCALE_ID;
+        }
+      }
+
+      ~ChannelPreference() = default;
+
+      const int &get_id() const { return this->id; }
+      const int &get_channel_id() const { return this->channel_id; }
+      const std::string &get_prefix() const { return this->prefix; }
+      const std::string &get_locale() const { return this->locale; }
+
+    private:
+      int id, channel_id;
+      std::string prefix, locale;
   };
 }
