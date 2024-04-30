@@ -81,6 +81,7 @@ namespace bot::schemas {
       const int &get_user_id() const { return this->user_id; }
       const int &get_channel_id() const { return this->channel_id; }
       const PermissionLevel &get_level() const { return this->level; }
+      void set_level(PermissionLevel level) { this->level = level; }
 
     private:
       int id, user_id, channel_id;
