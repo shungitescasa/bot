@@ -63,11 +63,32 @@ namespace bot::command {
 
     schemas::Channel channel(channel_query[0]);
 
+    pqxx::result user_query =
+        work->exec("SELECT * FROM users WHERE alias_id = " +
+                   std::to_string(irc_message.sender.id));
+
+    // Create new user data in the database if it didn't exist before
+    if (user_query.empty()) {
+      work->exec("INSERT INTO users (alias_id, alias_name) VALUES (" +
+                 std::to_string(irc_message.sender.id) + ", '" +
+                 irc_message.sender.login + "')");
+
+      work->commit();
+
+      delete work;
+      work = new pqxx::work(conn);
+
+      user_query = work->exec("SELECT * FROM users WHERE alias_id = " +
+                              std::to_string(irc_message.sender.id));
+    }
+
+    schemas::User user(user_query[0]);
+
     delete work;
 
     if (parts.empty()) {
-      Request req{command_id,  std::nullopt, std::nullopt,
-                  irc_message, channel,      conn};
+      Request req{command_id, std::nullopt, std::nullopt, irc_message,
+                  channel,    user,         conn};
 
       return req;
     }
@@ -84,7 +105,8 @@ namespace bot::command {
       message = std::nullopt;
     }
 
-    Request req{command_id, subcommand_id, message, irc_message, channel, conn};
+    Request req{command_id, subcommand_id, message, irc_message,
+                channel,    user,          conn};
     return req;
   }
 }
