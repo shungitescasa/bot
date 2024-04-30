@@ -63,4 +63,27 @@ namespace bot::schemas {
       std::chrono::system_clock::time_point joined_at;
       std::optional<std::chrono::system_clock::time_point> opted_out_at;
   };
+
+  enum PermissionLevel { SUSPENDED, USER, VIP, MODERATOR, BROADCASTER };
+
+  class UserRights {
+    public:
+      UserRights(const pqxx::row &row) {
+        this->id = row[0].as<int>();
+        this->user_id = row[1].as<int>();
+        this->channel_id = row[2].as<int>();
+        this->level = static_cast<PermissionLevel>(row[3].as<int>());
+      }
+
+      ~UserRights() = default;
+
+      const int &get_id() const { return this->id; }
+      const int &get_user_id() const { return this->user_id; }
+      const int &get_channel_id() const { return this->channel_id; }
+      const PermissionLevel &get_level() const { return this->level; }
+
+    private:
+      int id, user_id, channel_id;
+      PermissionLevel level;
+  };
 }
