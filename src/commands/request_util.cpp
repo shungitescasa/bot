@@ -106,6 +106,17 @@ namespace bot::command {
 
     schemas::User user(query[0]);
 
+    if (user.get_alias_name() != irc_message.sender.login) {
+      work->exec("UPDATE users SET alias_name = '" + irc_message.sender.login +
+                 "' WHERE id = " + std::to_string(user.get_id()));
+      work->commit();
+
+      delete work;
+      work = new pqxx::work(conn);
+
+      user.set_alias_name(irc_message.sender.login);
+    }
+
     schemas::PermissionLevel level = schemas::PermissionLevel::USER;
     const auto &badges = irc_message.sender.badges;
 

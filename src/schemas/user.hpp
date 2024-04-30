@@ -49,6 +49,9 @@ namespace bot::schemas {
       const int &get_id() const { return this->id; }
       const int &get_alias_id() const { return this->alias_id; }
       const std::string &get_alias_name() const { return this->alias_name; }
+      void set_alias_name(const std::string &alias_name) {
+        this->alias_name = alias_name;
+      }
       const std::chrono::system_clock::time_point &get_joined_at() const {
         return this->joined_at;
       }
