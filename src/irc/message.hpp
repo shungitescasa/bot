@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <map>
 #include <optional>
 #include <sstream>
 #include <string>
@@ -17,6 +18,8 @@ namespace bot {
         std::string login;
         std::string display_name;
         int id;
+
+        std::map<std::string, int> badges;
 
         // More fields will be here
     };
@@ -85,6 +88,24 @@ namespace bot {
             source.id = std::stoi(value);
           } else if (key == "user-id") {
             sender.id = std::stoi(value);
+          } else if (key == "badges") {
+            std::vector<std::string> badges =
+                utils::string::split_text(value, ',');
+
+            std::map<std::string, int> map;
+
+            for (const auto &badge : badges) {
+              std::istringstream iss2(badge);
+              std::string name;
+              std::string value;
+
+              std::getline(iss2, name, '/');
+              std::getline(iss2, value);
+
+              map.insert(name, value);
+            }
+
+            sender.badges = map;
           }
         }
 
