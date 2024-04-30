@@ -2,9 +2,11 @@
 
 #include <optional>
 #include <pqxx/pqxx>
+#include <string>
 
 #include "../constants.hpp"
 #include "../irc/message.hpp"
+#include "../schemas/channel.hpp"
 #include "command.hpp"
 #include "request.hpp"
 
@@ -13,6 +15,10 @@ namespace bot::command {
       const command::CommandLoader &command_loader,
       const irc::Message<irc::MessageType::Privmsg> &irc_message,
       pqxx::connection &conn) {
+    pqxx::work *work;
+
+    work = new pqxx::work(conn);
+
     std::vector<std::string> parts =
         utils::string::split_text(irc_message.message, ' ');
 
@@ -36,8 +42,32 @@ namespace bot::command {
 
     parts.erase(parts.begin());
 
+    pqxx::result channel_query =
+        work->exec("SELECT * FROM channels WHERE alias_id = " +
+                   std::to_string(irc_message.source.id));
+
+    // Create new channel data in the database if it didn't exist b4
+    if (channel_query.empty()) {
+      work->exec("INSERT INTO channels (alias_id, alias_name) VALUES (" +
+                 std::to_string(irc_message.source.id) + ", '" +
+                 irc_message.source.login + "')");
+
+      work->commit();
+
+      delete work;
+      work = new pqxx::work(conn);
+
+      channel_query = work->exec("SELECT * FROM channels WHERE alias_id = " +
+                                 std::to_string(irc_message.source.id));
+    }
+
+    schemas::Channel channel(channel_query[0]);
+
+    delete work;
+
     if (parts.empty()) {
-      Request req{command_id, std::nullopt, std::nullopt, irc_message, work};
+      Request req{command_id,  std::nullopt, std::nullopt,
+                  irc_message, channel,      conn};
 
       return req;
     }
@@ -54,7 +84,7 @@ namespace bot::command {
       message = std::nullopt;
     }
 
-    Request req{command_id, subcommand_id, message, irc_message, work};
+    Request req{command_id, subcommand_id, message, irc_message, channel, conn};
     return req;
   }
 }

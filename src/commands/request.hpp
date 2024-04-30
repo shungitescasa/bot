@@ -5,6 +5,7 @@
 #include <string>
 
 #include "../irc/message.hpp"
+#include "../schemas/channel.hpp"
 
 namespace bot::command {
   struct Request {
@@ -12,6 +13,9 @@ namespace bot::command {
       std::optional<std::string> subcommand_id;
       std::optional<std::string> message;
       const irc::Message<irc::MessageType::Privmsg> &irc_message;
+
+      schemas::Channel channel;
+
       pqxx::connection &conn;
   };
 }
