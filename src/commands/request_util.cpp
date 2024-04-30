@@ -42,12 +42,11 @@ namespace bot::command {
 
     parts.erase(parts.begin());
 
-    pqxx::result channel_query =
-        work->exec("SELECT * FROM channels WHERE alias_id = " +
-                   std::to_string(irc_message.source.id));
+    pqxx::result query = work->exec("SELECT * FROM channels WHERE alias_id = " +
+                                    std::to_string(irc_message.source.id));
 
     // Create new channel data in the database if it didn't exist b4
-    if (channel_query.empty()) {
+    if (query.empty()) {
       work->exec("INSERT INTO channels (alias_id, alias_name) VALUES (" +
                  std::to_string(irc_message.source.id) + ", '" +
                  irc_message.source.login + "')");
@@ -57,18 +56,17 @@ namespace bot::command {
       delete work;
       work = new pqxx::work(conn);
 
-      channel_query = work->exec("SELECT * FROM channels WHERE alias_id = " +
-                                 std::to_string(irc_message.source.id));
+      query = work->exec("SELECT * FROM channels WHERE alias_id = " +
+                         std::to_string(irc_message.source.id));
     }
 
-    schemas::Channel channel(channel_query[0]);
+    schemas::Channel channel(query[0]);
 
-    pqxx::result channel_pref_query =
-        work->exec("SELECT * FROM channel_preferences WHERE channel_id = " +
-                   std::to_string(channel.get_id()));
+    query = work->exec("SELECT * FROM channel_preferences WHERE channel_id = " +
+                       std::to_string(channel.get_id()));
 
     // Create new channel preference data in the database if it didn't exist b4
-    if (channel_pref_query.empty()) {
+    if (query.empty()) {
       work->exec(
           "INSERT INTO channel_preferences (channel_id, prefix, locale) VALUES "
           "(" +
@@ -80,19 +78,18 @@ namespace bot::command {
       delete work;
       work = new pqxx::work(conn);
 
-      channel_pref_query =
+      query =
           work->exec("SELECT * FROM channel_preferences WHERE channel_id = " +
                      std::to_string(channel.get_id()));
     }
 
-    schemas::ChannelPreferences channel_preferences(channel_pref_query[0]);
+    schemas::ChannelPreferences channel_preferences(query[0]);
 
-    pqxx::result user_query =
-        work->exec("SELECT * FROM users WHERE alias_id = " +
-                   std::to_string(irc_message.sender.id));
+    query = work->exec("SELECT * FROM users WHERE alias_id = " +
+                       std::to_string(irc_message.sender.id));
 
     // Create new user data in the database if it didn't exist before
-    if (user_query.empty()) {
+    if (query.empty()) {
       work->exec("INSERT INTO users (alias_id, alias_name) VALUES (" +
                  std::to_string(irc_message.sender.id) + ", '" +
                  irc_message.sender.login + "')");
@@ -102,17 +99,39 @@ namespace bot::command {
       delete work;
       work = new pqxx::work(conn);
 
-      user_query = work->exec("SELECT * FROM users WHERE alias_id = " +
-                              std::to_string(irc_message.sender.id));
+      query = work->exec("SELECT * FROM users WHERE alias_id = " +
+                         std::to_string(irc_message.sender.id));
     }
 
-    schemas::User user(user_query[0]);
+    schemas::User user(query[0]);
+
+    query = work->exec("SELECT * FROM user_rights WHERE user_id = " +
+                       std::to_string(user.get_id()) +
+                       " AND channel_id = " + std::to_string(channel.get_id()));
+
+    if (query.empty()) {
+      work->exec("INSERT INTO user_rights (user_id, channel_id) VALUES (" +
+                 std::to_string(user.get_id()) + ", " +
+                 std::to_string(channel.get_id()) + ")");
+
+      work->commit();
+
+      delete work;
+      work = new pqxx::work(conn);
+
+      query = work->exec("SELECT * FROM user_rights WHERE user_id = " +
+                         std::to_string(user.get_id()) + " AND channel_id = " +
+                         std::to_string(channel.get_id()));
+    }
+
+    schemas::UserRights user_rights(query[0]);
 
     delete work;
 
     if (parts.empty()) {
-      Request req{command_id, std::nullopt,        std::nullopt, irc_message,
-                  channel,    channel_preferences, user,         conn};
+      Request req{command_id,  std::nullopt, std::nullopt,
+                  irc_message, channel,      channel_preferences,
+                  user,        user_rights,  conn};
 
       return req;
     }
@@ -129,8 +148,9 @@ namespace bot::command {
       message = std::nullopt;
     }
 
-    Request req{command_id, subcommand_id,       message, irc_message,
-                channel,    channel_preferences, user,    conn};
+    Request req{command_id,  subcommand_id, message,
+                irc_message, channel,       channel_preferences,
+                user,        user_rights,   conn};
     return req;
   }
 }

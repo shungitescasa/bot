@@ -18,6 +18,7 @@ namespace bot::command {
       schemas::Channel channel;
       schemas::ChannelPreferences channel_preferences;
       schemas::User user;
+      schemas::UserRights user_rights;
 
       pqxx::connection &conn;
   };
