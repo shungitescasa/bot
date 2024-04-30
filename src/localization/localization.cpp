@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
+#include <map>
 #include <nlohmann/json.hpp>
 #include <optional>
 #include <string>
@@ -51,7 +52,7 @@ namespace bot {
     }
 
     std::optional<std::string> Localization::get_localized_line(
-        const std::string &locale_id, const LineId &line_id) {
+        const std::string &locale_id, const LineId &line_id) const {
       auto locale_it =
           std::find_if(this->localizations.begin(), this->localizations.end(),
                        [&](const auto &x) { return x.first == locale_id; });
@@ -73,7 +74,7 @@ namespace bot {
 
     std::optional<std::string> Localization::get_formatted_line(
         const std::string &locale_id, const LineId &line_id,
-        const std::vector<std::string> &args) {
+        const std::vector<std::string> &args) const {
       std::optional<std::string> o_line =
           this->get_localized_line(locale_id, line_id);
 
@@ -99,5 +100,33 @@ namespace bot {
       return line;
     }
 
+    std::optional<std::string> Localization::get_formatted_line(
+        const command::Request &request, const LineId &line_id,
+        const std::vector<std::string> &args) const {
+      std::optional<std::string> o_line = this->get_formatted_line(
+          request.channel_preferences.get_locale(), line_id, args);
+
+      if (!o_line.has_value()) {
+        return std::nullopt;
+      }
+
+      std::string line = o_line.value();
+
+      std::map<std::string, std::string> token_map = {
+          {"{sender.alias_name}", request.user.get_alias_name()},
+          {"{source.alias_name}", request.channel.get_alias_name()},
+      };
+
+      for (const auto &pair : token_map) {
+        int pos = line.find(pair.first);
+
+        while (pos != std::string::npos) {
+          line.replace(pos, pair.first.length(), pair.second);
+          pos = line.find(pair.first, pos + pair.second.length());
+        }
+      }
+
+      return line;
+    }
   }
 }

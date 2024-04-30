@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "../commands/request.hpp"
 #include "line_id.hpp"
 
 namespace bot {
@@ -15,11 +16,15 @@ namespace bot {
         ~Localization() = default;
 
         std::optional<std::string> get_localized_line(
-            const std::string &locale_id, const LineId &line_id);
+            const std::string &locale_id, const LineId &line_id) const;
 
         std::optional<std::string> get_formatted_line(
             const std::string &locale_id, const LineId &line_id,
-            const std::vector<std::string> &args);
+            const std::vector<std::string> &args) const;
+
+        std::optional<std::string> get_formatted_line(
+            const command::Request &request, const LineId &line_id,
+            const std::vector<std::string> &args) const;
 
       private:
         std::unordered_map<LineId, std::string> load_from_file(
