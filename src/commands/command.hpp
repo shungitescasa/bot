@@ -20,6 +20,9 @@ namespace bot {
           return schemas::PermissionLevel::USER;
         }
         virtual int get_delay_seconds() const { return 5; }
+        virtual std::vector<std::string> get_subcommand_ids() const {
+          return {};
+        }
     };
 
     class CommandLoader {

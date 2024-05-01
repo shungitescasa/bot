@@ -32,12 +32,12 @@ namespace bot::command {
     command_id =
         command_id.substr(DEFAULT_PREFIX.length(), command_id.length());
 
-    bool found = std::any_of(
+    auto cmd = std::find_if(
         command_loader.get_commands().begin(),
         command_loader.get_commands().end(),
         [&](const auto &command) { return command->get_name() == command_id; });
 
-    if (!found) {
+    if (cmd == command_loader.get_commands().end()) {
       return std::nullopt;
     }
 
@@ -177,7 +177,14 @@ namespace bot::command {
     if (subcommand_id->empty()) {
       subcommand_id = std::nullopt;
     }
-    parts.erase(parts.begin());
+
+    auto subcommand_ids = (*cmd)->get_subcommand_ids();
+
+    if (subcommand_id != std::nullopt &&
+        std::any_of(subcommand_ids.begin(), subcommand_ids.end(),
+                    [&](const auto &x) { return x == subcommand_id; })) {
+      parts.erase(parts.begin());
+    }
 
     std::optional<std::string> message = utils::string::join_vector(parts, ' ');
 
