@@ -19,6 +19,7 @@ namespace bot {
         virtual schemas::PermissionLevel get_permission_level() const {
           return schemas::PermissionLevel::USER;
         }
+        virtual int get_delay_seconds() const { return 5; }
     };
 
     class CommandLoader {
