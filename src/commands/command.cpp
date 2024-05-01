@@ -9,6 +9,7 @@
 #include <string>
 
 #include "../bundle.hpp"
+#include "../modules/massping.hpp"
 #include "../modules/ping.hpp"
 #include "../utils/chrono.hpp"
 #include "request.hpp"
@@ -17,6 +18,7 @@ namespace bot {
   namespace command {
     CommandLoader::CommandLoader() {
       this->add_command(std::make_unique<mod::Ping>());
+      this->add_command(std::make_unique<mod::Massping>());
     }
 
     void CommandLoader::add_command(std::unique_ptr<Command> command) {
