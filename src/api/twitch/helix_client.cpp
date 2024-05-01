@@ -75,4 +75,31 @@ namespace bot::api::twitch {
 
     return users;
   }
+
+  std::vector<schemas::User> HelixClient::get_chatters(
+      const int &broadcaster_id, const int &moderator_id) const {
+    cpr::Response response =
+        cpr::Get(cpr::Url{this->base_url + "/chat/chatters?broadcaster_id=" +
+                          std::to_string(broadcaster_id) +
+                          "&moderator_id=" + std::to_string(moderator_id)},
+                 cpr::Bearer{this->token},
+                 cpr::Header{{"Client-Id", this->client_id.c_str()}});
+
+    if (response.status_code != 200) {
+      return {};
+    }
+
+    std::vector<schemas::User> users;
+
+    nlohmann::json j = nlohmann::json::parse(response.text);
+
+    for (const auto &d : j["data"]) {
+      schemas::User u{std::stoi(d["user_id"].get<std::string>()),
+                      d["user_login"]};
+
+      users.push_back(u);
+    }
+
+    return users;
+  }
 }
