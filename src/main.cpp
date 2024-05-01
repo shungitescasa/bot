@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-  bot::irc::Client client(cfg.bot_username, cfg.bot_password);
+  bot::irc::Client client(cfg.bot_client_id, cfg.bot_password);
   bot::command::CommandLoader command_loader;
   bot::loc::Localization localization("localization");
 

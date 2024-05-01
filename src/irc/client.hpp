@@ -11,7 +11,7 @@ namespace bot {
   namespace irc {
     class Client {
       public:
-        Client(std::string username, std::string password);
+        Client(std::string client_id, std::string token);
         ~Client() = default;
 
         void run();
@@ -31,14 +31,18 @@ namespace bot {
           }
         }
 
+        const std::string &get_bot_username() const { return this->username; };
+        const int &get_bot_id() const { return this->id; }
+
       private:
         void authorize();
 
-        std::string username;
-        std::string password;
+        std::string client_id, token, username;
 
         std::string host;
         std::string port;
+
+        int id;
 
         ix::WebSocket websocket;
 

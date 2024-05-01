@@ -9,18 +9,37 @@
 #include <string>
 #include <vector>
 
+#include "cpr/api.h"
+#include "cpr/cprtypes.h"
+#include "cpr/response.h"
 #include "message.hpp"
+#include "nlohmann/json.hpp"
 
 using namespace bot::irc;
 
-Client::Client(std::string username, std::string password) {
-  this->username = username;
-  this->password = password;
+Client::Client(std::string client_id, std::string token) {
+  this->client_id = client_id;
+  this->token = token;
 
   this->host = "wss://irc-ws.chat.twitch.tv";
   this->port = "443";
 
   this->websocket.setUrl(this->host + ":" + this->port);
+
+  // getting token owner
+  cpr::Response response = cpr::Get(
+      cpr::Url{"https://api.twitch.tv/helix/users"}, cpr::Bearer{this->token},
+      cpr::Header{{"Client-Id", this->client_id}});
+
+  if (response.status_code != 200) {
+    std::cout << "* Failed to get bot username from Twitch API!\n";
+  } else {
+    nlohmann::json j = nlohmann::json::parse(response.text);
+
+    auto d = j["data"][0];
+    this->id = std::stoi(d["id"].get<std::string>());
+    this->username = d["login"];
+  }
 }
 
 void Client::run() {
@@ -117,14 +136,14 @@ void Client::raw(const std::string &raw_message) {
 }
 
 void Client::authorize() {
-  if (this->username.empty() || this->password.empty()) {
-    std::cout << "Bot username and password must be set!\n";
+  if (this->username.empty() || this->token.empty()) {
+    std::cout << "Bot username and token must be set!\n";
     return;
   }
 
   std::cout << "Authorizing on Twitch IRC servers...\n";
 
-  this->raw("PASS oauth:" + this->password);
+  this->raw("PASS oauth:" + this->token);
   this->raw("NICK " + this->username);
   this->raw("CAP REQ :twitch.tv/membership");
   this->raw("CAP REQ :twitch.tv/commands");
