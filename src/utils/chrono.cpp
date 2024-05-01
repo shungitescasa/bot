@@ -1,6 +1,10 @@
 #include "chrono.hpp"
 
+#include <chrono>
 #include <cmath>
+#include <ctime>
+#include <iomanip>
+#include <sstream>
 #include <string>
 
 namespace bot::utils::chrono {
@@ -26,5 +30,19 @@ namespace bot::utils::chrono {
     else {
       return std::to_string(d) + "d" + std::to_string(h) + "h";
     }
+  }
+
+  std::chrono::system_clock::time_point string_to_time_point(
+      const std::string &value, const std::string &format) {
+    std::tm tm = {};
+    std::stringstream ss(value);
+
+    ss >> std::get_time(&tm, format.c_str());
+
+    if (ss.fail()) {
+      throw std::invalid_argument("Invalid time format");
+    }
+
+    return std::chrono::system_clock::from_time_t(std::mktime(&tm));
   }
 }
