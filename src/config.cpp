@@ -38,6 +38,8 @@ namespace bot {
         cfg.bot_username = value;
       } else if (key == "bot_password") {
         cfg.bot_password = value;
+      } else if (key == "bot_client_id") {
+        cfg.bot_client_id = value;
       } else if (key == "db_name") {
         db_cfg.name = value;
       } else if (key == "db_user") {

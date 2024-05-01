@@ -23,8 +23,10 @@ int main(int argc, char *argv[]) {
 
   bot::Configuration cfg = o_cfg.value();
 
-  if (cfg.bot_password.empty() || cfg.bot_username.empty()) {
-    std::cerr << "*** BOT_USERNAME and BOT_PASSWORD must be set!\n";
+  if (cfg.bot_password.empty() || cfg.bot_username.empty() ||
+      cfg.bot_client_id.empty()) {
+    std::cerr
+        << "*** BOT_USERNAME, BOT_CLIENT_ID and BOT_PASSWORD must be set!\n";
     return -1;
   }
 

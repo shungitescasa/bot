@@ -20,6 +20,7 @@ namespace bot {
   struct Configuration {
       std::string bot_username;
       std::string bot_password;
+      std::string bot_client_id;
       DatabaseConfiguration database;
   };
 
