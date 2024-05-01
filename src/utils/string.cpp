@@ -1,5 +1,6 @@
 #include "string.hpp"
 
+#include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -23,6 +24,10 @@ namespace bot {
 
       std::string join_vector(const std::vector<std::string> &vec,
                               char delimiter) {
+        if (vec.empty()) {
+          return "";
+        }
+
         std::string str;
 
         for (auto i = vec.begin(); i != vec.end() - 1; i++) {
