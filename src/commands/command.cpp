@@ -29,6 +29,11 @@ namespace bot {
         return std::nullopt;
       }
 
+      if ((*command)->get_permission_level() >
+          request.user_rights.get_level()) {
+        return std::nullopt;
+      }
+
       return (*command)->run(bundle, request);
     }
   }
