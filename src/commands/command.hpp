@@ -16,6 +16,9 @@ namespace bot {
         virtual std::string get_name() const = 0;
         virtual std::variant<std::vector<std::string>, std::string> run(
             const InstanceBundle &bundle, const Request &request) const = 0;
+        virtual schemas::PermissionLevel get_permission_level() const {
+          return schemas::PermissionLevel::USER;
+        }
     };
 
     class CommandLoader {
