@@ -124,7 +124,7 @@ void Client::authorize() {
 
   std::cout << "Authorizing on Twitch IRC servers...\n";
 
-  this->raw("PASS " + this->password);
+  this->raw("PASS oauth:" + this->password);
   this->raw("NICK " + this->username);
   this->raw("CAP REQ :twitch.tv/membership");
   this->raw("CAP REQ :twitch.tv/commands");
