@@ -3,6 +3,7 @@
 #include <pqxx/pqxx>
 #include <string>
 
+#include "api/twitch/helix_client.hpp"
 #include "bundle.hpp"
 #include "commands/command.hpp"
 #include "config.hpp"
@@ -56,6 +57,9 @@ int main(int argc, char *argv[]) {
 
   work.commit();
   conn.close();
+
+  bot::api::twitch::HelixClient helix_client(cfg.bot_password,
+                                             cfg.bot_client_id);
 
   client.on<bot::irc::MessageType::Privmsg>(
       [&client, &command_loader, &localization,
