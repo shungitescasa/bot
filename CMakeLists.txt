@@ -9,6 +9,8 @@ project(
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 add_executable(Bot)
 
 set_target_properties(
@@ -21,4 +23,9 @@ file(GLOB_RECURSE SRC_FILES "src/*.cpp" "src/*.h" "src/*.hpp")
 
 target_sources(Bot PRIVATE ${SRC_FILES})
 
-target_link_libraries(Bot PRIVATE ixwebsocket pqxx)
+include(FetchContent)
+
+FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
+FetchContent_MakeAvailable(json)
+
+target_link_libraries(Bot PRIVATE ixwebsocket pqxx nlohmann_json::nlohmann_json)
