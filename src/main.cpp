@@ -11,6 +11,7 @@
 #include "irc/client.hpp"
 #include "irc/message.hpp"
 #include "localization/localization.hpp"
+#include "stream.hpp"
 
 int main(int argc, char *argv[]) {
   std::cout << "hi world\n";
@@ -61,6 +62,8 @@ int main(int argc, char *argv[]) {
   bot::api::twitch::HelixClient helix_client(cfg.bot_password,
                                              cfg.bot_client_id);
 
+  bot::stream::StreamListenerClient stream_listener_client(helix_client);
+
   client.on<bot::irc::MessageType::Privmsg>(
       [&client, &command_loader, &localization, &cfg, &helix_client](
           const bot::irc::Message<bot::irc::MessageType::Privmsg> &message) {
@@ -75,6 +78,7 @@ int main(int argc, char *argv[]) {
       });
 
   client.run();
+  stream_listener_client.run_thread();
 
   return 0;
 }
