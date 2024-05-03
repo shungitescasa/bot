@@ -8,6 +8,7 @@
 #include "cpr/bearer.h"
 #include "cpr/cprtypes.h"
 #include "cpr/response.h"
+#include "schemas/stream.hpp"
 #include "schemas/user.hpp"
 
 namespace bot::api::twitch {
@@ -101,5 +102,43 @@ namespace bot::api::twitch {
     }
 
     return users;
+  }
+
+  std::vector<schemas::Stream> HelixClient::get_streams(
+      const std::vector<int> &ids) const {
+    std::string s;
+
+    for (auto i = ids.begin(); i != ids.end(); i++) {
+      std::string start;
+      if (i == ids.begin()) {
+        start = "?";
+      } else {
+        start = "&";
+      }
+
+      s += start + "user_id=" + std::to_string(*i);
+    }
+
+    cpr::Response response = cpr::Get(
+        cpr::Url{this->base_url + "/streams" + s}, cpr::Bearer{this->token},
+        cpr::Header{{"Client-Id", this->client_id.c_str()}});
+
+    if (response.status_code != 200) {
+      return {};
+    }
+
+    std::vector<schemas::Stream> streams;
+
+    nlohmann::json j = nlohmann::json::parse(response.text);
+
+    for (const auto &d : j["data"]) {
+      schemas::Stream u{std::stoi(d["user_id"].get<std::string>()),
+                        d["user_login"], d["game_name"], d["title"],
+                        d["started_at"]};
+
+      streams.push_back(u);
+    }
+
+    return streams;
   }
 }

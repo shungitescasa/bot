@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 
+#include "schemas/stream.hpp"
 #include "schemas/user.hpp"
 
 namespace bot::api::twitch {
@@ -17,6 +18,9 @@ namespace bot::api::twitch {
 
       std::vector<schemas::User> get_chatters(const int &broadcaster_id,
                                               const int &moderator_id) const;
+
+      std::vector<schemas::Stream> get_streams(
+          const std::vector<int> &ids) const;
 
     private:
       std::vector<schemas::User> get_users_by_query(
