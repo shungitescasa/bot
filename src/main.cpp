@@ -62,7 +62,8 @@ int main(int argc, char *argv[]) {
   bot::api::twitch::HelixClient helix_client(cfg.bot_password,
                                              cfg.bot_client_id);
 
-  bot::stream::StreamListenerClient stream_listener_client(helix_client);
+  bot::stream::StreamListenerClient stream_listener_client(helix_client, client,
+                                                           cfg);
 
   client.on<bot::irc::MessageType::Privmsg>(
       [&client, &command_loader, &localization, &cfg, &helix_client](

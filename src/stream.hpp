@@ -4,12 +4,20 @@
 #include <vector>
 
 #include "api/twitch/helix_client.hpp"
+#include "api/twitch/schemas/stream.hpp"
+#include "config.hpp"
+#include "irc/client.hpp"
+#include "schemas/stream.hpp"
 
 namespace bot::stream {
   class StreamListenerClient {
     public:
-      StreamListenerClient(const api::twitch::HelixClient &helix_client)
-          : helix_client(helix_client){};
+      StreamListenerClient(const api::twitch::HelixClient &helix_client,
+                           irc::Client &irc_client,
+                           const Configuration &configuration)
+          : helix_client(helix_client),
+            irc_client(irc_client),
+            configuration(configuration){};
       ~StreamListenerClient() = default;
 
       void run_thread();
@@ -22,6 +30,8 @@ namespace bot::stream {
       void check();
 
       const api::twitch::HelixClient &helix_client;
+      irc::Client &irc_client;
+      const Configuration &configuration;
 
       std::vector<int> ids;
 
