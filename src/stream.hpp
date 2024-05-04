@@ -28,6 +28,8 @@ namespace bot::stream {
     private:
       void run();
       void check();
+      void handler(const schemas::EventType &type,
+                   const api::twitch::schemas::Stream &stream);
 
       const api::twitch::HelixClient &helix_client;
       irc::Client &irc_client;
