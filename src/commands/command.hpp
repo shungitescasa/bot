@@ -11,6 +11,16 @@
 
 namespace bot {
   namespace command {
+    enum CommandArgument {
+      SUBCOMMAND,
+      MESSAGE,
+      INTERVAL,
+      NAME,
+      TARGET,
+      VALUE,
+      AMOUNT,
+    };
+
     class Command {
       public:
         virtual std::string get_name() const = 0;
