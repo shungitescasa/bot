@@ -6,6 +6,14 @@
 namespace bot {
   namespace loc {
     enum LineId {
+      ArgumentSubcommand,
+      ArgumentMessage,
+      ArgumentInterval,
+      ArgumentName,
+      ArgumentTarget,
+      ArgumentValue,
+      ArgumentAmount,
+
       ErrorTemplate,
       ErrorNotEnoughArguments,
       ErrorIncorrectArgument,
@@ -13,6 +21,7 @@ namespace bot {
       ErrorNamesakeCreation,
       ErrorNotFound,
       ErrorSomethingWentWrong,
+      ErrorExternalAPIError,
       ErrorInsufficientRights,
 
       PingResponse

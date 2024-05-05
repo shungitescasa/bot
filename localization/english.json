@@ -1,4 +1,12 @@
 {
+  "argument.subcommand": "Subcommand",
+  "argument.message": "Message",
+  "argument.interval": "Interval",
+  "argument.name": "Name",
+  "argument.target": "Target",
+  "argument.value": "Value",
+  "argument.amount": "Amount",
+
   "error.template": "{sender.alias_name}: 🚨 %s",
   "error.not_enough_arguments": "Not enough arguments (%s)",
   "error.incorrect_argument": "Incorrect argument (%s)",

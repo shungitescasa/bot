@@ -1,4 +1,12 @@
 {
+  "argument.subcommand": "Подкоманда",
+  "argument.message": "Сообщение",
+  "argument.interval": "Интервал",
+  "argument.name": "Название",
+  "argument.target": "Цель",
+  "argument.value": "Значение",
+  "argument.amount": "Количество",
+
   "error.template": "{sender.alias_name}: 🚨 %s",
   "error.not_enough_arguments": "Недостаточно аргументов (%s)",
   "error.incorrect_argument": "Некорректный аргумент (%s)",
