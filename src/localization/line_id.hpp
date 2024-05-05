@@ -27,7 +27,10 @@ namespace bot {
       PingResponse,
 
       EventOn,
-      EventOff
+      EventOff,
+
+      NotifySub,
+      NotifyUnsub
     };
 
     std::optional<LineId> string_to_line_id(const std::string &str);

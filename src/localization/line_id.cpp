@@ -50,6 +50,12 @@ namespace bot {
         return LineId::EventOff;
       }
 
+      else if (str == "notify.sub") {
+        return LineId::NotifySub;
+      } else if (str == "notify.unsub") {
+        return LineId::NotifyUnsub;
+      }
+
       else {
         return std::nullopt;
       }

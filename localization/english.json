@@ -20,5 +20,8 @@
   "ping.response": "{sender.alias_name}: Pong! Uptime: %s · Used memory: %sMB",
 
   "event.on": "{sender.alias_name}: New event \"%s\" has been successfully created!",
-  "event.off": "{sender.alias_name}: The event \"%s\" has been deleted!"
+  "event.off": "{sender.alias_name}: The event \"%s\" has been deleted!",
+
+  "notify.sub": "{sender.alias_name}: You have been successfully subscribed to the \"%s\" event!",
+  "notify.unsub": "{sender.alias_name}: You have been unsubscribed from the \"%s\" event!"
 }
