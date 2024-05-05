@@ -1,6 +1,7 @@
 #pragma once
 
 #include <exception>
+#include <iostream>
 #include <optional>
 #include <string>
 #include <type_traits>
@@ -40,10 +41,7 @@ namespace bot {
           : request(request),
             localizator(localizator),
             message(message),
-            error(T) {}
-      ~ResponseException() = default;
-
-      const char *what() const noexcept override {
+            error(T) {
         loc::LineId line_id;
 
         switch (this->error) {
@@ -64,19 +62,20 @@ namespace bot {
             break;
         };
 
-        static auto line =
+        this->line =
             this->localizator
                 .get_formatted_line(this->request, line_id, {this->message})
                 .value();
-
-        return line.c_str();
       }
+      ~ResponseException() = default;
+
+      const char *what() const noexcept override { return this->line.c_str(); }
 
     private:
       const command::Request &request;
       const loc::Localization &localizator;
-      const std::string &message;
-      const ResponseError error;
+      std::string message, line;
+      ResponseError error;
   };
 
   template <ResponseError T>
@@ -87,10 +86,7 @@ namespace bot {
     public:
       ResponseException(const command::Request &request,
                         const loc::Localization &localizator)
-          : request(request), localizator(localizator), error(T) {}
-      ~ResponseException() = default;
-
-      const char *what() const noexcept override {
+          : request(request), localizator(localizator), error(T) {
         loc::LineId line_id;
 
         if (this->error == INSUFFICIENT_RIGHTS) {
@@ -99,17 +95,19 @@ namespace bot {
           line_id = loc::LineId::ErrorSomethingWentWrong;
         }
 
-        static auto line =
+        this->line =
             this->localizator.get_formatted_line(this->request, line_id, {})
                 .value();
-
-        return line.c_str();
       }
+      ~ResponseException() = default;
+
+      const char *what() const noexcept override { return this->line.c_str(); }
 
     private:
       const command::Request &request;
       const loc::Localization &localizator;
-      const ResponseError error;
+      std::string line;
+      ResponseError error;
   };
 
   template <ResponseError T>
@@ -125,10 +123,7 @@ namespace bot {
             localizator(localizator),
             code(code),
             message(message),
-            error(T) {}
-      ~ResponseException() = default;
-
-      const char *what() const noexcept override {
+            error(T) {
         loc::LineId line_id = loc::LineId::ErrorExternalAPIError;
         std::vector<std::string> args = {std::to_string(this->code)};
 
@@ -136,19 +131,21 @@ namespace bot {
           args.push_back(" " + this->message.value());
         }
 
-        static auto line =
+        this->line =
             this->localizator.get_formatted_line(this->request, line_id, args)
                 .value();
-
-        return line.c_str();
       }
+      ~ResponseException() = default;
+
+      const char *what() const noexcept override { return this->line.c_str(); }
 
     private:
       const command::Request &request;
       const loc::Localization &localizator;
-      const int &code;
-      const std::optional<std::string> &message;
-      const ResponseError error;
+      int code;
+      std::optional<std::string> message;
+      std::string line;
+      ResponseError error;
   };
 
   template <ResponseError T>
@@ -158,14 +155,11 @@ namespace bot {
     public:
       ResponseException(const command::Request &request,
                         const loc::Localization &localizator,
-                        const command::CommandArgument &argument)
+                        command::CommandArgument argument)
           : request(request),
             localizator(localizator),
             argument(argument),
-            error(T) {}
-      ~ResponseException() = default;
-
-      const char *what() const noexcept override {
+            error(T) {
         loc::LineId line_id = loc::LineId::ErrorNotEnoughArguments;
         loc::LineId arg_id;
 
@@ -201,18 +195,20 @@ namespace bot {
                     this->request.channel_preferences.get_locale(), arg_id)
                 .value();
 
-        static auto line =
+        this->line =
             this->localizator.get_formatted_line(this->request, line_id, {arg})
                 .value();
-
-        return line.c_str();
       }
+      ~ResponseException() = default;
+
+      const char *what() const noexcept override { return this->line.c_str(); }
 
     private:
       const command::Request &request;
       const loc::Localization &localizator;
-      const command::CommandArgument &argument;
-      const ResponseError error;
+      command::CommandArgument argument;
+      ResponseError error;
+      std::string line;
   };
 
 }
