@@ -17,5 +17,8 @@
   "error.external_api_error": "Ошибка стороннего API (%s%s)",
   "error.insufficient_rights": "Недостаточно прав",
 
-  "ping.response": "{sender.alias_name}: Понг! Время сессии: %s · ОЗУ: %sМБ"
+  "ping.response": "{sender.alias_name}: Понг! Время сессии: %s · ОЗУ: %sМБ",
+
+  "event.on": "{sender.alias_name}: Событие \"%s\" успешно создано!",
+  "event.off": "{sender.alias_name}: Событие \"%s\" удалено!"
 }

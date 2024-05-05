@@ -24,7 +24,10 @@ namespace bot {
       ErrorExternalAPIError,
       ErrorInsufficientRights,
 
-      PingResponse
+      PingResponse,
+
+      EventOn,
+      EventOff
     };
 
     std::optional<LineId> string_to_line_id(const std::string &str);

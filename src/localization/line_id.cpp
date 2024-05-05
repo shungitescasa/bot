@@ -44,6 +44,12 @@ namespace bot {
         return LineId::ErrorInsufficientRights;
       }
 
+      else if (str == "event.on") {
+        return LineId::EventOn;
+      } else if (str == "event.off") {
+        return LineId::EventOff;
+      }
+
       else {
         return std::nullopt;
       }
