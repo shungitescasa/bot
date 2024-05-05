@@ -43,8 +43,9 @@ namespace bot::command {
   };
 
   template <ResponseErrorType T>
-  class ResponseError<T, typename std::enable_if<T == SOMETHING_WENT_WRONG ||
-                                                 T == INSUFFICIENT_RIGHTS>> {
+  class ResponseError<T,
+                      typename std::enable_if<T == SOMETHING_WENT_WRONG ||
+                                              T == INSUFFICIENT_RIGHTS>::type> {
     public:
       ResponseError() : m_type(T){};
       ~ResponseError() = default;
@@ -56,7 +57,8 @@ namespace bot::command {
   };
 
   template <ResponseErrorType T>
-  class ResponseError<T, typename std::enable_if<T == EXTERNAL_API_ERROR>> {
+  class ResponseError<T,
+                      typename std::enable_if<T == EXTERNAL_API_ERROR>::type> {
     public:
       ResponseError(const int &code, const std::optional<std::string> &message)
           : m_code(code), message(message), m_type(T){};
@@ -75,7 +77,8 @@ namespace bot::command {
   };
 
   template <ResponseErrorType T>
-  class ResponseError<T, typename std::enable_if<T == NOT_ENOUGH_ARGUMENTS>> {
+  class ResponseError<
+      T, typename std::enable_if<T == NOT_ENOUGH_ARGUMENTS>::type> {
     public:
       ResponseError(const CommandArgument &argument)
           : m_argument(argument), m_type(T){};
