@@ -1,13 +1,16 @@
 #pragma once
 
+#include <exception>
 #include <optional>
 #include <string>
 #include <type_traits>
+#include <vector>
 
 #include "command.hpp"
+#include "request.hpp"
 
-namespace bot::command {
-  enum ResponseErrorType {
+namespace bot {
+  enum ResponseError {
     NOT_ENOUGH_ARGUMENTS,
     INCORRECT_ARGUMENT,
 
@@ -21,76 +24,195 @@ namespace bot::command {
     INSUFFICIENT_RIGHTS
   };
 
-  template <ResponseErrorType T, class Enable = void>
-  class ResponseError;
+  template <ResponseError T, class Enable = void>
+  class ResponseException;
 
-  template <ResponseErrorType T>
-  class ResponseError<T,
-                      typename std::enable_if<
-                          T == INCORRECT_ARGUMENT || T == INCOMPATIBLE_NAME ||
-                          T == NAMESAKE_CREATION || T == NOT_FOUND>::type> {
+  template <ResponseError T>
+  class ResponseException<
+      T, typename std::enable_if<
+             T == INCORRECT_ARGUMENT || T == INCOMPATIBLE_NAME ||
+             T == NAMESAKE_CREATION || T == NOT_FOUND>::type>
+      : public std::exception {
     public:
-      ResponseError(const std::string &message) : message(message), m_type(T){};
-      ~ResponseError() = default;
+      ResponseException(const command::Request &request,
+                        const loc::Localization &localizator,
+                        const std::string &message)
+          : request(request),
+            localizator(localizator),
+            message(message),
+            error(T) {}
+      ~ResponseException() = default;
 
-      const std::string &what() const noexcept { return this->message; }
+      const char *what() const noexcept override {
+        loc::LineId line_id;
 
-      const ResponseErrorType &type() const noexcept { return this->m_type; }
+        switch (this->error) {
+          case INCORRECT_ARGUMENT:
+            line_id = loc::LineId::ErrorIncorrectArgument;
+            break;
+          case INCOMPATIBLE_NAME:
+            line_id = loc::LineId::ErrorIncompatibleName;
+            break;
+          case NAMESAKE_CREATION:
+            line_id = loc::LineId::ErrorNamesakeCreation;
+            break;
+          case NOT_FOUND:
+            line_id = loc::LineId::ErrorNotFound;
+            break;
+          default:
+            line_id = loc::LineId::ErrorSomethingWentWrong;
+            break;
+        };
 
-    private:
-      std::string message;
-      ResponseErrorType m_type;
-  };
+        static auto line =
+            this->localizator
+                .get_formatted_line(this->request, line_id, {this->message})
+                .value();
 
-  template <ResponseErrorType T>
-  class ResponseError<T,
-                      typename std::enable_if<T == SOMETHING_WENT_WRONG ||
-                                              T == INSUFFICIENT_RIGHTS>::type> {
-    public:
-      ResponseError() : m_type(T){};
-      ~ResponseError() = default;
-
-      const ResponseErrorType &type() const noexcept { return this->m_type; }
-
-    private:
-      ResponseErrorType m_type;
-  };
-
-  template <ResponseErrorType T>
-  class ResponseError<T,
-                      typename std::enable_if<T == EXTERNAL_API_ERROR>::type> {
-    public:
-      ResponseError(const int &code, const std::optional<std::string> &message)
-          : m_code(code), message(message), m_type(T){};
-      ~ResponseError() = default;
-
-      const std::optional<std::string> &what() const noexcept {
-        return this->message;
+        return line.c_str();
       }
-      const int &code() const noexcept { return this->code; }
-      const ResponseErrorType &type() const noexcept { return this->m_type; }
 
     private:
-      int m_code;
-      std::optional<std::string> message;
-      ResponseErrorType m_type;
+      const command::Request &request;
+      const loc::Localization &localizator;
+      const std::string &message;
+      const ResponseError error;
   };
 
-  template <ResponseErrorType T>
-  class ResponseError<
-      T, typename std::enable_if<T == NOT_ENOUGH_ARGUMENTS>::type> {
+  template <ResponseError T>
+  class ResponseException<
+      T, typename std::enable_if<T == SOMETHING_WENT_WRONG ||
+                                 T == INSUFFICIENT_RIGHTS>::type>
+      : public std::exception {
     public:
-      ResponseError(const CommandArgument &argument)
-          : m_argument(argument), m_type(T){};
-      ~ResponseError() = default;
+      ResponseException(const command::Request &request,
+                        const loc::Localization &localizator)
+          : request(request), localizator(localizator), error(T) {}
+      ~ResponseException() = default;
 
-      const CommandArgument &argument() const noexcept {
-        return this->m_argument;
+      const char *what() const noexcept override {
+        loc::LineId line_id;
+
+        if (this->error == INSUFFICIENT_RIGHTS) {
+          line_id = loc::LineId::ErrorInsufficientRights;
+        } else {
+          line_id = loc::LineId::ErrorSomethingWentWrong;
+        }
+
+        static auto line =
+            this->localizator.get_formatted_line(this->request, line_id, {})
+                .value();
+
+        return line.c_str();
       }
-      const ResponseErrorType &type() const noexcept { return this->m_type; }
 
     private:
-      CommandArgument m_argument;
-      ResponseErrorType m_type;
+      const command::Request &request;
+      const loc::Localization &localizator;
+      const ResponseError error;
   };
+
+  template <ResponseError T>
+  class ResponseException<
+      T, typename std::enable_if<T == EXTERNAL_API_ERROR>::type>
+      : public std::exception {
+    public:
+      ResponseException(
+          const command::Request &request, const loc::Localization &localizator,
+          const int &code,
+          const std::optional<std::string> &message = std::nullopt)
+          : request(request),
+            localizator(localizator),
+            code(code),
+            message(message),
+            error(T) {}
+      ~ResponseException() = default;
+
+      const char *what() const noexcept override {
+        loc::LineId line_id = loc::LineId::ErrorExternalAPIError;
+        std::vector<std::string> args = {std::to_string(this->code)};
+
+        if (this->message.has_value()) {
+          args.push_back(" " + this->message.value());
+        }
+
+        static auto line =
+            this->localizator.get_formatted_line(this->request, line_id, args)
+                .value();
+
+        return line.c_str();
+      }
+
+    private:
+      const command::Request &request;
+      const loc::Localization &localizator;
+      const int &code;
+      const std::optional<std::string> &message;
+      const ResponseError error;
+  };
+
+  template <ResponseError T>
+  class ResponseException<
+      T, typename std::enable_if<T == NOT_ENOUGH_ARGUMENTS>::type>
+      : public std::exception {
+    public:
+      ResponseException(const command::Request &request,
+                        const loc::Localization &localizator,
+                        const command::CommandArgument &argument)
+          : request(request),
+            localizator(localizator),
+            argument(argument),
+            error(T) {}
+      ~ResponseException() = default;
+
+      const char *what() const noexcept override {
+        loc::LineId line_id = loc::LineId::ErrorNotEnoughArguments;
+        loc::LineId arg_id;
+
+        switch (this->argument) {
+          case command::SUBCOMMAND:
+            arg_id = loc::LineId::ArgumentSubcommand;
+            break;
+          case command::MESSAGE:
+            arg_id = loc::LineId::ArgumentMessage;
+            break;
+          case command::INTERVAL:
+            arg_id = loc::LineId::ArgumentInterval;
+            break;
+          case command::NAME:
+            arg_id = loc::LineId::ArgumentName;
+            break;
+          case command::TARGET:
+            arg_id = loc::LineId::ArgumentTarget;
+            break;
+          case command::VALUE:
+            arg_id = loc::LineId::ArgumentValue;
+            break;
+          case command::AMOUNT:
+            arg_id = loc::LineId::ArgumentAmount;
+            break;
+          default:
+            break;
+        }
+
+        auto arg =
+            this->localizator
+                .get_localized_line(
+                    this->request.channel_preferences.get_locale(), arg_id)
+                .value();
+
+        static auto line =
+            this->localizator.get_formatted_line(this->request, line_id, {arg})
+                .value();
+
+        return line.c_str();
+      }
+
+    private:
+      const command::Request &request;
+      const loc::Localization &localizator;
+      const command::CommandArgument &argument;
+      const ResponseError error;
+  };
+
 }
