@@ -174,16 +174,14 @@ namespace bot::command {
     }
 
     std::optional<std::string> subcommand_id = parts[0];
-    if (subcommand_id->empty()) {
-      subcommand_id = std::nullopt;
-    }
-
     auto subcommand_ids = (*cmd)->get_subcommand_ids();
 
-    if (subcommand_id != std::nullopt &&
-        std::any_of(subcommand_ids.begin(), subcommand_ids.end(),
-                    [&](const auto &x) { return x == subcommand_id; })) {
+    if (std::any_of(
+            subcommand_ids.begin(), subcommand_ids.end(),
+            [&](const auto &x) { return x == subcommand_id.value(); })) {
       parts.erase(parts.begin());
+    } else {
+      subcommand_id = std::nullopt;
     }
 
     std::optional<std::string> message = utils::string::join_vector(parts, ' ');
