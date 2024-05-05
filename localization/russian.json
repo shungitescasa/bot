@@ -1,3 +1,13 @@
 {
+  "error.template": "{sender.alias_name}: 🚨 %s",
+  "error.not_enough_arguments": "Недостаточно аргументов (%s)",
+  "error.incorrect_argument": "Некорректный аргумент (%s)",
+  "error.incompatible_name": "Несовместимое имя (%s)",
+  "error.namesake_creation": "Занятое имя (%s)",
+  "error.not_found": "Не найдено (%s)",
+  "error.something_went_wrong": "Что-то пошло не так",
+  "error.external_api_error": "Ошибка стороннего API (%s%s)",
+  "error.insufficient_rights": "Недостаточно прав",
+
   "ping.response": "{sender.alias_name}: Понг! Время сессии: %s · ОЗУ: %sМБ"
 }

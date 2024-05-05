@@ -1,3 +1,13 @@
 {
+  "error.template": "{sender.alias_name}: 🚨 %s",
+  "error.not_enough_arguments": "Not enough arguments (%s)",
+  "error.incorrect_argument": "Incorrect argument (%s)",
+  "error.incompatible_name": "Incompatible name (%s)",
+  "error.namesake_creation": "Namesake creation (%s)",
+  "error.not_found": "Not found (%s)",
+  "error.something_went_wrong": "Something went wrong",
+  "error.external_api_error": "External API error (%s%s)",
+  "error.insufficient_rights": "Insufficient rights",
+
   "ping.response": "{sender.alias_name}: Pong! Uptime: %s · Used memory: %sMB"
 }

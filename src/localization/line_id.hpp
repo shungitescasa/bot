@@ -5,7 +5,18 @@
 
 namespace bot {
   namespace loc {
-    enum LineId { PingResponse };
+    enum LineId {
+      ErrorTemplate,
+      ErrorNotEnoughArguments,
+      ErrorIncorrectArgument,
+      ErrorIncompatibleName,
+      ErrorNamesakeCreation,
+      ErrorNotFound,
+      ErrorSomethingWentWrong,
+      ErrorInsufficientRights,
+
+      PingResponse
+    };
 
     std::optional<LineId> string_to_line_id(const std::string &str);
   }
