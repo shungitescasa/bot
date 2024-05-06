@@ -19,6 +19,7 @@ namespace bot {
     }
 
     Configuration cfg;
+    TwitchCredentialsConfiguration ttv_crd_cfg;
     DatabaseConfiguration db_cfg;
 
     std::string line;
@@ -34,12 +35,10 @@ namespace bot {
         c = tolower(c);
       }
 
-      if (key == "bot_username") {
-        cfg.bot_username = value;
-      } else if (key == "bot_password") {
-        cfg.bot_password = value;
-      } else if (key == "bot_client_id") {
-        cfg.bot_client_id = value;
+      if (key == "twitch_credentials.client_id") {
+        ttv_crd_cfg.client_id = value;
+      } else if (key == "twitch_credentials.token") {
+        ttv_crd_cfg.token = value;
       } else if (key == "db_name") {
         db_cfg.name = value;
       } else if (key == "db_user") {
@@ -53,6 +52,7 @@ namespace bot {
       }
     }
 
+    cfg.twitch_credentials = ttv_crd_cfg;
     cfg.database = db_cfg;
 
     return cfg;

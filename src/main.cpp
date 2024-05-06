@@ -25,10 +25,10 @@ int main(int argc, char *argv[]) {
 
   bot::Configuration cfg = o_cfg.value();
 
-  if (cfg.bot_password.empty() || cfg.bot_username.empty() ||
-      cfg.bot_client_id.empty()) {
-    std::cerr
-        << "*** BOT_USERNAME, BOT_CLIENT_ID and BOT_PASSWORD must be set!\n";
+  if (cfg.twitch_credentials.client_id.empty() ||
+      cfg.twitch_credentials.token.empty()) {
+    std::cerr << "*** TWITCH_CREDENTIALS.CLIENT_ID and "
+                 "TWITCH_CREDENTIALS.TOKEN must be set!\n";
     return -1;
   }
 
@@ -40,11 +40,12 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-  bot::irc::Client client(cfg.bot_client_id, cfg.bot_password);
+  bot::irc::Client client(cfg.twitch_credentials.client_id,
+                          cfg.twitch_credentials.token);
   bot::command::CommandLoader command_loader;
   bot::loc::Localization localization("localization");
 
-  client.join(cfg.bot_username);
+  client.join(client.get_bot_username());
 
   pqxx::connection conn(GET_DATABASE_CONNECTION_URL(cfg));
   pqxx::work work(conn);
@@ -59,8 +60,8 @@ int main(int argc, char *argv[]) {
   work.commit();
   conn.close();
 
-  bot::api::twitch::HelixClient helix_client(cfg.bot_password,
-                                             cfg.bot_client_id);
+  bot::api::twitch::HelixClient helix_client(cfg.twitch_credentials.token,
+                                             cfg.twitch_credentials.client_id);
 
   bot::stream::StreamListenerClient stream_listener_client(helix_client, client,
                                                            cfg);

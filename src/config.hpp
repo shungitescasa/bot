@@ -17,10 +17,13 @@ namespace bot {
       std::string port;
   };
 
+  struct TwitchCredentialsConfiguration {
+      std::string client_id;
+      std::string token;
+  };
+
   struct Configuration {
-      std::string bot_username;
-      std::string bot_password;
-      std::string bot_client_id;
+      TwitchCredentialsConfiguration twitch_credentials;
       DatabaseConfiguration database;
   };
 
