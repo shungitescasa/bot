@@ -22,6 +22,7 @@ namespace bot {
     TwitchCredentialsConfiguration ttv_crd_cfg;
     DatabaseConfiguration db_cfg;
     CommandConfiguration cmd_cfg;
+    OwnerConfiguration owner_cfg;
 
     std::string line;
     while (std::getline(ifs, line, '\n')) {
@@ -57,8 +58,15 @@ namespace bot {
       } else if (key == "commands.join_allow_from_other_chats") {
         cmd_cfg.join_allow_from_other_chats = std::stoi(value);
       }
+
+      else if (key == "owner.name") {
+        owner_cfg.name = value;
+      } else if (key == "owner.id") {
+        owner_cfg.id = std::stoi(value);
+      }
     }
 
+    cfg.owner = owner_cfg;
     cfg.commands = cmd_cfg;
     cfg.twitch_credentials = ttv_crd_cfg;
     cfg.database = db_cfg;

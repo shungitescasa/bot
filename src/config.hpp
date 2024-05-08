@@ -27,10 +27,16 @@ namespace bot {
       bool join_allow_from_other_chats = false;
   };
 
+  struct OwnerConfiguration {
+      std::optional<std::string> name = std::nullopt;
+      std::optional<int> id = std::nullopt;
+  };
+
   struct Configuration {
       TwitchCredentialsConfiguration twitch_credentials;
       DatabaseConfiguration database;
       CommandConfiguration commands;
+      OwnerConfiguration owner;
   };
 
   std::optional<Configuration> parse_configuration_from_file(
