@@ -1,4 +1,6 @@
 {
+  "msg.owner": "Contact @%s",
+
   "argument.subcommand": "Subcommand",
   "argument.message": "Message",
   "argument.interval": "Interval",
@@ -23,5 +25,12 @@
   "event.off": "{sender.alias_name}: The event \"%s\" has been deleted!",
 
   "notify.sub": "{sender.alias_name}: You have been successfully subscribed to the \"%s\" event!",
-  "notify.unsub": "{sender.alias_name}: You have been unsubscribed from the \"%s\" event!"
+  "notify.unsub": "{sender.alias_name}: You have been unsubscribed from the \"%s\" event!",
+
+  "join.response": "{sender.alias_name}: Successfully joined your chat room!",
+  "join.response_in_chat": "Hi, I'm %s and I'll be serving this chat. Send {default.prefix}help to learn about the commands!",
+  "join.already_in": "{sender.alias_name}: I'm already in your chat room!",
+  "join.rejoined": "{sender.alias_name}: I have rejoined your chat room!",
+  "join.from_other_chat": "{sender.alias_name}: In order for the bot to join your chat, you need to send {default.prefix}join directly in %s chat.",
+  "join.not_allowed": "{sender.alias_name}: The bot cannot join chat rooms!%s"
 }

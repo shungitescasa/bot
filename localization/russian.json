@@ -1,4 +1,6 @@
 {
+  "msg.owner": "Свяжитесь с @%s",
+
   "argument.subcommand": "Подкоманда",
   "argument.message": "Сообщение",
   "argument.interval": "Интервал",
@@ -23,5 +25,12 @@
   "event.off": "{sender.alias_name}: Событие \"%s\" удалено!",
   
   "notify.sub": "{sender.alias_name}: Вы успешно подписались на событие \"%s\"!",
-  "notify.unsub": "{sender.alias_name}: Вы отписались от события \"%s\"!"
+  "notify.unsub": "{sender.alias_name}: Вы отписались от события \"%s\"!",
+
+  "join.response": "{sender.alias_name}: Успешно зашёл в ваш чат!",
+  "join.response_in_chat": "Привет! Я - %s и я буду обслуживать этот чат. Напишите {default.prefix}help, чтобы узнать о командах!",
+  "join.already_in": "{sender.alias_name}: Уже в вашем чат!",
+  "join.rejoined": "{sender.alias_name}: Перезашёл в ваш чат!",
+  "join.from_other_chat": "{sender.alias_name}: Чтобы бот мог зайти в ваш чат, нужно написать {default.prefix}join непосредственно в чате %s",
+  "join.not_allowed": "{sender.alias_name}: Бот не может заходить в чужие чаты!%s"
 }

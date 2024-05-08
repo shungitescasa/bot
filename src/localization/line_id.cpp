@@ -10,6 +10,10 @@ namespace bot {
         return LineId::PingResponse;
       }
 
+      else if (str == "msg.owner") {
+        return LineId::MsgOwner;
+      }
+
       else if (str == "argument.subcommand") {
         return LineId::ArgumentSubcommand;
       } else if (str == "argument.message") {
@@ -54,6 +58,20 @@ namespace bot {
         return LineId::NotifySub;
       } else if (str == "notify.unsub") {
         return LineId::NotifyUnsub;
+      }
+
+      else if (str == "join.response") {
+        return LineId::JoinResponse;
+      } else if (str == "join.response_in_chat") {
+        return LineId::JoinResponseInChat;
+      } else if (str == "join.already_in") {
+        return LineId::JoinAlreadyIn;
+      } else if (str == "join.rejoined") {
+        return LineId::JoinRejoined;
+      } else if (str == "join.from_other_chat") {
+        return LineId::JoinFromOtherChat;
+      } else if (str == "join.not_allowed") {
+        return LineId::JoinNotAllowed;
       }
 
       else {

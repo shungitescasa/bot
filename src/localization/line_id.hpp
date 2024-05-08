@@ -6,6 +6,8 @@
 namespace bot {
   namespace loc {
     enum LineId {
+      MsgOwner,
+
       ArgumentSubcommand,
       ArgumentMessage,
       ArgumentInterval,
@@ -30,7 +32,14 @@ namespace bot {
       EventOff,
 
       NotifySub,
-      NotifyUnsub
+      NotifyUnsub,
+
+      JoinResponse,
+      JoinResponseInChat,
+      JoinAlreadyIn,
+      JoinRejoined,
+      JoinFromOtherChat,
+      JoinNotAllowed
     };
 
     std::optional<LineId> string_to_line_id(const std::string &str);
