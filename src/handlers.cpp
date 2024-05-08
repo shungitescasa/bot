@@ -3,6 +3,7 @@
 #include <exception>
 #include <optional>
 #include <pqxx/pqxx>
+#include <string>
 #include <vector>
 
 #include "bundle.hpp"
@@ -50,5 +51,26 @@ namespace bot::handlers {
         bundle.irc_client.say(message.source.login, line);
       }
     }
+
+    pqxx::work work(conn);
+    pqxx::result channels =
+        work.exec("SELECT id FROM channels WHERE alias_id = " +
+                  std::to_string(message.source.id));
+
+    if (!channels.empty()) {
+      int channel_id = channels[0][0].as<int>();
+      pqxx::result cmds =
+          work.exec("SELECT message FROM custom_commands WHERE name = '" +
+                    message.message + "' AND channel_id = '" +
+                    std::to_string(channel_id) + "'");
+
+      if (!cmds.empty()) {
+        std::string msg = cmds[0][0].as<std::string>();
+
+        bundle.irc_client.say(message.source.login, msg);
+      }
+    }
+
+    work.commit();
   }
 }
