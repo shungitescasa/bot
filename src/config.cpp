@@ -21,6 +21,7 @@ namespace bot {
     Configuration cfg;
     TwitchCredentialsConfiguration ttv_crd_cfg;
     DatabaseConfiguration db_cfg;
+    CommandConfiguration cmd_cfg;
 
     std::string line;
     while (std::getline(ifs, line, '\n')) {
@@ -50,8 +51,15 @@ namespace bot {
       } else if (key == "db_port") {
         db_cfg.port = value;
       }
+
+      else if (key == "commands.join_allowed") {
+        cmd_cfg.join_allowed = std::stoi(value);
+      } else if (key == "commands.join_allow_from_other_chats") {
+        cmd_cfg.join_allow_from_other_chats = std::stoi(value);
+      }
     }
 
+    cfg.commands = cmd_cfg;
     cfg.twitch_credentials = ttv_crd_cfg;
     cfg.database = db_cfg;
 

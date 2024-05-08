@@ -115,7 +115,7 @@ namespace bot {
       std::map<std::string, std::string> token_map = {
           {"{sender.alias_name}", request.user.get_alias_name()},
           {"{source.alias_name}", request.channel.get_alias_name()},
-      };
+          {"{default.prefix}", DEFAULT_PREFIX}};
 
       for (const auto &pair : token_map) {
         int pos = line.find(pair.first);

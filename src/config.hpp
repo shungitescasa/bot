@@ -22,9 +22,15 @@ namespace bot {
       std::string token;
   };
 
+  struct CommandConfiguration {
+      bool join_allowed = true;
+      bool join_allow_from_other_chats = false;
+  };
+
   struct Configuration {
       TwitchCredentialsConfiguration twitch_credentials;
       DatabaseConfiguration database;
+      CommandConfiguration commands;
   };
 
   std::optional<Configuration> parse_configuration_from_file(
