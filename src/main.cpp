@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
   client.on<bot::irc::MessageType::Privmsg>(
       [&client, &command_loader, &localization, &cfg, &helix_client](
           const bot::irc::Message<bot::irc::MessageType::Privmsg> &message) {
-        bot::InstanceBundle bundle{client, helix_client, localization};
+        bot::InstanceBundle bundle{client, helix_client, localization, cfg};
 
         pqxx::connection conn(GET_DATABASE_CONNECTION_URL(cfg));
 
