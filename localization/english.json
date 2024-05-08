@@ -19,7 +19,7 @@
   "error.external_api_error": "External API error (%s%s)",
   "error.insufficient_rights": "Insufficient rights",
 
-  "ping.response": "{sender.alias_name}: Pong! Uptime: %s · Used memory: %sMB",
+  "ping.response": "{sender.alias_name}: funnywhitecat Pong! %s Uptime: %s · Used memory: %sMB",
 
   "event.on": "{sender.alias_name}: New event \"%s\" has been successfully created!",
   "event.off": "{sender.alias_name}: The event \"%s\" has been deleted!",

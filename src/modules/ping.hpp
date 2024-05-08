@@ -32,9 +32,26 @@ namespace bot {
 
           int used_memory = usage.ru_maxrss / 1024;
 
+          std::string cpp_info;
+
+#ifdef __cplusplus
+          cpp_info.append("C++" + std::to_string(__cplusplus).substr(2, 2));
+#endif
+
+#ifdef __VERSION__
+          cpp_info.append(" (gcc " +
+                          bot::utils::string::split_text(__VERSION__, ' ')[0] +
+                          ")");
+#endif
+
+          if (!cpp_info.empty()) {
+            cpp_info.append(" · ");
+          }
+
           return bundle.localization
-              .get_formatted_line(request, loc::LineId::PingResponse,
-                                  {uptime, std::to_string(used_memory)})
+              .get_formatted_line(
+                  request, loc::LineId::PingResponse,
+                  {cpp_info, uptime, std::to_string(used_memory)})
               .value();
         }
     };
