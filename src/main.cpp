@@ -13,6 +13,7 @@
 #include "irc/message.hpp"
 #include "localization/localization.hpp"
 #include "stream.hpp"
+#include "timer.hpp"
 
 int main(int argc, char *argv[]) {
   std::cout << "hi world\n";
@@ -110,6 +111,10 @@ int main(int argc, char *argv[]) {
       });
 
   client.run();
+
+  std::thread timer_thread(bot::create_timer_thread, &client, &cfg);
+  timer_thread.join();
+
   stream_listener_client.run_thread();
 
   return 0;

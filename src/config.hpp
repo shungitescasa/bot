@@ -8,6 +8,11 @@
       " password = " + c.database.password + " host = " + c.database.host + \
       " port = " + c.database.port
 
+#define GET_DATABASE_CONNECTION_URL_POINTER(c)                                \
+  "dbname = " + c->database.name + " user = " + c->database.user +            \
+      " password = " + c->database.password + " host = " + c->database.host + \
+      " port = " + c->database.port
+
 namespace bot {
   struct DatabaseConfiguration {
       std::string name;
