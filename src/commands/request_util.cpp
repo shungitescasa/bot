@@ -26,6 +26,7 @@ namespace bot::command {
     std::string command_id = parts[0];
 
     if (command_id.substr(0, DEFAULT_PREFIX.length()) != DEFAULT_PREFIX) {
+      delete work;
       return std::nullopt;
     }
 
@@ -38,6 +39,7 @@ namespace bot::command {
         [&](const auto &command) { return command->get_name() == command_id; });
 
     if (cmd == command_loader.get_commands().end()) {
+      delete work;
       return std::nullopt;
     }
 
