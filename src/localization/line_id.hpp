@@ -39,7 +39,10 @@ namespace bot {
       JoinAlreadyIn,
       JoinRejoined,
       JoinFromOtherChat,
-      JoinNotAllowed
+      JoinNotAllowed,
+
+      CustomcommandNew,
+      CustomcommandDelete
     };
 
     std::optional<LineId> string_to_line_id(const std::string &str);

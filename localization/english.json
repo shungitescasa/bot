@@ -32,5 +32,8 @@
   "join.already_in": "{sender.alias_name}: I'm already in your chat room!",
   "join.rejoined": "{sender.alias_name}: I have rejoined your chat room!",
   "join.from_other_chat": "{sender.alias_name}: In order for the bot to join your chat, you need to send {default.prefix}join directly in %s chat.",
-  "join.not_allowed": "{sender.alias_name}: The bot cannot join chat rooms!%s"
+  "join.not_allowed": "{sender.alias_name}: The bot cannot join chat rooms!%s",
+
+  "custom_command.new": "{sender.alias_name}: New command \"%s\" has been successfully created!",
+  "custom_command.delete": "{sender.alias_name}: The command \"%s\" has been deleted!"
 }

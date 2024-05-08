@@ -74,6 +74,12 @@ namespace bot {
         return LineId::JoinNotAllowed;
       }
 
+      else if (str == "custom_command.new") {
+        return LineId::CustomcommandNew;
+      } else if (str == "custom_command.delete") {
+        return LineId::CustomcommandDelete;
+      }
+
       else {
         return std::nullopt;
       }
