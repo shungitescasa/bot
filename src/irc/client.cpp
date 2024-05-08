@@ -106,7 +106,7 @@ void Client::run() {
         }
       });
 
-  this->websocket.run();
+  this->websocket.start();
 }
 
 void Client::say(const std::string &channel_login, const std::string &message) {
