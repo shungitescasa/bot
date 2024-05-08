@@ -35,5 +35,8 @@
   "join.not_allowed": "{sender.alias_name}: Бот не может заходить в чужие чаты!%s",
 
   "custom_command.new": "{sender.alias_name}: Новая команда \"%s\" была успешно создана!",
-  "custom_command.delete": "{sender.alias_name}: Команда \"%s\" была удалена!"
+  "custom_command.delete": "{sender.alias_name}: Команда \"%s\" была удалена!",
+
+  "timer.new": "{sender.alias_name}: Новый таймер \"%s\" был успешно создан!",
+  "timer.delete": "{sender.alias_name}: Таймер \"%s\" был удален!"
 }

@@ -15,6 +15,7 @@
 #include "../modules/massping.hpp"
 #include "../modules/notify.hpp"
 #include "../modules/ping.hpp"
+#include "../modules/timer.hpp"
 #include "../utils/chrono.hpp"
 #include "request.hpp"
 
@@ -27,6 +28,7 @@ namespace bot {
       this->add_command(std::make_unique<mod::Notify>());
       this->add_command(std::make_unique<mod::Join>());
       this->add_command(std::make_unique<mod::CustomCommand>());
+      this->add_command(std::make_unique<mod::Timer>());
     }
 
     void CommandLoader::add_command(std::unique_ptr<Command> command) {

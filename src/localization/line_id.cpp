@@ -80,6 +80,12 @@ namespace bot {
         return LineId::CustomcommandDelete;
       }
 
+      else if (str == "timer.new") {
+        return LineId::TimerNew;
+      } else if (str == "timer.delete") {
+        return LineId::TimerDelete;
+      }
+
       else {
         return std::nullopt;
       }

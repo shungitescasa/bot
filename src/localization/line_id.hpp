@@ -42,7 +42,10 @@ namespace bot {
       JoinNotAllowed,
 
       CustomcommandNew,
-      CustomcommandDelete
+      CustomcommandDelete,
+
+      TimerNew,
+      TimerDelete
     };
 
     std::optional<LineId> string_to_line_id(const std::string &str);

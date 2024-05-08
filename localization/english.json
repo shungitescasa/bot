@@ -35,5 +35,8 @@
   "join.not_allowed": "{sender.alias_name}: The bot cannot join chat rooms!%s",
 
   "custom_command.new": "{sender.alias_name}: New command \"%s\" has been successfully created!",
-  "custom_command.delete": "{sender.alias_name}: The command \"%s\" has been deleted!"
+  "custom_command.delete": "{sender.alias_name}: The command \"%s\" has been deleted!",
+
+  "timer.new": "{sender.alias_name}: New timer \"%s\" has been successfully created!",
+  "timer.delete": "{sender.alias_name}: The timer \"%s\" has been deleted!"
 }
