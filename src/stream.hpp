@@ -30,6 +30,7 @@ namespace bot::stream {
       void check();
       void handler(const schemas::EventType &type,
                    const api::twitch::schemas::Stream &stream);
+      void update_channel_ids();
 
       const api::twitch::HelixClient &helix_client;
       irc::Client &irc_client;

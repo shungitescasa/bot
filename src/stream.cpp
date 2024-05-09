@@ -39,6 +39,7 @@ namespace bot::stream {
   }
   void StreamListenerClient::run() {
     while (true) {
+      this->update_channel_ids();
       this->check();
       std::this_thread::sleep_for(std::chrono::seconds(5));
     }
@@ -158,5 +159,26 @@ namespace bot::stream {
       work.commit();
       conn.close();
     }
+  }
+  void StreamListenerClient::update_channel_ids() {
+    pqxx::connection conn(GET_DATABASE_CONNECTION_URL(this->configuration));
+    pqxx::work work(conn);
+
+    pqxx::result ids =
+        work.exec("SELECT target_alias_id FROM events WHERE event_type < 99");
+
+    for (const auto &row : ids) {
+      int id = row[0].as<int>();
+
+      if (std::any_of(this->ids.begin(), this->ids.end(),
+                      [&](const auto &x) { return x == id; })) {
+        continue;
+      }
+
+      this->ids.push_back(id);
+    }
+
+    work.commit();
+    conn.close();
   }
 }
