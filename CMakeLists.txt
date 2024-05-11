@@ -11,6 +11,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+add_definitions(-DUSE_TLS=1)
+
 add_executable(Bot)
 
 set_target_properties(
