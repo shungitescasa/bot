@@ -69,8 +69,6 @@ namespace bot {
                 .value();
           }
 
-          return "asd";
-
           work.exec("INSERT INTO channels(alias_id, alias_name) VALUES (" +
                     std::to_string(request.user.get_alias_id()) + ", '" +
                     request.user.get_alias_name() + "')");
