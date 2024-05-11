@@ -46,6 +46,8 @@ namespace bot {
         return LineId::ErrorSomethingWentWrong;
       } else if (str == "error.insufficient_rights") {
         return LineId::ErrorInsufficientRights;
+      } else if (str == "error.illegal_command") {
+        return LineId::ErrorIllegalCommand;
       }
 
       else if (str == "event.on") {

@@ -18,6 +18,7 @@
   "error.something_went_wrong": "Что-то пошло не так",
   "error.external_api_error": "Ошибка стороннего API (%s%s)",
   "error.insufficient_rights": "Недостаточно прав",
+  "error.illegal_command": "Команда недоступна",
 
   "ping.response": "{sender.alias_name}: funnywhitecat Понг! %s Время сессии: %s · ОЗУ: %sМБ",
 

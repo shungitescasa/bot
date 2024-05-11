@@ -22,7 +22,9 @@ namespace bot {
     SOMETHING_WENT_WRONG,
 
     EXTERNAL_API_ERROR,
-    INSUFFICIENT_RIGHTS
+    INSUFFICIENT_RIGHTS,
+
+    ILLEGAL_COMMAND
   };
 
   template <ResponseError T, class Enable = void>
@@ -79,9 +81,10 @@ namespace bot {
   };
 
   template <ResponseError T>
-  class ResponseException<
-      T, typename std::enable_if<T == SOMETHING_WENT_WRONG ||
-                                 T == INSUFFICIENT_RIGHTS>::type>
+  class ResponseException<T,
+                          typename std::enable_if<T == SOMETHING_WENT_WRONG ||
+                                                  T == INSUFFICIENT_RIGHTS ||
+                                                  T == ILLEGAL_COMMAND>::type>
       : public std::exception {
     public:
       ResponseException(const command::Request &request,
@@ -89,10 +92,16 @@ namespace bot {
           : request(request), localizator(localizator), error(T) {
         loc::LineId line_id;
 
-        if (this->error == INSUFFICIENT_RIGHTS) {
-          line_id = loc::LineId::ErrorInsufficientRights;
-        } else {
-          line_id = loc::LineId::ErrorSomethingWentWrong;
+        switch (this->error) {
+          case INSUFFICIENT_RIGHTS:
+            line_id = loc::LineId::ErrorInsufficientRights;
+            break;
+          case ILLEGAL_COMMAND:
+            line_id = loc::LineId::ErrorIllegalCommand;
+            break;
+          default:
+            line_id = loc::LineId::ErrorSomethingWentWrong;
+            break;
         }
 
         this->line =

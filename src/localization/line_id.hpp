@@ -25,6 +25,7 @@ namespace bot {
       ErrorSomethingWentWrong,
       ErrorExternalAPIError,
       ErrorInsufficientRights,
+      ErrorIllegalCommand,
 
       PingResponse,
 
