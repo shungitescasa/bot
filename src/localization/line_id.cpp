@@ -88,6 +88,10 @@ namespace bot {
         return LineId::TimerDelete;
       }
 
+      else if (str == "help.response") {
+        return LineId::HelpResponse;
+      }
+
       else {
         return std::nullopt;
       }

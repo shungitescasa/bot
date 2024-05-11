@@ -23,6 +23,7 @@ namespace bot {
     DatabaseConfiguration db_cfg;
     CommandConfiguration cmd_cfg;
     OwnerConfiguration owner_cfg;
+    UrlConfiguration url_cfg;
 
     std::string line;
     while (std::getline(ifs, line, '\n')) {
@@ -64,8 +65,13 @@ namespace bot {
       } else if (key == "owner.id") {
         owner_cfg.id = std::stoi(value);
       }
+
+      else if (key == "url.help") {
+        url_cfg.help = value;
+      }
     }
 
+    cfg.url = url_cfg;
     cfg.owner = owner_cfg;
     cfg.commands = cmd_cfg;
     cfg.twitch_credentials = ttv_crd_cfg;

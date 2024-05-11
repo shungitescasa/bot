@@ -37,11 +37,16 @@ namespace bot {
       std::optional<int> id = std::nullopt;
   };
 
+  struct UrlConfiguration {
+      std::optional<std::string> help = std::nullopt;
+  };
+
   struct Configuration {
       TwitchCredentialsConfiguration twitch_credentials;
       DatabaseConfiguration database;
       CommandConfiguration commands;
       OwnerConfiguration owner;
+      UrlConfiguration url;
   };
 
   std::optional<Configuration> parse_configuration_from_file(

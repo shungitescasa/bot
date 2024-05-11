@@ -46,7 +46,9 @@ namespace bot {
       CustomcommandDelete,
 
       TimerNew,
-      TimerDelete
+      TimerDelete,
+
+      HelpResponse
     };
 
     std::optional<LineId> string_to_line_id(const std::string &str);

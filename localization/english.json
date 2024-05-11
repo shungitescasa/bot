@@ -39,5 +39,7 @@
   "custom_command.delete": "{sender.alias_name}: The command \"%s\" has been deleted!",
 
   "timer.new": "{sender.alias_name}: New timer \"%s\" has been successfully created!",
-  "timer.delete": "{sender.alias_name}: The timer \"%s\" has been deleted!"
+  "timer.delete": "{sender.alias_name}: The timer \"%s\" has been deleted!",
+
+  "help.response": "{sender.alias_name}: Bot command reference: %s"
 }
