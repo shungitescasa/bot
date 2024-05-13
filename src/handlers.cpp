@@ -1,6 +1,7 @@
 #include "handlers.hpp"
 
 #include <exception>
+#include <iostream>
 #include <optional>
 #include <pqxx/pqxx>
 #include <string>
@@ -12,6 +13,7 @@
 #include "commands/request_util.hpp"
 #include "irc/message.hpp"
 #include "localization/line_id.hpp"
+#include "utils/string.hpp"
 
 namespace bot::handlers {
   void handle_private_message(
@@ -19,6 +21,14 @@ namespace bot::handlers {
       const command::CommandLoader &command_loader,
       const irc::Message<irc::MessageType::Privmsg> &message,
       pqxx::connection &conn) {
+    if (utils::string::string_contains_sql_injection(message.message)) {
+      std::cout << "[TWITCH HANDLER] Attempted to process the message, but it "
+                   "seems to contain SQL "
+                   "injection symbols: "
+                << message.message << "\n";
+      return;
+    }
+
     std::optional<command::Request> request =
         command::generate_request(command_loader, message, conn);
 

@@ -1,5 +1,6 @@
 #include "string.hpp"
 
+#include <algorithm>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -47,6 +48,20 @@ namespace bot {
         }
 
         return str;
+      }
+
+      bool string_contains_sql_injection(const std::string &input) {
+        std::string forbidden_strings[] = {";",   "--",     "'",      "\"",
+                                           "/*",  "*/",     "xp_",    "exec",
+                                           "sp_", "insert", "select", "delete"};
+
+        for (const auto &str : forbidden_strings) {
+          if (input.find(str) != std::string::npos) {
+            return true;
+          }
+        }
+
+        return false;
       }
     }
   }

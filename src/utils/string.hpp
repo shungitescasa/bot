@@ -25,6 +25,8 @@ namespace bot {
         }
         return ss.str();
       }
+
+      bool string_contains_sql_injection(const std::string &input);
     }
   }
 }
