@@ -18,7 +18,7 @@ add_executable(Bot)
 set_target_properties(
   Bot PROPERTIES
   DESCRIPTION ${PROJECT_DESCRIPTION}
-  OUTPUT_NAME "redpilled-bot_${PROJECT_VERSION}"
+  OUTPUT_NAME "redpilledbot"
 )
 
 file(GLOB_RECURSE SRC_FILES "src/*.cpp" "src/*.h" "src/*.hpp")
