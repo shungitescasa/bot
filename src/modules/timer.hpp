@@ -18,7 +18,7 @@ namespace bot {
         }
 
         std::vector<std::string> get_subcommand_ids() const override {
-          return {"new", "delete"};
+          return {"new", "remove"};
         }
 
         std::variant<std::vector<std::string>, std::string> run(
@@ -89,7 +89,7 @@ namespace bot {
             return bundle.localization
                 .get_formatted_line(request, loc::LineId::TimerNew, {name})
                 .value();
-          } else if (subcommand_id == "delete") {
+          } else if (subcommand_id == "remove") {
             if (timers.empty()) {
               throw ResponseException<ResponseError::NOT_FOUND>(
                   request, bundle.localization, name);
