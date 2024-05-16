@@ -38,11 +38,11 @@ namespace bot {
             now - last_executed_at);
 
         if (difference.count() > interval_sec) {
-          pqxx::result channels =
-              work->exec("SELECT alias_name FROM channels WHERE id = " +
-                         std::to_string(channel_id));
+          pqxx::result channels = work->exec(
+              "SELECT alias_name, opted_out_at FROM channels WHERE id = " +
+              std::to_string(channel_id));
 
-          if (!channels.empty()) {
+          if (!channels.empty() && channels[0][1].is_null()) {
             std::string alias_name = channels[0][0].as<std::string>();
 
             irc_client->say(alias_name, message);

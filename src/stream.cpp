@@ -87,9 +87,14 @@ namespace bot::stream {
         " AND target_alias_id = " + std::to_string(stream.user_id));
 
     for (const auto &event : events) {
-      pqxx::row channel =
-          work.exec1("SELECT alias_id, alias_name FROM channels WHERE id = " +
-                     std::to_string(event[1].as<int>()));
+      pqxx::row channel = work.exec1(
+          "SELECT alias_id, alias_name, opted_out_at FROM channels WHERE id "
+          "= " +
+          std::to_string(event[1].as<int>()));
+
+      if (!channel[2].is_null()) {
+        continue;
+      }
 
       pqxx::result subs = work.exec(
           "SELECT user_id FROM event_subscriptions WHERE event_id = " +

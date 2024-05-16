@@ -65,6 +65,11 @@ namespace bot::command {
 
     schemas::Channel channel(query[0]);
 
+    if (channel.get_opted_out_at().has_value()) {
+      delete work;
+      return std::nullopt;
+    }
+
     query = work->exec("SELECT * FROM channel_preferences WHERE channel_id = " +
                        std::to_string(channel.get_id()));
 
