@@ -34,10 +34,6 @@ namespace bot::stream {
       this->online_ids.erase(y);
     }
   }
-  void StreamListenerClient::run_thread() {
-    std::thread t(&bot::stream::StreamListenerClient::run, this);
-    t.join();
-  }
   void StreamListenerClient::run() {
     while (true) {
       this->update_channel_ids();

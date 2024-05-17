@@ -20,13 +20,11 @@ namespace bot::stream {
             configuration(configuration){};
       ~StreamListenerClient() = default;
 
-      void run_thread();
-
+      void run();
       void listen_channel(const int &id);
       void unlisten_channel(const int &id);
 
     private:
-      void run();
       void check();
       void handler(const schemas::EventType &type,
                    const api::twitch::schemas::Stream &stream);

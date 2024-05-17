@@ -114,10 +114,14 @@ int main(int argc, char *argv[]) {
 
   client.run();
 
-  std::thread timer_thread(bot::create_timer_thread, &client, &cfg);
-  timer_thread.join();
+  std::vector<std::thread> threads;
+  threads.push_back(std::thread(bot::create_timer_thread, &client, &cfg));
+  threads.push_back(std::thread(&bot::stream::StreamListenerClient::run,
+                                &stream_listener_client));
 
-  stream_listener_client.run_thread();
+  for (auto &thread : threads) {
+    thread.join();
+  }
 
   return 0;
 }
