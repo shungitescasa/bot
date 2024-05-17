@@ -15,6 +15,10 @@ add_definitions(-DUSE_TLS=1)
 
 add_executable(Bot)
 
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_definitions(Bot PRIVATE DEBUG_MODE)
+endif()
+
 set_target_properties(
   Bot PROPERTIES
   DESCRIPTION ${PROJECT_DESCRIPTION}
