@@ -1,7 +1,6 @@
 #include "handlers.hpp"
 
 #include <exception>
-#include <iostream>
 #include <optional>
 #include <pqxx/pqxx>
 #include <string>
@@ -13,6 +12,7 @@
 #include "commands/request_util.hpp"
 #include "irc/message.hpp"
 #include "localization/line_id.hpp"
+#include "logger.hpp"
 #include "utils/string.hpp"
 
 namespace bot::handlers {
@@ -22,10 +22,9 @@ namespace bot::handlers {
       const irc::Message<irc::MessageType::Privmsg> &message,
       pqxx::connection &conn) {
     if (utils::string::string_contains_sql_injection(message.message)) {
-      std::cout << "[TWITCH HANDLER] Attempted to process the message, but it "
-                   "seems to contain SQL "
-                   "injection symbols: "
-                << message.message << "\n";
+      log::warn("PrivateMessageHandler",
+                "Received the message in #" + message.source.login +
+                    " with SQL injection: " + message.message);
       return;
     }
 

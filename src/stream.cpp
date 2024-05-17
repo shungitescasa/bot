@@ -11,6 +11,7 @@
 
 #include "api/twitch/schemas/stream.hpp"
 #include "config.hpp"
+#include "logger.hpp"
 #include "schemas/stream.hpp"
 #include "utils/string.hpp"
 
@@ -179,6 +180,9 @@ namespace bot::stream {
                       [&](const auto &x) { return x == id; })) {
         continue;
       }
+
+      log::info("TwitchStreamListener",
+                "Listening stream events for ID " + std::to_string(id));
 
       this->ids.push_back(id);
     }

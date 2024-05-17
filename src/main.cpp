@@ -1,4 +1,3 @@
-#include <iostream>
 #include <optional>
 #include <pqxx/pqxx>
 #include <string>
@@ -12,34 +11,37 @@
 #include "irc/client.hpp"
 #include "irc/message.hpp"
 #include "localization/localization.hpp"
+#include "logger.hpp"
 #include "stream.hpp"
 #include "timer.hpp"
 
 int main(int argc, char *argv[]) {
-  std::cout << "hi world\n";
+  bot::log::info("Main", "Starting up...");
 
   std::optional<bot::Configuration> o_cfg =
       bot::parse_configuration_from_file(".env");
 
   if (!o_cfg.has_value()) {
-    return -1;
+    return 1;
   }
 
   bot::Configuration cfg = o_cfg.value();
 
   if (cfg.twitch_credentials.client_id.empty() ||
       cfg.twitch_credentials.token.empty()) {
-    std::cerr << "*** TWITCH_CREDENTIALS.CLIENT_ID and "
-                 "TWITCH_CREDENTIALS.TOKEN must be set!\n";
-    return -1;
+    bot::log::error("Main",
+                    "TWITCH_CREDENTIALS.CLIENT_ID and TWITCH_CREDENTIALS.TOKEN "
+                    "must be set in environmental file!");
+    return 1;
   }
 
   if (cfg.database.name.empty() || cfg.database.user.empty() ||
       cfg.database.password.empty() || cfg.database.host.empty() ||
       cfg.database.port.empty()) {
-    std::cerr
-        << "*** DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT must be set!\n";
-    return -1;
+    bot::log::error("Main",
+                    "DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT "
+                    "must be set in environmental file!");
+    return 1;
   }
 
   bot::irc::Client client(cfg.twitch_credentials.client_id,

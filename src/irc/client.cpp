@@ -4,11 +4,11 @@
 #include <ixwebsocket/IXWebSocketMessageType.h>
 
 #include <algorithm>
-#include <iostream>
 #include <optional>
 #include <string>
 #include <vector>
 
+#include "../logger.hpp"
 #include "cpr/api.h"
 #include "cpr/cprtypes.h"
 #include "cpr/response.h"
@@ -32,7 +32,9 @@ Client::Client(std::string client_id, std::string token) {
       cpr::Header{{"Client-Id", this->client_id}});
 
   if (response.status_code != 200) {
-    std::cout << "* Failed to get bot username from Twitch API!\n";
+    log::warn("IRC", "Failed to get bot username from Twitch API: " +
+                         std::to_string(response.status_code) + " " +
+                         response.status_line);
   } else {
     nlohmann::json j = nlohmann::json::parse(response.text);
 
@@ -47,7 +49,7 @@ void Client::run() {
       [this](const ix::WebSocketMessagePtr &msg) {
         switch (msg->type) {
           case ix::WebSocketMessageType::Message: {
-            std::cout << "Got a message: " << msg->str << std::endl;
+            log::debug("IRC", "Received message: " + msg->str);
 
             std::vector<std::string> lines =
                 utils::string::split_text(msg->str, '\n');
@@ -81,7 +83,7 @@ void Client::run() {
             break;
           }
           case ix::WebSocketMessageType::Open: {
-            std::cout << "Connected to Twitch IRC!\n";
+            log::info("IRC", "Connected to Twitch IRC");
             this->is_connected = true;
             this->authorize();
             for (const auto &msg : this->pool) {
@@ -91,7 +93,7 @@ void Client::run() {
             break;
           }
           case ix::WebSocketMessageType::Close: {
-            std::cout << "Twitch IRC Connection closed!\n";
+            log::info("IRC", "Twitch IRC connection closed");
             this->is_connected = false;
 
             for (const auto &x : this->joined_channels) {
@@ -111,6 +113,7 @@ void Client::run() {
 
 void Client::say(const std::string &channel_login, const std::string &message) {
   this->raw("PRIVMSG #" + channel_login + " :" + message);
+  log::debug("IRC", "Sent '" + message + "' in #" + channel_login);
 }
 
 bool Client::join(const std::string &channel_login) {
@@ -121,6 +124,7 @@ bool Client::join(const std::string &channel_login) {
   if (!already_joined) {
     this->raw("JOIN #" + channel_login);
     this->joined_channels.push_back(channel_login);
+    log::info("IRC", "Joined #" + channel_login);
   }
 
   return !already_joined;
@@ -137,11 +141,11 @@ void Client::raw(const std::string &raw_message) {
 
 void Client::authorize() {
   if (this->username.empty() || this->token.empty()) {
-    std::cout << "Bot username and token must be set!\n";
+    log::error("IRC", "Bot username and token must be set for authorization!");
     return;
   }
 
-  std::cout << "Authorizing on Twitch IRC servers...\n";
+  log::info("IRC", "Authorizing on Twitch IRC servers...");
 
   this->raw("PASS oauth:" + this->token);
   this->raw("NICK " + this->username);

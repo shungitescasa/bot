@@ -2,10 +2,11 @@
 
 #include <cctype>
 #include <fstream>
-#include <iostream>
 #include <optional>
 #include <sstream>
 #include <string>
+
+#include "logger.hpp"
 
 namespace bot {
   std::optional<Configuration> parse_configuration_from_file(
@@ -13,8 +14,7 @@ namespace bot {
     std::ifstream ifs(file_path);
 
     if (!ifs.is_open()) {
-      std::cerr << "*** Failed to open the configuration file: " << file_path
-                << "!\n";
+      log::error("Configuration", "Failed to open the file at " + file_path);
       return std::nullopt;
     }
 
@@ -77,6 +77,8 @@ namespace bot {
     cfg.twitch_credentials = ttv_crd_cfg;
     cfg.database = db_cfg;
 
+    log::info("Configuration",
+              "Successfully loaded the file from '" + file_path + "'");
     return cfg;
   }
 }
