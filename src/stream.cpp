@@ -52,10 +52,10 @@ namespace bot::stream {
     for (const auto &stream : streams) {
       bool is_already_live =
           std::any_of(this->online_ids.begin(), this->online_ids.end(),
-                      [&](const auto &x) { return x == stream.user_id; });
+                      [&](const auto &x) { return x == stream.get_user_id(); });
 
       if (!is_already_live) {
-        this->online_ids.insert(stream.user_id);
+        this->online_ids.insert(stream.get_user_id());
         this->handler(schemas::EventType::LIVE, stream);
       }
     }
@@ -64,7 +64,7 @@ namespace bot::stream {
     for (auto i = this->online_ids.begin(); i != this->online_ids.end();) {
       auto stream =
           std::find_if(streams.begin(), streams.end(),
-                       [&](const auto &x) { return x.user_id == *i; });
+                       [&](const auto &x) { return x.get_user_id() == *i; });
 
       if (stream == streams.end()) {
         this->handler(schemas::EventType::OFFLINE,
@@ -85,7 +85,7 @@ namespace bot::stream {
         "SELECT id, channel_id, message, flags FROM events WHERE event_type "
         "= " +
         std::to_string(type) +
-        " AND target_alias_id = " + std::to_string(stream.user_id));
+        " AND target_alias_id = " + std::to_string(stream.get_user_id()));
 
     for (const auto &event : events) {
       pqxx::row channel = work.exec1(
