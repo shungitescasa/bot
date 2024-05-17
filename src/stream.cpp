@@ -161,10 +161,10 @@ namespace bot::stream {
       for (const auto &msg : msgs) {
         this->irc_client.say(channel[1].as<std::string>(), base + msg);
       }
-
-      work.commit();
-      conn.close();
     }
+
+    work.commit();
+    conn.close();
   }
   void StreamListenerClient::update_channel_ids() {
     pqxx::connection conn(GET_DATABASE_CONNECTION_URL(this->configuration));
