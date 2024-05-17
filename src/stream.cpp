@@ -47,6 +47,10 @@ namespace bot::stream {
   }
   void StreamListenerClient::check() {
     auto streams = this->helix_client.get_streams(this->ids);
+    auto now = std::chrono::system_clock::now();
+    auto now_time_it = std::chrono::system_clock::to_time_t(now);
+    auto now_tm = std::gmtime(&now_time_it);
+    now = std::chrono::system_clock::from_time_t(std::mktime(now_tm));
 
     // adding new ids
     for (const auto &stream : streams) {
@@ -56,7 +60,14 @@ namespace bot::stream {
 
       if (!is_already_live) {
         this->online_ids.insert(stream.get_user_id());
-        this->handler(schemas::EventType::LIVE, stream);
+
+        auto difference = now - stream.get_started_at();
+        auto difference_min =
+            std::chrono::duration_cast<std::chrono::minutes>(difference);
+
+        if (difference_min.count() < 1) {
+          this->handler(schemas::EventType::LIVE, stream);
+        }
       }
     }
 
