@@ -5,9 +5,33 @@
   </head>
   <body>
     <div class="min-h-screen w-full flex justify-center">
-      <div class="w-1/2 flex items-center flex-col">
+      <div class="lg:w-1/2 w-full flex items-center flex-col">
         {{> header.html }}
-        <p>lol</p>
+
+        <!-- Large banner -->
+        <div class="w-full p-12 my-4 space-y-8 lg:space-y-0 flex flex-col lg:flex-row items-center bg-gradient-to-t from-green-400 to-green-300">
+          <img src="static/img/bot_pfp.png" alt="" width="256">
+          <div class="lg:w-1/2 w-full text-center lg:text-right flex flex-col space-y-8 flex-grow">
+            <div>
+              <h1 class="text-4xl font-semibold text-shadow">
+                Enhance your chat with the bot
+              </h1>
+              <p class="text-md text-shadow">
+                A multi-utility Twitch chat bot that brings<br/>
+                a lot of functionality into your chat.
+              </p>
+            </div>
+            <a href="/wiki/join" class="h-16 w-full">
+              <button
+                  class="h-full w-full lg:w-1/4 bg-red-500 text-lg font-semibold rounded-lg shadow-lg"
+                  href="/wiki/join"
+              >
+                Get the bot
+              </button>
+            </a>
+          </div>
+        </div>
+
       </div>
     </div>
   </body>
