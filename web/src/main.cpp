@@ -1,8 +1,11 @@
+#include "config.hpp"
 #include "crow/app.h"
 #include "crow/mustache.h"
 #include "handlers.hpp"
 
 int main(int argc, char *argv[]) {
+  auto cfg = botweb::parse_configuration_from_file(".env");
+
   crow::SimpleApp app;
 
   CROW_ROUTE(app, "/")
