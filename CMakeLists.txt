@@ -15,8 +15,10 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_definitions(-DUSE_TLS=1)
 
 file(GLOB_RECURSE BOT_SRC_FILES "bot/src/*.cpp" "bot/src/*.h" "bot/src/*.hpp")
+file(GLOB_RECURSE WEB_SRC_FILES "web/src/*.cpp" "web/src/*.h" "web/src/*.hpp")
 
 option(BUILD_BOT "Build the bot" ON)
+option(BUILD_WEB "Build the web application" ON)
 
 if (BUILD_BOT)
   add_executable(Bot)
@@ -65,4 +67,26 @@ if (BUILD_BOT)
   FetchContent_MakeAvailable(ixwebsocket)
 
   target_link_libraries(Bot PRIVATE ixwebsocket::ixwebsocket pqxx nlohmann_json::nlohmann_json cpr::cpr)
+endif()
+
+if (BUILD_WEB)
+  add_executable(Web)
+
+  set_target_properties(
+    Web PROPERTIES
+    DESCRIPTION ${PROJECT_DESCRIPTION}
+    OUTPUT_NAME "redpilledweb"
+  )
+
+  target_sources(Web PRIVATE ${WEB_SRC_FILES})
+
+  # web framework
+  FetchContent_Declare(
+    crow
+    GIT_REPOSITORY https://github.com/CrowCpp/Crow
+    GIT_TAG v1.1.0
+  )
+  FetchContent_MakeAvailable(crow)
+
+  target_include_directories(Web PRIVATE ${crow_SOURCE_DIR}/include)
 endif()
