@@ -88,5 +88,14 @@ if (BUILD_WEB)
   )
   FetchContent_MakeAvailable(crow)
 
+  # markdown parser
+  FetchContent_Declare(
+    maddy
+    GIT_REPOSITORY https://github.com/progsource/maddy.git
+    GIT_TAG 1.3.0
+  )
+  FetchContent_MakeAvailable(maddy)
+
   target_include_directories(Web PRIVATE ${crow_SOURCE_DIR}/include)
+  target_link_libraries(Web PRIVATE maddy)
 endif()
