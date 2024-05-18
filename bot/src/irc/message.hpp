@@ -11,7 +11,7 @@
 
 namespace bot {
   namespace irc {
-    enum MessageType { Privmsg, Notice };
+    enum MessageType { Privmsg, Ping, Notice };
     std::optional<MessageType> define_message_type(const std::string &msg);
 
     struct MessageSender {

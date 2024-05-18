@@ -22,6 +22,8 @@ namespace bot {
         return MessageType::Notice;
       } else if (parts[i] == "PRIVMSG") {
         return MessageType::Privmsg;
+      } else if (parts[i] == "PING") {
+        return MessageType::Ping;
       }
 
       return std::nullopt;

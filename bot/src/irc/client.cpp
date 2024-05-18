@@ -4,6 +4,7 @@
 #include <ixwebsocket/IXWebSocketMessageType.h>
 
 #include <algorithm>
+#include <iostream>
 #include <optional>
 #include <string>
 #include <vector>
@@ -77,6 +78,12 @@ void Client::run() {
                 if (message.has_value()) {
                   this->onPrivmsg(message.value());
                 }
+              } else if (m_type == MessageType::Ping) {
+                // as the docs say, the message should be the same as the one
+                // from the ping
+                std::string response_text = msg->str.substr(4, msg->str.size());
+
+                this->raw("PONG" + response_text);
               }
             }
 
