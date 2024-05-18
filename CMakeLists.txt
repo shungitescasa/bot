@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
+include(FetchContent)
 
 project(
   RedpilledBot
@@ -13,53 +14,55 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_definitions(-DUSE_TLS=1)
 
-add_executable(Bot)
+file(GLOB_RECURSE BOT_SRC_FILES "bot/src/*.cpp" "bot/src/*.h" "bot/src/*.hpp")
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_compile_definitions(Bot PRIVATE DEBUG_MODE)
+option(BUILD_BOT "Build the bot" ON)
+
+if (BUILD_BOT)
+  add_executable(Bot)
+
+  if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+      target_compile_definitions(Bot PRIVATE DEBUG_MODE)
+  endif()
+
+  set_target_properties(
+    Bot PROPERTIES
+    DESCRIPTION ${PROJECT_DESCRIPTION}
+    OUTPUT_NAME "redpilledbot"
+  )
+
+  target_sources(Bot PRIVATE ${BOT_SRC_FILES})
+
+  # Getting libraries
+  # json
+  FetchContent_Declare(
+    json
+    URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
+  )
+  FetchContent_MakeAvailable(json)
+
+  # http request maker
+  FetchContent_Declare(
+    cpr
+    GIT_REPOSITORY https://github.com/libcpr/cpr.git
+    GIT_TAG 1.10.5
+  )
+  FetchContent_MakeAvailable(cpr)
+
+  # postgresql
+  FetchContent_Declare(
+    pqxx
+    GIT_REPOSITORY https://github.com/jtv/libpqxx.git
+    GIT_TAG 7.9.0
+  )
+  FetchContent_MakeAvailable(pqxx)
+
+  FetchContent_Declare(
+    ixwebsocket
+    GIT_REPOSITORY https://github.com/machinezone/IXWebSocket
+    GIT_TAG v11.4.5
+  )
+  FetchContent_MakeAvailable(ixwebsocket)
+
+  target_link_libraries(Bot PRIVATE ixwebsocket::ixwebsocket pqxx nlohmann_json::nlohmann_json cpr::cpr)
 endif()
-
-set_target_properties(
-  Bot PROPERTIES
-  DESCRIPTION ${PROJECT_DESCRIPTION}
-  OUTPUT_NAME "redpilledbot"
-)
-
-file(GLOB_RECURSE SRC_FILES "src/*.cpp" "src/*.h" "src/*.hpp")
-
-target_sources(Bot PRIVATE ${SRC_FILES})
-
-# Getting libraries
-include(FetchContent)
-
-# json
-FetchContent_Declare(
-  json
-  URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
-)
-FetchContent_MakeAvailable(json)
-
-# http request maker
-FetchContent_Declare(
-  cpr
-  GIT_REPOSITORY https://github.com/libcpr/cpr.git
-  GIT_TAG 1.10.5
-)
-FetchContent_MakeAvailable(cpr)
-
-# postgresql
-FetchContent_Declare(
-  pqxx
-  GIT_REPOSITORY https://github.com/jtv/libpqxx.git
-  GIT_TAG 7.9.0
-)
-FetchContent_MakeAvailable(pqxx)
-
-FetchContent_Declare(
-  ixwebsocket
-  GIT_REPOSITORY https://github.com/machinezone/IXWebSocket
-  GIT_TAG v11.4.5
-)
-FetchContent_MakeAvailable(ixwebsocket)
-
-target_link_libraries(Bot PRIVATE ixwebsocket::ixwebsocket pqxx nlohmann_json::nlohmann_json cpr::cpr)
