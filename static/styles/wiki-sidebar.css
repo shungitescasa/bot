@@ -1,0 +1,35 @@
+.wiki-sidebar {
+  min-width: 256px;
+}
+
+.wiki-sidebar h1 {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.wiki-sidebar h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+.wiki-sidebar h1, .wiki-sidebar h2 {
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+
+.wiki-sidebar ul {
+  margin: 0 8px;
+}
+
+.wiki-sidebar li {}
+
+.wiki-sidebar a {
+  color: rgb(4, 120, 87);
+  text-decoration: underline;
+}
+
+.wiki-sidebar a:hover {
+  color: rgb(16, 185, 129);
+}

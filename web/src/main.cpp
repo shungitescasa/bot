@@ -1,5 +1,6 @@
 #include "crow/app.h"
 #include "crow/mustache.h"
+#include "handlers.hpp"
 
 int main(int argc, char *argv[]) {
   crow::SimpleApp app;
@@ -10,6 +11,10 @@ int main(int argc, char *argv[]) {
 
     return page.render();
   });
+
+  CROW_ROUTE(app, "/wiki")([]() { return botweb::get_wiki_page("/README"); });
+  CROW_ROUTE(app, "/wiki/<path>")
+  ([](const std::string &path) { return botweb::get_wiki_page(path); });
 
   app.multithreaded().port(18083).run();
   return 0;

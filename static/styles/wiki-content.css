@@ -1,0 +1,59 @@
+.wiki-content {
+  margin: 0 16px;
+  margin-bottom: 64px;
+}
+
+.wiki-content h1 {
+  font-size: 32px;
+  font-weight: 600;
+}
+
+.wiki-content h2 {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.wiki-content h3 {
+  font-size: 24px;
+}
+
+.wiki-content h1, .wiki-content h2, .wiki-content h3 {
+  margin: 16px 0;
+}
+
+.wiki-content p {
+  margin: 0 16px;
+}
+
+.wiki-content ul {
+  margin: 0 32px;
+}
+
+.wiki-content li {
+  list-style-type: disc;
+}
+
+.wiki-content a {
+  color: rgb(4, 120, 87);
+  text-decoration: underline;
+}
+
+.wiki-content a:hover {
+  color: rgb(16, 185, 129);
+}
+
+.wiki-content code {
+  background-color: rgba(243, 244, 246, 255);
+  color: rgba(5, 150, 105, 255);
+  padding: 2px;
+  border-radius: 2px;
+}
+
+.wiki-content blockquote {
+  background-color: rgba(243, 244, 246, 255);
+  padding: 2px;
+  margin: 16px 0;
+
+  border-left-width: 4px;
+  border-color: rgba(5, 150, 105, 255);
+}
