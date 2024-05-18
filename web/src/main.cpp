@@ -6,9 +6,9 @@ int main(int argc, char *argv[]) {
 
   CROW_ROUTE(app, "/")
   ([]() {
-    auto page = crow::mustache::load_text("index.html");
+    auto page = crow::mustache::load("index.html");
 
-    return page;
+    return page.render();
   });
 
   app.multithreaded().port(18083).run();
