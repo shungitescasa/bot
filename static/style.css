@@ -1,4 +1,5 @@
 @import url('https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css');
 
 .text-shadow {
   text-shadow: 1px 1px 3px rgb(0 0 0 / 40%);
