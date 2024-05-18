@@ -32,6 +32,113 @@
           </div>
         </div>
 
+        <!-- Features section -->
+        <div class="w-full flex flex-col space-y-16">
+          <!-- Features title -->
+          <div class="w-full py-4 bg-gray-200 flex justify-center items-center">
+            <h1 class="text-4xl font-bold">
+              Features
+            </h1>
+          </div>
+
+          <!-- HUGE FEATURES -->
+          <div class="space-y-32">
+            <!-- FEATURE: Stream notifications -->
+            <div class="w-full flex flex-row justify-between items-center feature">
+              <div class="px-2 lg:px-6">
+                <h1 class="text-4xl font-semibold mb-6">
+                  Stream notifications
+                </h1>
+                <p>
+                  A convenient way to keep track of streams on Twitch.
+                  Simply use the <a href="/wiki/stream/events" class="command">!event</a> command to create a notification in chat about an upcoming stream.
+                  To always be in the know, sign up for notifications using the <a href="/wiki/stream/notifications" class="command">!notify</a> command.
+                  Never miss a moment and enjoy your streams on time!
+                </p>
+              </div>
+              <div class="mx-4 my-4 lg:my-0">
+                <img src="static/img/live.gif" alt="" width="256">
+              </div>
+            </div>
+
+            <!-- FEATURE: Emote updates -->
+            <div class="w-full flex flex-row justify-between items-center feature">
+              <div class="px-2 lg:px-6">
+                <h1 class="text-4xl font-semibold mb-6">
+                  Emote updates
+                </h1>
+                <p>
+                  Instant updates on new changes to the emote set.
+                  The bot automatically notifies the chat about new emotes, deletion of existing emotes, and changes in their names.<br />
+                  <span class="font-bold text-yellow-700">For now only for 7TV.</span>
+                </p>
+              </div>
+              <div class="mx-4 my-4 lg:my-0">
+                <img src="static/img/7tv.gif" alt="" width="150">
+              </div>
+            </div>
+          </div>
+
+          <!-- SMALL FEATURES -->
+          <div class="w-full flex flex-col space-y-6 lg:space-y-0 lg:grid lg:grid-cols-2 lg:grid-gap-6">
+            <!-- SMALL FEATURE: Massping -->
+            <div class="flex flex-col p-8 space-y-4 rounded-lg border-1 border-gray-500">
+              <div class="w-12 h-12 flex justify-center items-center rounded-lg text-white bg-gradient-to-r from-green-800 to-green-600">
+                <i class="fa-solid fa-bell"></i>
+              </div>
+              <h1 class="text-2xl font-semibold">
+                @everyone in your chat
+              </h1>
+              <p>
+                With the &quot;<a href="/wiki/mod/mass-ping" class="command">!massping</a>&quot; command,
+                moderators can quickly notify all participants by mentioning them with an important message.
+              </p>
+            </div>
+
+            <!-- SMALL FEATURE: Spam -->
+            <div class="flex flex-col p-8 space-y-4 rounded-lg border-1 border-gray-500">
+              <div class="w-12 h-12 flex justify-center items-center rounded-lg text-white bg-gradient-to-r from-yellow-600 to-yellow-800">
+                <i class="fa-solid fa-keyboard"></i>
+              </div>
+              <h1 class="text-2xl font-semibold">
+                No Ctrl+Enter anymore
+              </h1>
+              <p>
+                In addition, the &quot;<a href="/wiki/mod/spam" className="command">!spam</a>&quot; command provides
+                the ability to repeat a message the desired number of times,
+                which is useful for repetitive reminders or clarifications.
+              </p>
+            </div>
+
+            <!-- SMALL FEATURE: Timers -->
+            <div class="flex flex-col p-8 space-y-4 rounded-lg border-1 border-gray-500">
+              <div class="w-12 h-12 flex justify-center items-center rounded-lg text-white bg-gradient-to-r from-blue-600 to-blue-800">
+                <i class="fa-solid fa-clock"></i>
+              </div>
+              <h1 class="text-2xl font-semibold">
+                Timers
+              </h1>
+              <p>
+                With the <a href="/wiki/channel/timer" class="command">!timer</a> command, you can set messages to be sent each interval.
+                moderators can quickly notify all participants by mentioning them with an important message.
+              </p>
+            </div>
+
+            <!-- SMALL FEATURE: Custom commands -->
+            <div class="flex flex-col p-8 space-y-4 rounded-lg border-1 border-gray-500">
+              <div class="w-12 h-12 flex justify-center items-center rounded-lg text-white bg-gradient-to-r from-red-600 to-red-800">
+                <i class="fa-solid fa-message"></i>
+              </div>
+              <h1 class="text-2xl font-semibold">
+                Create your own commands
+              </h1>
+              <p>
+                The <a href="/wiki/channel/custom-commands" class="command">!cmd</a> command allow the creation of personalized commands,
+                which adds interactivity and flexibility to communication by allowing channel owners to create their own commands.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </body>
