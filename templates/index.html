@@ -23,7 +23,7 @@
             </div>
             <a href="/wiki/join" class="h-16 w-full">
               <button
-                  class="h-full w-full lg:w-1/4 bg-red-500 text-lg font-semibold rounded-lg shadow-lg"
+                  class="h-full w-full lg:w-1/4 bg-red-500 hover:bg-red-400 text-lg font-semibold rounded-lg shadow-lg transition-colors"
                   href="/wiki/join"
               >
                 Get the bot
@@ -42,10 +42,10 @@
           </div>
 
           <!-- HUGE FEATURES -->
-          <div class="space-y-32">
+          <div class="space-y-32 px-4 lg:px-0">
             <!-- FEATURE: Stream notifications -->
-            <div class="w-full flex flex-row justify-between items-center feature">
-              <div class="px-2 lg:px-6">
+            <div class="w-full flex flex-col lg:flex-row justify-between items-center feature">
+              <div class="pr-2 lg:pr-6">
                 <h1 class="text-4xl font-semibold mb-6">
                   Stream notifications
                 </h1>
@@ -62,8 +62,8 @@
             </div>
 
             <!-- FEATURE: Emote updates -->
-            <div class="w-full flex flex-row justify-between items-center feature">
-              <div class="px-2 lg:px-6">
+            <div class="w-full flex flex-col lg:flex-row justify-between items-center feature">
+              <div class="pr-2 lg:pr-6">
                 <h1 class="text-4xl font-semibold mb-6">
                   Emote updates
                 </h1>
@@ -80,9 +80,9 @@
           </div>
 
           <!-- SMALL FEATURES -->
-          <div class="w-full flex flex-col space-y-6 lg:space-y-0 lg:grid lg:grid-cols-2 lg:grid-gap-6">
+          <div class="w-full px-4 lg:px-0 flex flex-col space-y-6 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-6">
             <!-- SMALL FEATURE: Massping -->
-            <div class="flex flex-col p-8 space-y-4 rounded-lg border-1 border-gray-500">
+            <div class="flex flex-col py-8 space-y-4 rounded-lg border-1 border-gray-500">
               <div class="w-12 h-12 flex justify-center items-center rounded-lg text-white bg-gradient-to-r from-green-800 to-green-600">
                 <i class="fa-solid fa-bell"></i>
               </div>
@@ -96,7 +96,7 @@
             </div>
 
             <!-- SMALL FEATURE: Spam -->
-            <div class="flex flex-col p-8 space-y-4 rounded-lg border-1 border-gray-500">
+            <div class="flex flex-col py-8 space-y-4 rounded-lg border-1 border-gray-500">
               <div class="w-12 h-12 flex justify-center items-center rounded-lg text-white bg-gradient-to-r from-yellow-600 to-yellow-800">
                 <i class="fa-solid fa-keyboard"></i>
               </div>
@@ -104,14 +104,14 @@
                 No Ctrl+Enter anymore
               </h1>
               <p>
-                In addition, the &quot;<a href="/wiki/mod/spam" className="command">!spam</a>&quot; command provides
+                In addition, the &quot;<a href="/wiki/mod/spam" class="command">!spam</a>&quot; command provides
                 the ability to repeat a message the desired number of times,
                 which is useful for repetitive reminders or clarifications.
               </p>
             </div>
 
             <!-- SMALL FEATURE: Timers -->
-            <div class="flex flex-col p-8 space-y-4 rounded-lg border-1 border-gray-500">
+            <div class="flex flex-col py-8 space-y-4 rounded-lg border-1 border-gray-500">
               <div class="w-12 h-12 flex justify-center items-center rounded-lg text-white bg-gradient-to-r from-blue-600 to-blue-800">
                 <i class="fa-solid fa-clock"></i>
               </div>
@@ -125,7 +125,7 @@
             </div>
 
             <!-- SMALL FEATURE: Custom commands -->
-            <div class="flex flex-col p-8 space-y-4 rounded-lg border-1 border-gray-500">
+            <div class="flex flex-col py-8 space-y-4 rounded-lg border-1 border-gray-500">
               <div class="w-12 h-12 flex justify-center items-center rounded-lg text-white bg-gradient-to-r from-red-600 to-red-800">
                 <i class="fa-solid fa-message"></i>
               </div>
