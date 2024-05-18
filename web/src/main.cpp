@@ -9,15 +9,22 @@ int main(int argc, char *argv[]) {
   crow::SimpleApp app;
 
   CROW_ROUTE(app, "/")
-  ([]() {
+  ([&cfg]() {
     auto page = crow::mustache::load("index.html");
 
-    return page.render();
+    crow::mustache::context ctx;
+    ctx["contact_url"] = (*cfg).contact_url;
+    ctx["contact_name"] = (*cfg).contact_name;
+
+    return page.render(ctx);
   });
 
-  CROW_ROUTE(app, "/wiki")([]() { return botweb::get_wiki_page("/README"); });
+  CROW_ROUTE(app, "/wiki")
+  ([&cfg]() { return botweb::get_wiki_page("/README", cfg); });
   CROW_ROUTE(app, "/wiki/<path>")
-  ([](const std::string &path) { return botweb::get_wiki_page(path); });
+  ([&cfg](const std::string &path) {
+    return botweb::get_wiki_page(path, cfg);
+  });
 
   app.multithreaded().port(18083).run();
   return 0;
