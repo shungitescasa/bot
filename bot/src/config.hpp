@@ -39,6 +39,7 @@ namespace bot {
 
   struct UrlConfiguration {
       std::optional<std::string> help = std::nullopt;
+      std::optional<std::string> paste_service = std::nullopt;
   };
 
   struct Configuration {

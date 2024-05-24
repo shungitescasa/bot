@@ -9,6 +9,7 @@
 #include <string>
 
 #include "../bundle.hpp"
+#include "../modules/chatters.hpp"
 #include "../modules/custom_command.hpp"
 #include "../modules/event.hpp"
 #include "../modules/help.hpp"
@@ -31,6 +32,7 @@ namespace bot {
       this->add_command(std::make_unique<mod::CustomCommand>());
       this->add_command(std::make_unique<mod::Timer>());
       this->add_command(std::make_unique<mod::Help>());
+      this->add_command(std::make_unique<mod::Chatters>());
     }
 
     void CommandLoader::add_command(std::unique_ptr<Command> command) {

@@ -48,7 +48,9 @@ namespace bot {
       TimerNew,
       TimerDelete,
 
-      HelpResponse
+      HelpResponse,
+
+      ChattersResponse
     };
 
     std::optional<LineId> string_to_line_id(const std::string &str);

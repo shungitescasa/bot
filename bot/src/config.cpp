@@ -68,6 +68,8 @@ namespace bot {
 
       else if (key == "url.help") {
         url_cfg.help = value;
+      } else if (key == "url.chatters.paste_service") {
+        url_cfg.paste_service = value;
       }
     }
 

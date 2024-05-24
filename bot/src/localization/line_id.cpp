@@ -92,6 +92,10 @@ namespace bot {
         return LineId::HelpResponse;
       }
 
+      else if (str == "chatters.response") {
+        return LineId::ChattersResponse;
+      }
+
       else {
         return std::nullopt;
       }

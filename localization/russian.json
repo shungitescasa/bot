@@ -41,5 +41,7 @@
   "timer.new": "{sender.alias_name}: Новый таймер \"%s\" был успешно создан!",
   "timer.delete": "{sender.alias_name}: Таймер \"%s\" был удален!",
 
-  "help.response": "{sender.alias_name}: Справочник по командам бота: %s"
+  "help.response": "{sender.alias_name}: Справочник по командам бота: %s",
+
+  "chatters.response": "{sender.alias_name}: Список чаттеров: %s"
 }
