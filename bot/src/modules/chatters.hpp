@@ -47,7 +47,7 @@ namespace bot::mod {
 
         std::ostringstream oss;
 
-        oss << std::put_time(now, "%d.%m.%Y %H:%M:%s");
+        oss << std::put_time(now, "%d.%m.%Y %H:%M:%S");
 
         cpr::Multipart multipart = {
             {"paste", body},
