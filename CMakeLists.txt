@@ -55,7 +55,7 @@ if (BUILD_BOT)
   FetchContent_Declare(
     pqxx
     GIT_REPOSITORY https://github.com/jtv/libpqxx.git
-    GIT_TAG 7.9.0
+    GIT_TAG 7.9.2
   )
   FetchContent_MakeAvailable(pqxx)
 
