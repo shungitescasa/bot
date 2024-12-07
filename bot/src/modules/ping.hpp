@@ -6,7 +6,6 @@
 
 #include <chrono>
 #include <string>
-#include <variant>
 #include <vector>
 
 #include "../bundle.hpp"
@@ -18,9 +17,8 @@ namespace bot {
     class Ping : public command::Command {
         std::string get_name() const override { return "ping"; }
 
-        std::variant<std::vector<std::string>, std::string> run(
-            const InstanceBundle &bundle,
-            const command::Request &request) const override {
+        command::Response run(const InstanceBundle &bundle,
+                              const command::Request &request) const override {
           auto now = std::chrono::steady_clock::now();
           auto duration = now - START_TIME;
           auto seconds =
@@ -48,11 +46,12 @@ namespace bot {
             cpp_info.append(" · ");
           }
 
-          return bundle.localization
-              .get_formatted_line(
-                  request, loc::LineId::PingResponse,
-                  {cpp_info, uptime, std::to_string(used_memory)})
-              .value();
+          return command::Response(
+              bundle.localization
+                  .get_formatted_line(
+                      request, loc::LineId::PingResponse,
+                      {cpp_info, uptime, std::to_string(used_memory)})
+                  .value());
         }
     };
   }

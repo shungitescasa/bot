@@ -20,6 +20,7 @@
 #include "../modules/timer.hpp"
 #include "../utils/chrono.hpp"
 #include "request.hpp"
+#include "response.hpp"
 
 namespace bot {
   namespace command {
@@ -39,9 +40,8 @@ namespace bot {
       this->commands.push_back(std::move(command));
     }
 
-    std::optional<std::variant<std::vector<std::string>, std::string>>
-    CommandLoader::run(const InstanceBundle &bundle,
-                       const Request &request) const {
+    std::optional<Response> CommandLoader::run(const InstanceBundle &bundle,
+                                               const Request &request) const {
       auto command = std::find_if(
           this->commands.begin(), this->commands.end(),
           [&](const auto &x) { return x->get_name() == request.command_id; });

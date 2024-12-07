@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <variant>
 #include <vector>
 
 #include "../bundle.hpp"
@@ -18,9 +17,8 @@ namespace bot {
           return {"sub", "unsub"};
         }
 
-        std::variant<std::vector<std::string>, std::string> run(
-            const InstanceBundle &bundle,
-            const command::Request &request) const override {
+        command::Response run(const InstanceBundle &bundle,
+                              const command::Request &request) const override {
           if (!request.subcommand_id.has_value()) {
             throw ResponseException<NOT_ENOUGH_ARGUMENTS>(
                 request, bundle.localization, command::SUBCOMMAND);
@@ -105,9 +103,10 @@ namespace bot {
                 std::to_string(request.user.get_id()));
             work.commit();
 
-            return bundle.localization
-                .get_formatted_line(request, loc::LineId::NotifySub, {t})
-                .value();
+            return command::Response(
+                bundle.localization
+                    .get_formatted_line(request, loc::LineId::NotifySub, {t})
+                    .value());
           } else if (subcommand_id == "unsub") {
             if (subs.empty()) {
               throw ResponseException<ResponseError::NOT_FOUND>(
@@ -118,9 +117,10 @@ namespace bot {
                       std::to_string(subs[0][0].as<int>()));
             work.commit();
 
-            return bundle.localization
-                .get_formatted_line(request, loc::LineId::NotifyUnsub, {t})
-                .value();
+            return command::Response(
+                bundle.localization
+                    .get_formatted_line(request, loc::LineId::NotifyUnsub, {t})
+                    .value());
           }
 
           throw ResponseException<ResponseError::SOMETHING_WENT_WRONG>(

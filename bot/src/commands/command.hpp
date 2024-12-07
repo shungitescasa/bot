@@ -3,11 +3,11 @@
 #include <memory>
 #include <optional>
 #include <string>
-#include <variant>
 #include <vector>
 
 #include "../bundle.hpp"
 #include "request.hpp"
+#include "response.hpp"
 
 namespace bot {
   namespace command {
@@ -24,8 +24,8 @@ namespace bot {
     class Command {
       public:
         virtual std::string get_name() const = 0;
-        virtual std::variant<std::vector<std::string>, std::string> run(
-            const InstanceBundle &bundle, const Request &request) const = 0;
+        virtual Response run(const InstanceBundle &bundle,
+                             const Request &request) const = 0;
         virtual schemas::PermissionLevel get_permission_level() const {
           return schemas::PermissionLevel::USER;
         }
@@ -41,8 +41,8 @@ namespace bot {
         ~CommandLoader() = default;
 
         void add_command(std::unique_ptr<Command> cmd);
-        std::optional<std::variant<std::vector<std::string>, std::string>> run(
-            const InstanceBundle &bundle, const Request &msg) const;
+        std::optional<Response> run(const InstanceBundle &bundle,
+                                    const Request &msg) const;
 
         const std::vector<std::unique_ptr<Command>> &get_commands() const {
           return this->commands;

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <variant>
 #include <vector>
 
 #include "../bundle.hpp"
@@ -22,9 +21,8 @@ namespace bot {
           return {"on", "off"};
         }
 
-        std::variant<std::vector<std::string>, std::string> run(
-            const InstanceBundle &bundle,
-            const command::Request &request) const override {
+        command::Response run(const InstanceBundle &bundle,
+                              const command::Request &request) const override {
           if (!request.subcommand_id.has_value()) {
             throw ResponseException<NOT_ENOUGH_ARGUMENTS>(
                 request, bundle.localization, command::SUBCOMMAND);
@@ -119,9 +117,10 @@ namespace bot {
             work.exec(query);
             work.commit();
 
-            return bundle.localization
-                .get_formatted_line(request, loc::LineId::EventOn, {t})
-                .value();
+            return command::Response(
+                bundle.localization
+                    .get_formatted_line(request, loc::LineId::EventOn, {t})
+                    .value());
           } else if (subcommand_id == "off") {
             if (event.empty()) {
               throw ResponseException<ResponseError::NOT_FOUND>(
@@ -132,9 +131,10 @@ namespace bot {
                       std::to_string(event[0][0].as<int>()));
             work.commit();
 
-            return bundle.localization
-                .get_formatted_line(request, loc::LineId::EventOff, {t})
-                .value();
+            return command::Response(
+                bundle.localization
+                    .get_formatted_line(request, loc::LineId::EventOff, {t})
+                    .value());
           }
 
           throw ResponseException<ResponseError::SOMETHING_WENT_WRONG>(

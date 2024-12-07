@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <variant>
 #include <vector>
 
 #include "../bundle.hpp"
@@ -21,9 +20,8 @@ namespace bot {
           return {"new", "remove"};
         }
 
-        std::variant<std::vector<std::string>, std::string> run(
-            const InstanceBundle &bundle,
-            const command::Request &request) const override {
+        command::Response run(const InstanceBundle &bundle,
+                              const command::Request &request) const override {
           if (!request.subcommand_id.has_value()) {
             throw ResponseException<NOT_ENOUGH_ARGUMENTS>(
                 request, bundle.localization, command::SUBCOMMAND);
@@ -86,9 +84,10 @@ namespace bot {
                 "', '" + m + "', " + std::to_string(interval_s) + ")");
             work.commit();
 
-            return bundle.localization
-                .get_formatted_line(request, loc::LineId::TimerNew, {name})
-                .value();
+            return command::Response(
+                bundle.localization
+                    .get_formatted_line(request, loc::LineId::TimerNew, {name})
+                    .value());
           } else if (subcommand_id == "remove") {
             if (timers.empty()) {
               throw ResponseException<ResponseError::NOT_FOUND>(
@@ -99,9 +98,11 @@ namespace bot {
                       std::to_string(timers[0][0].as<int>()));
             work.commit();
 
-            return bundle.localization
-                .get_formatted_line(request, loc::LineId::TimerDelete, {name})
-                .value();
+            return command::Response(
+                bundle.localization
+                    .get_formatted_line(request, loc::LineId::TimerDelete,
+                                        {name})
+                    .value());
           }
 
           throw ResponseException<ResponseError::SOMETHING_WENT_WRONG>(

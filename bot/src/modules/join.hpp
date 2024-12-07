@@ -2,7 +2,6 @@
 
 #include <pqxx/pqxx>
 #include <string>
-#include <variant>
 #include <vector>
 
 #include "../bundle.hpp"
@@ -14,9 +13,8 @@ namespace bot {
     class Join : public command::Command {
         std::string get_name() const override { return "join"; }
 
-        std::variant<std::vector<std::string>, std::string> run(
-            const InstanceBundle &bundle,
-            const command::Request &request) const override {
+        command::Response run(const InstanceBundle &bundle,
+                              const command::Request &request) const override {
           if (!bundle.configuration.commands.join_allowed) {
             std::string owner = "";
 
@@ -28,10 +26,11 @@ namespace bot {
                                 .value();
             }
 
-            return bundle.localization
-                .get_formatted_line(request, loc::LineId::JoinNotAllowed,
-                                    {owner})
-                .value();
+            return command::Response(
+                bundle.localization
+                    .get_formatted_line(request, loc::LineId::JoinNotAllowed,
+                                        {owner})
+                    .value());
           }
 
           if (!bundle.configuration.commands.join_allow_from_other_chats &&
@@ -59,14 +58,17 @@ namespace bot {
 
               bundle.irc_client.join(channel.get_alias_name());
 
-              return bundle.localization
-                  .get_formatted_line(request, loc::LineId::JoinRejoined, {})
-                  .value();
+              return command::Response(
+                  bundle.localization
+                      .get_formatted_line(request, loc::LineId::JoinRejoined,
+                                          {})
+                      .value());
             }
 
-            return bundle.localization
-                .get_formatted_line(request, loc::LineId::JoinAlreadyIn, {})
-                .value();
+            return command::Response(
+                bundle.localization
+                    .get_formatted_line(request, loc::LineId::JoinAlreadyIn, {})
+                    .value());
           }
 
           work.exec("INSERT INTO channels(alias_id, alias_name) VALUES (" +
@@ -82,9 +84,10 @@ namespace bot {
                                       {})
                   .value());
 
-          return bundle.localization
-              .get_formatted_line(request, loc::LineId::JoinResponse, {})
-              .value();
+          return command::Response(
+              bundle.localization
+                  .get_formatted_line(request, loc::LineId::JoinResponse, {})
+                  .value());
         }
     };
   }

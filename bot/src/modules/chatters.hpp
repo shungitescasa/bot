@@ -4,7 +4,6 @@
 #include <iomanip>
 #include <sstream>
 #include <string>
-#include <variant>
 #include <vector>
 
 #include "../bundle.hpp"
@@ -25,9 +24,8 @@ namespace bot::mod {
 
       int get_delay_seconds() const override { return 10; }
 
-      std::variant<std::vector<std::string>, std::string> run(
-          const InstanceBundle &bundle,
-          const command::Request &request) const override {
+      command::Response run(const InstanceBundle &bundle,
+                            const command::Request &request) const override {
         if (!bundle.configuration.url.paste_service.has_value()) {
           throw ResponseException<ResponseError::ILLEGAL_COMMAND>(
               request, bundle.localization);
@@ -65,9 +63,11 @@ namespace bot::mod {
 
           std::string url = *bundle.configuration.url.paste_service + "/" + id;
 
-          return bundle.localization
-              .get_formatted_line(request, loc::LineId::ChattersResponse, {url})
-              .value();
+          return command::Response(
+              bundle.localization
+                  .get_formatted_line(request, loc::LineId::ChattersResponse,
+                                      {url})
+                  .value());
         } else {
           throw ResponseException<ResponseError::EXTERNAL_API_ERROR>(
               request, bundle.localization, response.status_code,

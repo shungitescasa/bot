@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <variant>
 #include <vector>
 
 #include "../bundle.hpp"
@@ -18,9 +17,8 @@ namespace bot {
 
         int get_delay_seconds() const override { return 1; }
 
-        std::variant<std::vector<std::string>, std::string> run(
-            const InstanceBundle &bundle,
-            const command::Request &request) const override {
+        command::Response run(const InstanceBundle &bundle,
+                              const command::Request &request) const override {
           auto chatters = bundle.helix_client.get_chatters(
               request.channel.get_alias_id(), bundle.irc_client.get_bot_id());
 
@@ -55,7 +53,7 @@ namespace bot {
             msgs2.push_back(base + m);
           }
 
-          return msgs2;
+          return command::Response(msgs2);
         }
     };
   }

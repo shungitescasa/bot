@@ -36,18 +36,12 @@ namespace bot::handlers {
         auto response = command_loader.run(bundle, request.value());
 
         if (response.has_value()) {
-          try {
-            auto str = std::get<std::string>(*response);
-            bundle.irc_client.say(message.source.login, str);
-          } catch (const std::exception &e) {
-          }
-
-          try {
-            auto strs = std::get<std::vector<std::string>>(*response);
-            for (const std::string &str : strs) {
-              bundle.irc_client.say(message.source.login, str);
+          if (response->is_single()) {
+            bundle.irc_client.say(message.source.login, response->get_single());
+          } else if (response->is_multiple()) {
+            for (const std::string &msg : response->get_multiple()) {
+              bundle.irc_client.say(message.source.login, msg);
             }
-          } catch (const std::exception &e) {
           }
         }
       } catch (const std::exception &e) {
