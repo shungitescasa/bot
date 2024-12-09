@@ -27,6 +27,9 @@ namespace bot {
       }
 
       bool string_contains_sql_injection(const std::string &input);
+
+      std::vector<std::vector<std::string>> separate_by_length(
+          const std::vector<std::string> &vector, const int &max_length);
     }
   }
 }
