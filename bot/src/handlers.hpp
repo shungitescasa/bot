@@ -11,4 +11,10 @@ namespace bot::handlers {
       const command::CommandLoader &command_loader,
       const irc::Message<irc::MessageType::Privmsg> &message,
       pqxx::connection &conn);
+
+  void make_markov_response(
+      const InstanceBundle &bundle,
+      const irc::Message<irc::MessageType::Privmsg> &message,
+      const schemas::Channel &channel,
+      const schemas::ChannelPreferences &preference);
 }
