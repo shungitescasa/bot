@@ -4,6 +4,7 @@
 #include <exception>
 #include <optional>
 #include <pqxx/pqxx>
+#include <random>
 #include <string>
 #include <vector>
 
@@ -98,25 +99,47 @@ namespace bot::handlers {
       const irc::Message<irc::MessageType::Privmsg> &message,
       const schemas::Channel &channel,
       const schemas::ChannelPreferences &preference) {
-    bool is_markov_responses_enabled =
+    bool are_markov_responses_enabled =
         std::any_of(preference.get_features().begin(),
                     preference.get_features().end(), [](const int &x) {
                       return (schemas::ChannelFeature)x ==
                              schemas::ChannelFeature::MARKOV_RESPONSES;
                     });
 
-    if (!is_markov_responses_enabled) return;
+    if (!are_markov_responses_enabled) return;
+
+    bool are_random_markov_responses_enabled =
+        std::any_of(preference.get_features().begin(),
+                    preference.get_features().end(), [](const int &x) {
+                      return (schemas::ChannelFeature)x ==
+                             schemas::ChannelFeature::RANDOM_MARKOV_RESPONSES;
+                    });
 
     std::string prefix = "@" + bundle.irc_client.get_bot_username() + ",";
+    bool intended_call = message.message.substr(0, prefix.length()) == prefix;
 
-    if (message.message.substr(0, prefix.length()) != prefix) return;
+    int random = -1;
+    std::string question;
 
-    cpr::Response response = cpr::Post(
-        cpr::Url{"https://markov.ilotterytea.kz/api/v1/generate"},
-        cpr::Multipart{
-            {"question",
-             message.message.substr(prefix.length(), message.message.length())},
-            {"max_length", 200}});
+    if (are_random_markov_responses_enabled && !intended_call) {
+      std::random_device dev;
+      std::mt19937 rng(dev());
+
+      std::uniform_int_distribution<std::mt19937::result_type> dist(0, 10);
+      random = dist(rng);
+
+      if (random != 0) return;
+      question = message.message;
+    } else {
+      question =
+          message.message.substr(prefix.length(), message.message.length());
+    }
+
+    if (random == -1 && !intended_call) return;
+
+    cpr::Response response =
+        cpr::Post(cpr::Url{"https://markov.ilotterytea.kz/api/v1/generate"},
+                  cpr::Multipart{{"question", question}, {"max_length", 200}});
 
     if (response.status_code != 200) return;
 
