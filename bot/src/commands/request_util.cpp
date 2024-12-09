@@ -23,28 +23,6 @@ namespace bot::command {
     std::vector<std::string> parts =
         utils::string::split_text(irc_message.message, ' ');
 
-    std::string command_id = parts[0];
-
-    if (command_id.substr(0, DEFAULT_PREFIX.length()) != DEFAULT_PREFIX) {
-      delete work;
-      return std::nullopt;
-    }
-
-    command_id =
-        command_id.substr(DEFAULT_PREFIX.length(), command_id.length());
-
-    auto cmd = std::find_if(
-        command_loader.get_commands().begin(),
-        command_loader.get_commands().end(),
-        [&](const auto &command) { return command->get_name() == command_id; });
-
-    if (cmd == command_loader.get_commands().end()) {
-      delete work;
-      return std::nullopt;
-    }
-
-    parts.erase(parts.begin());
-
     pqxx::result query = work->exec("SELECT * FROM channels WHERE alias_id = " +
                                     std::to_string(irc_message.source.id));
 
@@ -169,6 +147,31 @@ namespace bot::command {
 
       user_rights.set_level(level);
     }
+    
+    // Checking if the user has sent a command
+    std::string command_id = parts[0];
+    
+    const std::string &prefix = channel_preferences.get_prefix();
+
+    if (command_id.substr(0, prefix.length()) != prefix) {
+      delete work;
+      return std::nullopt;
+    }
+
+    command_id =
+        command_id.substr(prefix.length(), command_id.length());
+
+    auto cmd = std::find_if(
+        command_loader.get_commands().begin(),
+        command_loader.get_commands().end(),
+        [&](const auto &command) { return command->get_name() == command_id; });
+
+    if (cmd == command_loader.get_commands().end()) {
+      delete work;
+      return std::nullopt;
+    }
+
+    parts.erase(parts.begin());
 
     delete work;
 
