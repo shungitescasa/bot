@@ -4,9 +4,11 @@
 #include <optional>
 #include <pqxx/pqxx>
 #include <string>
+#include <vector>
 
 #include "../constants.hpp"
 #include "../utils/chrono.hpp"
+#include "../utils/string.hpp"
 
 namespace bot::schemas {
   class Channel {
@@ -45,21 +47,35 @@ namespace bot::schemas {
       std::optional<std::chrono::system_clock::time_point> opted_out_at;
   };
 
+  enum ChannelFeature { MARKOV_RESPONSES };
+
   class ChannelPreferences {
     public:
       ChannelPreferences(const pqxx::row &row) {
         this->channel_id = row[0].as<int>();
 
-        if (!row[2].is_null()) {
+        if (!row[1].is_null()) {
           this->prefix = row[1].as<std::string>();
         } else {
           this->prefix = DEFAULT_PREFIX;
         }
 
-        if (!row[3].is_null()) {
+        if (!row[2].is_null()) {
           this->locale = row[2].as<std::string>();
         } else {
           this->locale = DEFAULT_LOCALE_ID;
+        }
+
+        if (!row[3].is_null()) {
+          std::string x = row[3].as<std::string>();
+          x = x.substr(1, x.length() - 2);
+          std::vector<std::string> split_text =
+              utils::string::split_text(x, ',');
+
+          for (const std::string &part : split_text) {
+            ChannelFeature feature = (ChannelFeature)std::stoi(part);
+            this->features.push_back(feature);
+          }
         }
       }
 
@@ -68,9 +84,13 @@ namespace bot::schemas {
       const int &get_channel_id() const { return this->channel_id; }
       const std::string &get_prefix() const { return this->prefix; }
       const std::string &get_locale() const { return this->locale; }
+      const std::vector<ChannelFeature> &get_features() const {
+        return this->features;
+      }
 
     private:
       int channel_id;
       std::string prefix, locale;
+      std::vector<ChannelFeature> features;
   };
 }
