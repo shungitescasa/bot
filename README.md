@@ -5,22 +5,38 @@ A feature-rich chatbot for Twitch. It is written in C++17 and uses the Twitch AP
 > The bot in real action can be seen at [https://twitch.tv/teabot](https://twitch.tv/teabot)
 
 ## Features
-+ Listening to stream start/end
-+ Mass-pinging chatters
++ Notifications when a stream starts or ends
++ Massping chatters :trollface:
 + Timer
 + Custom commands
++ Listening for commit updates in GitHub repositories
++ Markov-generated responses?!?!?!?
 
 ## Prerequisites
 
-+ C++ compiler *(I tested only GCC)*
++ C++ compiler
 + PostgreSQL
 
-## Installation Guide (Linux)
+## Dependencies
+
+### Bot
+
++ `ixwebsocket` for Twitch connections
++ `pqxx` for databases
++ `cpr` for HTTP requests
++ `nlohmann/json` for JSON data deserialization
+
+### Web
+
++ `CrowCpp` for creating a simple web server **(requires `asio` library)**
++ `Maddy` for MarkDown parsing
+
+## Installation Guide
 
 ### 1. Clone the Git repository
 
 ```bash
-git clone https://git.ilotterytea.kz/services/bot
+git clone https://github.com/ilotterytea/bot.git
 cd bot
 ```
 
@@ -28,7 +44,7 @@ cd bot
 
 All SQL migrations are located in the corresponding `/migrations` folder.
 
-You can run all `up.sql` in sequence yourself or you can use [a special program created for this purpose](https://git.ilotterytea.kz/tools/sql_migrator) and run the related command:
+You can run all `up.sql` in sequence yourself or you can use [a special program created for this purpose](https://github.com/ilotterytea/sql_migrator) and run the related command:
 
 `sqlm run --db-name DB_NAME --db-user DB_USER --db-pass DB_PASS`
 
@@ -37,7 +53,7 @@ You can run all `up.sql` in sequence yourself or you can use [a special program 
 ```bash
 mkdir build
 cd build
-cmake .. -DUSE_TLS=1
+cmake -DUSE_TLS=1 ..
 make
 ```
 
@@ -54,15 +70,7 @@ twitch_credentials.client_id=CLIENT_ID
 twitch_credentials.token=TOKEN
 ```
 
-### 5. Run the bot
+### 5. Launch
 
-```bash
-./redpilledbot
-```
-
-## Dependencies
-
-+ ixwebsocket (for Twitch connections)
-+ pqxx (for databases)
-+ cpr (for HTTP requests)
-+ nlohmann/json (for JSON data deserialization)
++ Launch bot: `./redpilledbot`
++ Start the web server: `./redpilledweb`
