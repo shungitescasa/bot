@@ -51,6 +51,8 @@ namespace bot::handlers {
               bundle.irc_client.say(message.source.login, msg);
             }
           }
+
+          return;
         }
       } catch (const std::exception &e) {
         std::string line =
