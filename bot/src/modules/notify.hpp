@@ -100,7 +100,7 @@ namespace bot {
             work.exec(
                 "INSERT INTO event_subscriptions(event_id, user_id) VALUES (" +
                 std::to_string(event[0].as<int>()) + ", " +
-                std::to_string(request.user.get_id()));
+                std::to_string(request.user.get_id()) + ")");
             work.commit();
 
             return command::Response(
