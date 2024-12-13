@@ -57,11 +57,12 @@ namespace bot::handlers {
       } catch (const std::exception &e) {
         std::string line =
             bundle.localization
-                .get_formatted_line(request.value(), loc::LineId::ErrorTemplate,
-                                    {e.what()})
+                .get_formatted_line(request.value(),
+                                    loc::LineId::ErrorSomethingWentWrong, {})
                 .value();
 
         bundle.irc_client.say(message.source.login, line);
+        log::error("PrivMsg/" + request->command_id, e.what());
       }
     }
 
