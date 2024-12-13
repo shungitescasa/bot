@@ -42,12 +42,17 @@ namespace bot {
       std::optional<std::string> paste_service = std::nullopt;
   };
 
+  struct TokenConfiguration {
+      std::optional<std::string> github_token = std::nullopt;
+  };
+
   struct Configuration {
       TwitchCredentialsConfiguration twitch_credentials;
       DatabaseConfiguration database;
       CommandConfiguration commands;
       OwnerConfiguration owner;
       UrlConfiguration url;
+      TokenConfiguration tokens;
   };
 
   std::optional<Configuration> parse_configuration_from_file(

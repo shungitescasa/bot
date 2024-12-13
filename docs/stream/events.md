@@ -12,6 +12,7 @@ The `!event` command gives broadcasters the ability to manage events for streams
 + offline
 + title
 + category
++ github (Placeholders for messages: `%0` - Commit hash, `%1` - Committer name, `%2` - Commit message)
 + custom
 
 ## Event flags
@@ -66,6 +67,7 @@ The `!event` command gives broadcasters the ability to manage events for streams
 
 ### Creating a new event
 + `!event on forsen:live forsen live!`
++ `!event on ilotterytea/bot:github %1 just made a commit (%0): %2`
 
 ### Deleting the event
 + `!event off forsen:live`

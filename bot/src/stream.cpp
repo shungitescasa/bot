@@ -178,7 +178,7 @@ namespace bot::stream {
     pqxx::work work(conn);
 
     pqxx::result ids =
-        work.exec("SELECT target_alias_id FROM events WHERE event_type < 99");
+        work.exec("SELECT target_alias_id FROM events WHERE event_type < 10");
 
     for (const auto &row : ids) {
       int id = row[0].as<int>();

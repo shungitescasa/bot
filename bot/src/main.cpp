@@ -1,12 +1,14 @@
 #include <optional>
 #include <pqxx/pqxx>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include "api/twitch/helix_client.hpp"
 #include "bundle.hpp"
 #include "commands/command.hpp"
 #include "config.hpp"
+#include "github.hpp"
 #include "handlers.hpp"
 #include "irc/client.hpp"
 #include "irc/message.hpp"
@@ -99,6 +101,8 @@ int main(int argc, char *argv[]) {
   bot::stream::StreamListenerClient stream_listener_client(helix_client, client,
                                                            cfg);
 
+  bot::GithubListener github_listener(cfg, client);
+
   client.on<bot::irc::MessageType::Privmsg>(
       [&client, &command_loader, &localization, &cfg, &helix_client](
           const bot::irc::Message<bot::irc::MessageType::Privmsg> &message) {
@@ -118,6 +122,7 @@ int main(int argc, char *argv[]) {
   threads.push_back(std::thread(bot::create_timer_thread, &client, &cfg));
   threads.push_back(std::thread(&bot::stream::StreamListenerClient::run,
                                 &stream_listener_client));
+  threads.push_back(std::thread(&bot::GithubListener::run, &github_listener));
 
   for (auto &thread : threads) {
     thread.join();

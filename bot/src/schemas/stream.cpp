@@ -10,6 +10,8 @@ namespace bot::schemas {
       return EventType::TITLE;
     } else if (type == "game") {
       return EventType::GAME;
+    } else if (type == "github") {
+      return EventType::GITHUB;
     } else {
       return EventType::CUSTOM;
     }

@@ -55,7 +55,7 @@ namespace bot {
           auto channels = bundle.helix_client.get_users({target});
           api::twitch::schemas::User channel;
 
-          if (channels.empty() && type != schemas::EventType::CUSTOM) {
+          if (channels.empty() && type < schemas::EventType::GITHUB) {
             throw ResponseException<ResponseError::NOT_FOUND>(
                 request, bundle.localization, t);
           }
@@ -63,7 +63,7 @@ namespace bot {
           pqxx::work work(request.conn);
           std::string query;
 
-          if (type != schemas::CUSTOM) {
+          if (type < schemas::GITHUB) {
             channel = channels[0];
 
             query = "SELECT id FROM events WHERE channel_id = " +

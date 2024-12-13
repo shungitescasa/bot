@@ -24,6 +24,7 @@ namespace bot {
     CommandConfiguration cmd_cfg;
     OwnerConfiguration owner_cfg;
     UrlConfiguration url_cfg;
+    TokenConfiguration token_cfg;
 
     std::string line;
     while (std::getline(ifs, line, '\n')) {
@@ -71,6 +72,10 @@ namespace bot {
       } else if (key == "url.chatters.paste_service") {
         url_cfg.paste_service = value;
       }
+
+      else if (key == "token.github") {
+        token_cfg.github_token = value;
+      }
     }
 
     cfg.url = url_cfg;
@@ -78,6 +83,7 @@ namespace bot {
     cfg.commands = cmd_cfg;
     cfg.twitch_credentials = ttv_crd_cfg;
     cfg.database = db_cfg;
+    cfg.tokens = token_cfg;
 
     log::info("Configuration",
               "Successfully loaded the file from '" + file_path + "'");
