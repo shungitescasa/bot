@@ -12,6 +12,7 @@
 #include "commands/command.hpp"
 #include "commands/request.hpp"
 #include "commands/request_util.hpp"
+#include "constants.hpp"
 #include "cpr/api.h"
 #include "cpr/multipart.h"
 #include "cpr/response.h"
@@ -125,10 +126,10 @@ namespace bot::handlers {
       std::random_device dev;
       std::mt19937 rng(dev());
 
-      std::uniform_int_distribution<std::mt19937::result_type> dist(0, 10);
+      std::uniform_int_distribution<std::mt19937::result_type> dist(0, 100);
       random = dist(rng);
 
-      if (random != 0) return;
+      if (random > MARKOV_RESPONSE_CHANCE) return;
       question = message.message;
     } else {
       question =

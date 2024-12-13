@@ -11,3 +11,5 @@ const std::string DEFAULT_PREFIX = "~";
 const std::string DEFAULT_PREFIX = "!";
 #endif
 const auto START_TIME = std::chrono::steady_clock::now();
+
+#define MARKOV_RESPONSE_CHANCE 1
