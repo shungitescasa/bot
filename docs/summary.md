@@ -20,6 +20,10 @@
 + [Mass ping](/wiki/mod/mass-ping)
 + [Spam](/wiki/mod/spam)
 
+## User management
+
++ [User ban check](/wiki/user/ban-check)
+
 ## Miscellaneous
 
 + [Ping](/wiki/misc/ping)
@@ -33,10 +37,6 @@
 + [Check the usage of emote](/wiki/emotes/count)
 + [Emote usage leaderboard](/wiki/emotes/top)
 + [Emote set similarity check](/wiki/emotes/sim)
-
-## User management
-
-+ [User ban check](/wiki/user/ban-check)
 
 ## Miscellaneous
 

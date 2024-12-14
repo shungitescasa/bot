@@ -20,6 +20,7 @@
 #include "../modules/settings.hpp"
 #include "../modules/spam.hpp"
 #include "../modules/timer.hpp"
+#include "../modules/user.hpp"
 #include "../utils/chrono.hpp"
 #include "request.hpp"
 #include "response.hpp"
@@ -38,6 +39,7 @@ namespace bot {
       this->add_command(std::make_unique<mod::Chatters>());
       this->add_command(std::make_unique<mod::Spam>());
       this->add_command(std::make_unique<mod::Settings>());
+      this->add_command(std::make_unique<mod::User>());
     }
 
     void CommandLoader::add_command(std::unique_ptr<Command> command) {
