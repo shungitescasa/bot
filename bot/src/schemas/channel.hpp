@@ -48,6 +48,8 @@ namespace bot::schemas {
   };
 
   enum ChannelFeature { MARKOV_RESPONSES, RANDOM_MARKOV_RESPONSES };
+  std::optional<ChannelFeature> string_to_channel_feature(
+      const std::string &value);
 
   class ChannelPreferences {
     public:
