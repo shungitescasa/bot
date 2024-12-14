@@ -11,7 +11,7 @@ This feature can be useful for highlighting important information.
 `!spam [amount] [message...]`
 
 + `[amount]` (optional) - A number that specified how many times the message should be repeated.\
-If not specified, the default value is 10. The maximum value is 100.
+If not specified, the default value is 5. The maximum value is 30.
 + `[message...]` - The text of the message to be repeated.
 
 ## Usage

@@ -17,6 +17,7 @@
 ## Moderation stuff
 
 + [Mass ping](/wiki/mod/mass-ping)
++ [Spam](/wiki/mod/spam)
 
 ## Miscellaneous
 
@@ -35,10 +36,6 @@
 + [Check the usage of emote](/wiki/emotes/count)
 + [Emote usage leaderboard](/wiki/emotes/top)
 + [Emote set similarity check](/wiki/emotes/sim)
-
-## Moderation stuff
-
-+ [Spam](/wiki/mod/spam)
 
 ## User management
 
