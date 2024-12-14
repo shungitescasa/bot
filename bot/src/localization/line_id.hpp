@@ -50,7 +50,12 @@ namespace bot {
 
       HelpResponse,
 
-      ChattersResponse
+      ChattersResponse,
+
+      SetLocale,
+      SetPrefix,
+      SetFeatureDisabled,
+      SetFeatureEnabled
     };
 
     std::optional<LineId> string_to_line_id(const std::string &str);

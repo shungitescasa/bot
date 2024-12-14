@@ -43,5 +43,10 @@
 
   "help.response": "{sender.alias_name}: Справочник по командам бота: %s",
 
-  "chatters.response": "{sender.alias_name}: Список чаттеров: %s"
+  "chatters.response": "{sender.alias_name}: Список чаттеров: %s",
+  
+  "set.locale": "{sender.alias_name}: Теперь бот говорит по-русски в этом чате!",
+  "set.prefix": "{sender.alias_name}: Префикс бота был установлен как \"%s\"",
+  "set.feature.disabled": "{sender.alias_name}: Функция \"%s\" была выключена в этом чате!",
+  "set.feature.enabled": "{sender.alias_name}: Функция \"%s\" была включена в этом чате!"
 }

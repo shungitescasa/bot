@@ -43,5 +43,10 @@
 
   "help.response": "{sender.alias_name}: Bot command reference: %s",
 
-  "chatters.response": "{sender.alias_name}: Chatter list: %s"
+  "chatters.response": "{sender.alias_name}: Chatter list: %s",
+  
+  "set.locale": "{sender.alias_name}: The bot now speaks English in this chat!",
+  "set.prefix": "{sender.alias_name}: The bot prefix is now \"%s\" in this chat!",
+  "set.feature.disabled": "{sender.alias_name}: The feature \"%s\" has been disabled for this chat!",
+  "set.feature.enabled": "{sender.alias_name}: The feature \"%s\" has been enabled for this chat!"
 }

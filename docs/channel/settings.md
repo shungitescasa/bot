@@ -8,7 +8,8 @@ The `!set` command gives broadcasters ability to customize the bot as they need 
 
 ## Available features
 
-+ `notify_7tv_updates` - Enable notifications for changes to the channel's 7TV emote set.
++ `markov_responses` - Enable Markov-generated responses *(triggered by "@teabot, " prefix)*
++ `random_markov_responses` - Enable Markov-generated responses on random messages. It is required that the feature `markov_responses` is enabled.
 
 ## Syntax
 
@@ -58,8 +59,8 @@ Available languages at the moment: **english**, **russian**.
 
 ### Enabling/disabling the bot feature
 
-+ `Successfully enabled the "notify_7tv_updates" feature for this chat!`
-+ `Successfully disabled the "notify_7tv_updates" feature for this chat!`
++ `Successfully enabled the "markov_responses" feature for this chat!`
++ `Successfully disabled the "random_markov_responses" feature for this chat!`
 
 ## Error handling
 

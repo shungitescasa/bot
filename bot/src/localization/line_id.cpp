@@ -96,6 +96,16 @@ namespace bot {
         return LineId::ChattersResponse;
       }
 
+      else if (str == "set.locale") {
+        return LineId::SetLocale;
+      } else if (str == "set.prefix") {
+        return LineId::SetPrefix;
+      } else if (str == "set.feature.disabled") {
+        return LineId::SetFeatureDisabled;
+      } else if (str == "set.feature.enabled") {
+        return LineId::SetFeatureEnabled;
+      }
+
       else {
         return std::nullopt;
       }

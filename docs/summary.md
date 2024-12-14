@@ -8,6 +8,7 @@
 
 + [Custom commands](/wiki/channel/custom-commands)
 + [Timers](/wiki/channel/timer)
++ [Settings](/wiki/channel/settings)
 
 ## Stream features
 
@@ -26,10 +27,6 @@
 # [Errors](/wiki/errors)
 
 # NOT IMPLEMENTED
-
-## Channel management
-
-+ [Settings](/wiki/channel/settings)
 
 ## Emote management
 

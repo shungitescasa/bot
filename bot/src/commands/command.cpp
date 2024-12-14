@@ -17,6 +17,7 @@
 #include "../modules/massping.hpp"
 #include "../modules/notify.hpp"
 #include "../modules/ping.hpp"
+#include "../modules/settings.hpp"
 #include "../modules/spam.hpp"
 #include "../modules/timer.hpp"
 #include "../utils/chrono.hpp"
@@ -36,6 +37,7 @@ namespace bot {
       this->add_command(std::make_unique<mod::Help>());
       this->add_command(std::make_unique<mod::Chatters>());
       this->add_command(std::make_unique<mod::Spam>());
+      this->add_command(std::make_unique<mod::Settings>());
     }
 
     void CommandLoader::add_command(std::unique_ptr<Command> command) {
