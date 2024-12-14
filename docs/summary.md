@@ -26,6 +26,7 @@
 
 ## Miscellaneous
 
++ [Minecraft server status check](/wiki/misc/mcsrv)
 + [Ping](/wiki/misc/ping)
 
 # [Errors](/wiki/errors)
@@ -40,5 +41,4 @@
 
 ## Miscellaneous
 
-+ [Minecraft server status check](/wiki/misc/mcsrv)
 + [Get today's holidays](/wiki/misc/holiday)

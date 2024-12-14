@@ -15,6 +15,7 @@
 #include "../modules/help.hpp"
 #include "../modules/join.hpp"
 #include "../modules/massping.hpp"
+#include "../modules/mcsrv.hpp"
 #include "../modules/notify.hpp"
 #include "../modules/ping.hpp"
 #include "../modules/settings.hpp"
@@ -40,6 +41,7 @@ namespace bot {
       this->add_command(std::make_unique<mod::Spam>());
       this->add_command(std::make_unique<mod::Settings>());
       this->add_command(std::make_unique<mod::User>());
+      this->add_command(std::make_unique<mod::MinecraftServerCheck>());
     }
 
     void CommandLoader::add_command(std::unique_ptr<Command> command) {
