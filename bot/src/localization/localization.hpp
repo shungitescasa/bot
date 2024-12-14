@@ -26,6 +26,8 @@ namespace bot {
             const command::Request &request, const LineId &line_id,
             const std::vector<std::string> &args) const;
 
+        const std::vector<std::string> get_loaded_localizations() const;
+
       private:
         std::unordered_map<LineId, std::string> load_from_file(
             const std::string &file_path);

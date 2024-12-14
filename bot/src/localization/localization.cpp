@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
+#include <iterator>
 #include <map>
 #include <nlohmann/json.hpp>
 #include <optional>
@@ -127,6 +128,16 @@ namespace bot {
       }
 
       return line;
+    }
+
+    const std::vector<std::string> Localization::get_loaded_localizations()
+        const {
+      std::vector<std::string> output;
+      std::transform(this->localizations.begin(), this->localizations.end(),
+                     std::back_inserter(output),
+                     [](const auto &x) { return x.first; });
+
+      return output;
     }
   }
 }
