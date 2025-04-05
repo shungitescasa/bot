@@ -2,9 +2,10 @@ cmake_minimum_required(VERSION 3.10)
 include(FetchContent)
 
 # Creating symbolic links
-file(CREATE_LINK "${CMAKE_SOURCE_DIR}/localization" "${CMAKE_CURRENT_BINARY_DIR}/localization" SYMBOLIC)
+create_symlink_if_exists("${CMAKE_SOURCE_DIR}/localization" "${CMAKE_CURRENT_BINARY_DIR}/localization")
+create_symlink_if_exists("${CMAKE_SOURCE_DIR}/luamods" "${CMAKE_CURRENT_BINARY_DIR}/luamods")
 if (EXISTS "${CMAKE_SOURCE_DIR}/.env")
-    file(CREATE_LINK "${CMAKE_SOURCE_DIR}/.env" "${CMAKE_CURRENT_BINARY_DIR}/.env" SYMBOLIC)
+  create_symlink_if_exists("${CMAKE_SOURCE_DIR}/.env" "${CMAKE_CURRENT_BINARY_DIR}/.env")
 endif()
 
 add_executable(Bot)

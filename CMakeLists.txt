@@ -6,6 +6,16 @@ project(
   DESCRIPTION "a silly twitch chat bot"
 )
 
+function(create_symlink_if_exists source target)
+    if(EXISTS "${source}")
+        message(STATUS "Creating symlink ${source} -> ${target}")
+        execute_process(COMMAND ${CMAKE_COMMAND} -E remove -f "${target}")
+        execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink "${source}" "${target}")
+    else()
+        message(WARNING "Source '${source}' does not exist. Skipping symlink creation.")
+    endif()
+endfunction()
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 

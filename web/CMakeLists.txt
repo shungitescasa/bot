@@ -2,11 +2,11 @@ cmake_minimum_required(VERSION 3.10)
 include(FetchContent)
 
 # Creating symbolic links
-file(CREATE_LINK "${CMAKE_SOURCE_DIR}/static" "${CMAKE_CURRENT_BINARY_DIR}/static" SYMBOLIC)
-file(CREATE_LINK "${CMAKE_SOURCE_DIR}/templates" "${CMAKE_CURRENT_BINARY_DIR}/templates" SYMBOLIC)
-file(CREATE_LINK "${CMAKE_SOURCE_DIR}/docs" "${CMAKE_CURRENT_BINARY_DIR}/docs" SYMBOLIC)
+create_symlink_if_exists("${CMAKE_SOURCE_DIR}/static" "${CMAKE_CURRENT_BINARY_DIR}/static")
+create_symlink_if_exists("${CMAKE_SOURCE_DIR}/templates" "${CMAKE_CURRENT_BINARY_DIR}/templates")
+create_symlink_if_exists("${CMAKE_SOURCE_DIR}/docs" "${CMAKE_CURRENT_BINARY_DIR}/docs")
 if (EXISTS "${CMAKE_SOURCE_DIR}/.env")
-    file(CREATE_LINK "${CMAKE_SOURCE_DIR}/.env" "${CMAKE_CURRENT_BINARY_DIR}/.env" SYMBOLIC)
+    create_symlink_if_exists("${CMAKE_SOURCE_DIR}/.env" "${CMAKE_CURRENT_BINARY_DIR}/.env")
 endif()
 
 add_executable(Web)
