@@ -2,6 +2,8 @@
 
 #include <memory>
 #include <optional>
+#include <sol/sol.hpp>
+#include <sol/state.hpp>
 #include <string>
 #include <vector>
 
@@ -41,6 +43,7 @@ namespace bot {
         ~CommandLoader() = default;
 
         void add_command(std::unique_ptr<Command> cmd);
+        void load_lua_directory(const std::string &folder_path);
         std::optional<Response> run(const InstanceBundle &bundle,
                                     const Request &msg) const;
 
@@ -50,6 +53,8 @@ namespace bot {
 
       private:
         std::vector<std::unique_ptr<Command>> commands;
+
+        std::shared_ptr<sol::state> luaState;
     };
   }
 }

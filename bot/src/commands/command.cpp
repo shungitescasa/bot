@@ -3,9 +3,13 @@
 #include <algorithm>
 #include <chrono>
 #include <ctime>
+#include <fstream>
 #include <memory>
 #include <optional>
 #include <pqxx/pqxx>
+#include <sol/state.hpp>
+#include <sol/types.hpp>
+#include <stdexcept>
 #include <string>
 
 #include "../bundle.hpp"
@@ -23,6 +27,8 @@
 #include "../modules/timer.hpp"
 #include "../modules/user.hpp"
 #include "../utils/chrono.hpp"
+#include "commands/lua.hpp"
+#include "logger.hpp"
 #include "request.hpp"
 #include "response.hpp"
 
@@ -42,6 +48,30 @@ namespace bot {
       this->add_command(std::make_unique<mod::Settings>());
       this->add_command(std::make_unique<mod::User>());
       this->add_command(std::make_unique<mod::MinecraftServerCheck>());
+
+      this->luaState = std::make_shared<sol::state>();
+      this->luaState->open_libraries(sol::lib::base, sol::lib::string);
+    }
+
+    void CommandLoader::load_lua_directory(const std::string &folder_path) {
+      for (const auto &entry :
+           std::filesystem::directory_iterator(folder_path)) {
+        std::ifstream ifs(entry.path());
+        if (!ifs.is_open()) {
+          throw new std::runtime_error("Failed to open the Lua file at " +
+                                       entry.path().string());
+        }
+        std::string content, line;
+
+        while (std::getline(ifs, line)) {
+          content += line + '\n';
+        }
+
+        ifs.close();
+
+        this->add_command(
+            std::make_unique<lua::LuaCommand>(this->luaState, content));
+      }
     }
 
     void CommandLoader::add_command(std::unique_ptr<Command> command) {

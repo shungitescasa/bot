@@ -1,7 +1,10 @@
 #pragma once
 
+#include <memory>
 #include <optional>
 #include <pqxx/pqxx>
+#include <sol/state.hpp>
+#include <sol/table.hpp>
 #include <string>
 
 #include "../irc/message.hpp"
@@ -21,5 +24,7 @@ namespace bot::command {
       schemas::UserRights user_rights;
 
       pqxx::connection &conn;
+
+      sol::table as_lua_table(std::shared_ptr<sol::state> luaState) const;
   };
 }

@@ -4,6 +4,7 @@ include(FetchContent)
 # Creating symbolic links
 create_symlink_if_exists("${CMAKE_SOURCE_DIR}/localization" "${CMAKE_CURRENT_BINARY_DIR}/localization")
 create_symlink_if_exists("${CMAKE_SOURCE_DIR}/luamods" "${CMAKE_CURRENT_BINARY_DIR}/luamods")
+
 if (EXISTS "${CMAKE_SOURCE_DIR}/.env")
   create_symlink_if_exists("${CMAKE_SOURCE_DIR}/.env" "${CMAKE_CURRENT_BINARY_DIR}/.env")
 endif()
@@ -53,6 +54,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(pqxx)
 
+# websockets
 FetchContent_Declare(
   ixwebsocket
   GIT_REPOSITORY https://github.com/machinezone/IXWebSocket
@@ -60,5 +62,22 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(ixwebsocket)
 
-target_link_libraries(Bot PRIVATE ixwebsocket::ixwebsocket pqxx nlohmann_json::nlohmann_json cpr::cpr)
+set(SOL2_LUA_VERSION "5.4.8" CACHE STRING "The version of Lua used")
+set(SOL2_BUILD_LUA FALSE CACHE BOOL "Always build Lua, do not search for it in the system")
+
+FetchContent_Declare(
+  sol
+  GIT_REPOSITORY https://github.com/ThePhD/sol2.git
+  GIT_TAG v3.5.0
+)
+FetchContent_MakeAvailable(sol)
+
+target_link_libraries(Bot PRIVATE
+    ixwebsocket::ixwebsocket
+    pqxx
+    nlohmann_json::nlohmann_json
+    cpr::cpr
+    lua
+    sol2::sol2
+)
 

@@ -3,6 +3,7 @@
 #include <chrono>
 #include <optional>
 #include <pqxx/pqxx>
+#include <sol/sol.hpp>
 #include <string>
 #include <vector>
 
@@ -40,6 +41,8 @@ namespace bot::schemas {
         return this->opted_out_at;
       }
 
+      sol::table as_lua_table(std::shared_ptr<sol::state> luaState) const;
+
     private:
       int id, alias_id;
       std::string alias_name;
@@ -50,6 +53,8 @@ namespace bot::schemas {
   enum ChannelFeature { MARKOV_RESPONSES, RANDOM_MARKOV_RESPONSES };
   std::optional<ChannelFeature> string_to_channel_feature(
       const std::string &value);
+  std::optional<std::string> channelfeature_to_string(
+      const ChannelFeature &value);
 
   class ChannelPreferences {
     public:
@@ -89,6 +94,8 @@ namespace bot::schemas {
       const std::vector<ChannelFeature> &get_features() const {
         return this->features;
       }
+
+      sol::table as_lua_table(std::shared_ptr<sol::state> luaState) const;
 
     private:
       int channel_id;

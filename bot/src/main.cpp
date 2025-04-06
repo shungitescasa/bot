@@ -1,5 +1,7 @@
+#include <memory>
 #include <optional>
 #include <pqxx/pqxx>
+#include <sol/state.hpp>
 #include <string>
 #include <thread>
 #include <vector>
@@ -7,6 +9,8 @@
 #include "api/twitch/helix_client.hpp"
 #include "bundle.hpp"
 #include "commands/command.hpp"
+#include "commands/lua.hpp"
+#include "commands/response.hpp"
 #include "config.hpp"
 #include "github.hpp"
 #include "handlers.hpp"
@@ -49,6 +53,8 @@ int main(int argc, char *argv[]) {
   bot::irc::Client client(cfg.twitch_credentials.client_id,
                           cfg.twitch_credentials.token);
   bot::command::CommandLoader command_loader;
+  command_loader.load_lua_directory("luamods");
+
   bot::loc::Localization localization("localization");
   bot::api::twitch::HelixClient helix_client(cfg.twitch_credentials.token,
                                              cfg.twitch_credentials.client_id);

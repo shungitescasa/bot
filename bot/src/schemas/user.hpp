@@ -3,6 +3,7 @@
 #include <chrono>
 #include <optional>
 #include <pqxx/pqxx>
+#include <sol/sol.hpp>
 #include <string>
 
 #include "../utils/chrono.hpp"
@@ -40,6 +41,8 @@ namespace bot::schemas {
         return this->opted_out_at;
       }
 
+      sol::table as_lua_table(std::shared_ptr<sol::state> luaState) const;
+
     private:
       int id, alias_id;
       std::string alias_name;
@@ -65,6 +68,8 @@ namespace bot::schemas {
       const int &get_channel_id() const { return this->channel_id; }
       const PermissionLevel &get_level() const { return this->level; }
       void set_level(PermissionLevel level) { this->level = level; }
+
+      sol::table as_lua_table(std::shared_ptr<sol::state> luaState) const;
 
     private:
       int id, user_id, channel_id;

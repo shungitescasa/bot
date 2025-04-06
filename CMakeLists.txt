@@ -25,6 +25,8 @@ option(BUILD_BOT "Build the bot" ON)
 option(BUILD_WEB "Build the web application" ON)
 
 if (BUILD_BOT)
+  set(LUA_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/lib/lua/src")
+  add_subdirectory(lib/lua)
   add_subdirectory(bot)
 endif()
 
