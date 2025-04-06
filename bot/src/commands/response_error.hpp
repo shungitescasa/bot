@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "command.hpp"
+#include "localization/line_id.hpp"
 #include "request.hpp"
 
 namespace bot {
@@ -23,7 +24,9 @@ namespace bot {
     EXTERNAL_API_ERROR,
     INSUFFICIENT_RIGHTS,
 
-    ILLEGAL_COMMAND
+    ILLEGAL_COMMAND,
+
+    LUA_EXECUTION_ERROR
   };
 
   template <ResponseError T, class Enable = void>
@@ -31,9 +34,10 @@ namespace bot {
 
   template <ResponseError T>
   class ResponseException<
-      T, typename std::enable_if<
-             T == INCORRECT_ARGUMENT || T == INCOMPATIBLE_NAME ||
-             T == NAMESAKE_CREATION || T == NOT_FOUND>::type>
+      T, typename std::enable_if<T == INCORRECT_ARGUMENT ||
+                                 T == INCOMPATIBLE_NAME ||
+                                 T == NAMESAKE_CREATION || T == NOT_FOUND ||
+                                 T == LUA_EXECUTION_ERROR>::type>
       : public std::exception {
     public:
       ResponseException(const command::Request &request,
@@ -57,6 +61,9 @@ namespace bot {
             break;
           case NOT_FOUND:
             line_id = loc::LineId::ErrorNotFound;
+            break;
+          case LUA_EXECUTION_ERROR:
+            line_id = loc::LineId::ErrorLuaExecutionError;
             break;
           default:
             line_id = loc::LineId::ErrorSomethingWentWrong;

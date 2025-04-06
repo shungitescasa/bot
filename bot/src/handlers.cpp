@@ -12,6 +12,7 @@
 #include "commands/command.hpp"
 #include "commands/request.hpp"
 #include "commands/request_util.hpp"
+#include "commands/response_error.hpp"
 #include "constants.hpp"
 #include "cpr/api.h"
 #include "cpr/multipart.h"
@@ -55,13 +56,7 @@ namespace bot::handlers {
           return;
         }
       } catch (const std::exception &e) {
-        std::string line =
-            bundle.localization
-                .get_formatted_line(request.value(),
-                                    loc::LineId::ErrorSomethingWentWrong, {})
-                .value();
-
-        bundle.irc_client.say(message.source.login, line);
+        bundle.irc_client.say(message.source.login, e.what());
         log::error("PrivMsg/" + request->command_id, e.what());
       }
     }

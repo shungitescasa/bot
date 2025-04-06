@@ -48,6 +48,8 @@ namespace bot {
         return LineId::ErrorInsufficientRights;
       } else if (str == "error.illegal_command") {
         return LineId::ErrorIllegalCommand;
+      } else if (str == "error.lua_execution_error") {
+        return LineId::ErrorLuaExecutionError;
       }
 
       else if (str == "event.on") {

@@ -19,6 +19,7 @@
   "error.external_api_error": "External API error (%s%s)",
   "error.insufficient_rights": "Insufficient rights",
   "error.illegal_command": "Command not available",
+  "error.lua_execution_error": "Lua execution error: %s",
 
   "ping.response": "{sender.alias_name}: funnywhitecat Pong! %s Uptime: %s · Used memory: %sMB",
 

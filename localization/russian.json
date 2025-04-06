@@ -19,6 +19,7 @@
   "error.external_api_error": "Ошибка стороннего API (%s%s)",
   "error.insufficient_rights": "Недостаточно прав",
   "error.illegal_command": "Команда недоступна",
+  "error.lua_execution_error": "Lua execution error: %s",
 
   "ping.response": "{sender.alias_name}: funnywhitecat Понг! %s Время сессии: %s · ОЗУ: %sМБ",
 
