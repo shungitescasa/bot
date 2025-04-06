@@ -7,8 +7,58 @@
 #include "commands/request.hpp"
 #include "commands/response.hpp"
 #include "schemas/user.hpp"
+#include "utils/chrono.hpp"
+#include "utils/string.hpp"
 
 namespace bot::command::lua {
+  namespace library {
+    void add_bot_library(std::shared_ptr<sol::state> state) {
+      state->set_function("bot_get_compiler_version", []() {
+        std::string info;
+#ifdef __cplusplus
+        info.append("C++" + std::to_string(__cplusplus).substr(2, 2));
+#endif
+#ifdef __VERSION__
+        info.append(" (gcc " +
+                    bot::utils::string::split_text(__VERSION__, ' ')[0] + ")");
+#endif
+        return info;
+      });
+
+      state->set_function("bot_get_uptime", []() {
+        auto now = std::chrono::steady_clock::now();
+        auto duration = now - START_TIME;
+        auto seconds =
+            std::chrono::duration_cast<std::chrono::seconds>(duration).count();
+        return static_cast<long long>(seconds);
+      });
+
+      state->set_function("bot_get_memory_usage", []() {
+        struct rusage usage;
+        getrusage(RUSAGE_SELF, &usage);
+        return usage.ru_maxrss;
+      });
+
+      state->set_function("bot_get_compile_time",
+                          []() { return BOT_COMPILED_TIMESTAMP; });
+
+      state->set_function("bot_get_version", []() { return BOT_VERSION; });
+    }
+
+    void add_time_library(std::shared_ptr<sol::state> state) {
+      state->set_function("time_current", []() {
+        return static_cast<long long>(
+            std::chrono::duration_cast<std::chrono::seconds>(
+                std::chrono::steady_clock::now().time_since_epoch())
+                .count());
+      });
+
+      state->set_function("time_humanize", [](const int &timestamp) {
+        return utils::chrono::format_timestamp(timestamp);
+      });
+    }
+  }
+
   LuaCommand::LuaCommand(std::shared_ptr<sol::state> luaState,
                          const std::string &script) {
     this->luaState = luaState;
@@ -40,7 +90,7 @@ namespace bot::command::lua {
       this->level = schemas::PermissionLevel::USER;
     }
 
-    this->handle = data["run"];
+    this->handle = data["handle"];
   }
 
   Response LuaCommand::run(const InstanceBundle &bundle,

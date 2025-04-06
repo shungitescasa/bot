@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <sol/sol.hpp>
 #include <sol/state.hpp>
 #include <sol/table.hpp>
@@ -14,6 +15,11 @@
 void print_lua_object_type(const sol::object &obj);
 
 namespace bot::command::lua {
+  namespace library {
+    void add_bot_library(std::shared_ptr<sol::state> state);
+    void add_time_library(std::shared_ptr<sol::state> state);
+  }
+
   class LuaCommand : public Command {
     public:
       LuaCommand(std::shared_ptr<sol::state> luaState,

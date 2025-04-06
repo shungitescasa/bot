@@ -21,7 +21,6 @@
 #include "../modules/massping.hpp"
 #include "../modules/mcsrv.hpp"
 #include "../modules/notify.hpp"
-#include "../modules/ping.hpp"
 #include "../modules/settings.hpp"
 #include "../modules/spam.hpp"
 #include "../modules/timer.hpp"
@@ -35,7 +34,6 @@
 namespace bot {
   namespace command {
     CommandLoader::CommandLoader() {
-      this->add_command(std::make_unique<mod::Ping>());
       this->add_command(std::make_unique<mod::Massping>());
       this->add_command(std::make_unique<mod::Event>());
       this->add_command(std::make_unique<mod::Notify>());
@@ -50,7 +48,11 @@ namespace bot {
       this->add_command(std::make_unique<mod::MinecraftServerCheck>());
 
       this->luaState = std::make_shared<sol::state>();
-      this->luaState->open_libraries(sol::lib::base, sol::lib::string);
+      this->luaState->open_libraries(sol::lib::base, sol::lib::string,
+                                     sol::lib::math);
+
+      lua::library::add_bot_library(this->luaState);
+      lua::library::add_time_library(this->luaState);
     }
 
     void CommandLoader::load_lua_directory(const std::string &folder_path) {
