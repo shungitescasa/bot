@@ -20,6 +20,10 @@ namespace bot::command::lua {
     void add_time_library(std::shared_ptr<sol::state> state);
   }
 
+  command::Response run_safe_lua_script(const Request &request,
+                                        const InstanceBundle &bundle,
+                                        const std::string &script);
+
   class LuaCommand : public Command {
     public:
       LuaCommand(std::shared_ptr<sol::state> luaState,

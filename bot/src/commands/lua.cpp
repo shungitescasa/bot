@@ -1,11 +1,17 @@
 #include "commands/lua.hpp"
 
+#include <memory>
+#include <sol/forward.hpp>
+#include <sol/load_result.hpp>
+#include <sol/protected_function_result.hpp>
+#include <sol/state.hpp>
 #include <sol/table.hpp>
 #include <string>
 
 #include "bundle.hpp"
 #include "commands/request.hpp"
 #include "commands/response.hpp"
+#include "commands/response_error.hpp"
 #include "schemas/user.hpp"
 #include "utils/chrono.hpp"
 #include "utils/string.hpp"
@@ -57,6 +63,57 @@ namespace bot::command::lua {
         return utils::chrono::format_timestamp(timestamp);
       });
     }
+  }
+
+  std::string parse_lua_response(const sol::table &r, sol::object &res) {
+    if (res.get_type() == sol::type::function) {
+      sol::function f = res.as<sol::function>();
+      sol::object o = f(r);
+      return parse_lua_response(r, o);
+    } else if (res.get_type() == sol::type::string) {
+      return {"🌑 " + res.as<std::string>()};
+    } else if (res.get_type() == sol::type::number) {
+      return {"🌑 " + std::to_string(res.as<double>())};
+    } else if (res.get_type() == sol::type::boolean) {
+      return {"🌑 " + std::to_string(res.as<bool>())};
+    } else {
+      // should it be ResponseException?
+      return "Empty or unsupported response";
+    }
+  }
+
+  command::Response run_safe_lua_script(const Request &request,
+                                        const InstanceBundle &bundle,
+                                        const std::string &script) {
+    // shared_ptr is unnecessary here, but my library needs it.
+    std::shared_ptr<sol::state> state = std::make_shared<sol::state>();
+
+    state->open_libraries(sol::lib::base, sol::lib::table, sol::lib::string);
+    library::add_bot_library(state);
+    library::add_time_library(state);
+
+    sol::load_result s = state->load("return " + script);
+    if (!s.valid()) {
+      s = state->load(script);
+    }
+
+    if (!s.valid()) {
+      sol::error err = s;
+      throw ResponseException<ResponseError::LUA_EXECUTION_ERROR>(
+          request, bundle.localization, std::string(err.what()));
+    }
+
+    sol::protected_function_result res = s();
+
+    if (!res.valid()) {
+      sol::error err = s;
+      throw ResponseException<ResponseError::LUA_EXECUTION_ERROR>(
+          request, bundle.localization, std::string(err.what()));
+    }
+
+    sol::object o = res;
+
+    return parse_lua_response(request.as_lua_table(state), o);
   }
 
   LuaCommand::LuaCommand(std::shared_ptr<sol::state> luaState,

@@ -28,6 +28,7 @@
 #include "../utils/chrono.hpp"
 #include "commands/lua.hpp"
 #include "logger.hpp"
+#include "modules/lua.hpp"
 #include "request.hpp"
 #include "response.hpp"
 
@@ -46,6 +47,8 @@ namespace bot {
       this->add_command(std::make_unique<mod::Settings>());
       this->add_command(std::make_unique<mod::User>());
       this->add_command(std::make_unique<mod::MinecraftServerCheck>());
+
+      this->add_command(std::make_unique<mod::LuaExecution>());
 
       this->luaState = std::make_shared<sol::state>();
       this->luaState->open_libraries(sol::lib::base, sol::lib::string,
