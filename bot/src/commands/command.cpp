@@ -61,22 +61,26 @@ namespace bot {
     void CommandLoader::load_lua_directory(const std::string &folder_path) {
       for (const auto &entry :
            std::filesystem::directory_iterator(folder_path)) {
-        std::ifstream ifs(entry.path());
-        if (!ifs.is_open()) {
-          throw new std::runtime_error("Failed to open the Lua file at " +
-                                       entry.path().string());
-        }
-        std::string content, line;
-
-        while (std::getline(ifs, line)) {
-          content += line + '\n';
-        }
-
-        ifs.close();
-
-        this->add_command(
-            std::make_unique<lua::LuaCommand>(this->luaState, content));
+        load_lua_file(entry.path());
       }
+    }
+
+    void CommandLoader::load_lua_file(const std::string &file_path) {
+      std::ifstream ifs(file_path);
+      if (!ifs.is_open()) {
+        throw new std::runtime_error("Failed to open the Lua file at " +
+                                     file_path);
+      }
+      std::string content, line;
+
+      while (std::getline(ifs, line)) {
+        content += line + '\n';
+      }
+
+      ifs.close();
+
+      this->add_command(
+          std::make_unique<lua::LuaCommand>(this->luaState, content));
     }
 
     void CommandLoader::add_command(std::unique_ptr<Command> command) {

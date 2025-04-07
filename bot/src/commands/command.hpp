@@ -44,6 +44,7 @@ namespace bot {
 
         void add_command(std::unique_ptr<Command> cmd);
         void load_lua_directory(const std::string &folder_path);
+        void load_lua_file(const std::string &file_path);
         std::optional<Response> run(const InstanceBundle &bundle,
                                     const Request &msg);
 
