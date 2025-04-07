@@ -144,6 +144,8 @@ namespace bot {
 
         if (this->message.has_value()) {
           args.push_back(" " + this->message.value());
+        } else {
+          args.push_back("");
         }
 
         this->line =
