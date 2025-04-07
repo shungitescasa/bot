@@ -160,6 +160,12 @@ namespace bot::command::lua {
         return lua_to_json(o).dump();
       });
     }
+
+    void add_base_libraries(std::shared_ptr<sol::state> state) {
+      add_bot_library(state);
+      add_time_library(state);
+      add_json_library(state);
+    }
   }
 
   std::string parse_lua_response(const sol::table &r, sol::object &res) {
@@ -186,8 +192,7 @@ namespace bot::command::lua {
     std::shared_ptr<sol::state> state = std::make_shared<sol::state>();
 
     state->open_libraries(sol::lib::base, sol::lib::table, sol::lib::string);
-    library::add_bot_library(state);
-    library::add_time_library(state);
+    library::add_base_libraries(state);
 
     sol::load_result s = state->load("return " + script);
     if (!s.valid()) {
