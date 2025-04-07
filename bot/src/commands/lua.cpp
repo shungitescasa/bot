@@ -1,12 +1,15 @@
 #include "commands/lua.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <memory>
 #include <nlohmann/json.hpp>
 #include <sol/sol.hpp>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
+#include "api/twitch/schemas/user.hpp"
 #include "bundle.hpp"
 #include "commands/request.hpp"
 #include "commands/response.hpp"
@@ -165,6 +168,30 @@ namespace bot::command::lua {
       add_bot_library(state);
       add_time_library(state);
       add_json_library(state);
+    }
+
+    void add_twitch_library(std::shared_ptr<sol::state> state,
+                            const Request &request,
+                            const InstanceBundle &bundle) {
+      // TODO: ratelimits
+      state->set_function("twitch_get_chatters", [state, &request, &bundle]() {
+        auto chatters = bundle.helix_client.get_chatters(
+            request.channel.get_alias_id(), bundle.irc_client.get_bot_id());
+
+        sol::table o = state->create_table();
+
+        std::for_each(chatters.begin(), chatters.end(),
+                      [state, &o](const api::twitch::schemas::User &x) {
+                        sol::table u = state->create_table();
+
+                        u["id"] = x.id;
+                        u["login"] = x.login;
+
+                        o.add(u);
+                      });
+
+        return o;
+      });
     }
   }
 

@@ -19,6 +19,9 @@ namespace bot::command::lua {
     void add_bot_library(std::shared_ptr<sol::state> state);
     void add_time_library(std::shared_ptr<sol::state> state);
     void add_json_library(std::shared_ptr<sol::state> state);
+    void add_twitch_library(std::shared_ptr<sol::state> state,
+                            const Request &request,
+                            const InstanceBundle &bundle);
 
     void add_base_libraries(std::shared_ptr<sol::state> state);
   }
