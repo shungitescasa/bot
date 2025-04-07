@@ -44,6 +44,8 @@ namespace bot {
         return LineId::ErrorNotFound;
       } else if (str == "error.something_went_wrong") {
         return LineId::ErrorSomethingWentWrong;
+      } else if (str == "error.external_api_error") {
+        return LineId::ErrorExternalAPIError;
       } else if (str == "error.insufficient_rights") {
         return LineId::ErrorInsufficientRights;
       } else if (str == "error.illegal_command") {
