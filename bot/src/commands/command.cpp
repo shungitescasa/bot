@@ -18,7 +18,6 @@
 #include "../modules/event.hpp"
 #include "../modules/help.hpp"
 #include "../modules/join.hpp"
-#include "../modules/massping.hpp"
 #include "../modules/mcsrv.hpp"
 #include "../modules/notify.hpp"
 #include "../modules/settings.hpp"
@@ -27,7 +26,6 @@
 #include "../modules/user.hpp"
 #include "../utils/chrono.hpp"
 #include "commands/lua.hpp"
-#include "logger.hpp"
 #include "modules/lua.hpp"
 #include "request.hpp"
 #include "response.hpp"
@@ -35,7 +33,6 @@
 namespace bot {
   namespace command {
     CommandLoader::CommandLoader() {
-      this->add_command(std::make_unique<mod::Massping>());
       this->add_command(std::make_unique<mod::Event>());
       this->add_command(std::make_unique<mod::Notify>());
       this->add_command(std::make_unique<mod::Join>());
