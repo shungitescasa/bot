@@ -53,7 +53,7 @@ namespace bot {
 
       this->luaState = std::make_shared<sol::state>();
       this->luaState->open_libraries(sol::lib::base, sol::lib::string,
-                                     sol::lib::math);
+                                     sol::lib::table, sol::lib::math);
 
       lua::library::add_base_libraries(this->luaState);
     }
