@@ -49,6 +49,7 @@ namespace bot {
       this->add_command(std::make_unique<mod::MinecraftServerCheck>());
 
       this->add_command(std::make_unique<mod::LuaExecution>());
+      this->add_command(std::make_unique<mod::LuaRemoteExecution>());
 
       this->luaState = std::make_shared<sol::state>();
       this->luaState->open_libraries(sol::lib::base, sol::lib::string,
