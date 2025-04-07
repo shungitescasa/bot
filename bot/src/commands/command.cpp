@@ -84,7 +84,9 @@ namespace bot {
     }
 
     std::optional<Response> CommandLoader::run(const InstanceBundle &bundle,
-                                               const Request &request) const {
+                                               const Request &request) {
+      lua::library::add_twitch_library(this->luaState, request, bundle);
+
       auto command = std::find_if(
           this->commands.begin(), this->commands.end(),
           [&](const auto &x) { return x->get_name() == request.command_id; });

@@ -26,8 +26,7 @@
 
 namespace bot::handlers {
   void handle_private_message(
-      const InstanceBundle &bundle,
-      const command::CommandLoader &command_loader,
+      const InstanceBundle &bundle, command::CommandLoader &command_loader,
       const irc::Message<irc::MessageType::Privmsg> &message,
       pqxx::connection &conn) {
     if (utils::string::string_contains_sql_injection(message.message)) {
