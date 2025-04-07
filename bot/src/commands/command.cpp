@@ -84,6 +84,13 @@ namespace bot {
     }
 
     void CommandLoader::add_command(std::unique_ptr<Command> command) {
+      auto it = std::find_if(this->commands.begin(), this->commands.end(),
+                             [&command](const auto &x) {
+                               return command->get_name() == x->get_name();
+                             });
+      if (it != this->commands.end()) {
+        this->commands.erase(it);
+      }
       this->commands.push_back(std::move(command));
     }
 
