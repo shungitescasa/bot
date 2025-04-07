@@ -56,6 +56,7 @@ namespace bot {
 
       lua::library::add_bot_library(this->luaState);
       lua::library::add_time_library(this->luaState);
+      lua::library::add_json_library(this->luaState);
     }
 
     void CommandLoader::load_lua_directory(const std::string &folder_path) {

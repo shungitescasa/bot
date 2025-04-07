@@ -18,6 +18,7 @@ namespace bot::command::lua {
   namespace library {
     void add_bot_library(std::shared_ptr<sol::state> state);
     void add_time_library(std::shared_ptr<sol::state> state);
+    void add_json_library(std::shared_ptr<sol::state> state);
   }
 
   command::Response run_safe_lua_script(const Request &request,

@@ -1,11 +1,10 @@
 #include "commands/lua.hpp"
 
+#include <cmath>
 #include <memory>
-#include <sol/forward.hpp>
-#include <sol/load_result.hpp>
-#include <sol/protected_function_result.hpp>
-#include <sol/state.hpp>
-#include <sol/table.hpp>
+#include <nlohmann/json.hpp>
+#include <sol/sol.hpp>
+#include <stdexcept>
 #include <string>
 
 #include "bundle.hpp"
@@ -61,6 +60,104 @@ namespace bot::command::lua {
 
       state->set_function("time_humanize", [](const int &timestamp) {
         return utils::chrono::format_timestamp(timestamp);
+      });
+    }
+
+    sol::object parse_json_object(std::shared_ptr<sol::state_view> state,
+                                  nlohmann::json j) {
+      switch (j.type()) {
+        case nlohmann::json::value_t::null:
+          return sol::make_object(*state, sol::lua_nil);
+        case nlohmann::json::value_t::string:
+          return sol::make_object(*state, j.get<std::string>());
+        case nlohmann::json::value_t::number_integer:
+          return sol::make_object(*state, j.get<int>());
+        case nlohmann::json::value_t::number_unsigned:
+          return sol::make_object(*state, j.get<unsigned int>());
+        case nlohmann::json::value_t::number_float:
+          return sol::make_object(*state, j.get<double>());
+        case nlohmann::json::value_t::array: {
+          sol::table a = state->create_table();
+
+          for (int i = 0; i < j.size(); ++i) {
+            a[i] = parse_json_object(state, j[i]);
+          }
+
+          return sol::make_object(*state, a);
+        }
+        case nlohmann::json::value_t::object: {
+          sol::table o = state->create_table();
+
+          for (const auto &[k, v] : j.items()) {
+            o[k] = parse_json_object(state, v);
+          }
+
+          return sol::make_object(*state, o);
+        }
+        default:
+          throw std::runtime_error("Unsupported Lua type: " +
+                                   std::string(j.type_name()));
+      }
+    }
+
+    nlohmann::json lua_to_json(sol::object o) {
+      switch (o.get_type()) {
+        case sol::type::lua_nil:
+          return nullptr;
+        case sol::type::string:
+          return o.as<std::string>();
+        case sol::type::boolean:
+          return o.as<bool>();
+        case sol::type::number: {
+          double num = o.as<double>();
+          if (std::floor(num) == num) {
+            return static_cast<long long>(num);
+          }
+          return num;
+        }
+        case sol::type::table: {
+          sol::table t = o;
+
+          bool is_array = true;
+          int count = 0;
+          for (auto &kv : t) {
+            sol::object key = kv.first;
+            if (key.get_type() != sol::type::number) {
+              is_array = false;
+              break;
+            }
+            ++count;
+          }
+
+          if (is_array) {
+            nlohmann::json a = nlohmann::json::array();
+            for (size_t i = 1; i <= count; ++i) {
+              a.push_back(lua_to_json(t[i]));
+            }
+            return a;
+          } else {
+            nlohmann::json ob = nlohmann::json::object();
+            for (auto &kv : t) {
+              std::string key = kv.first.as<std::string>();
+              ob[key] = lua_to_json(kv.second);
+            }
+            return ob;
+          }
+        }
+        default:
+          throw std::runtime_error(
+              "Unsupported Lua object for JSON conversion");
+      }
+    }
+
+    void add_json_library(std::shared_ptr<sol::state> state) {
+      state->set_function("json_parse", [state](const std::string &s) {
+        nlohmann::json j = nlohmann::json::parse(s);
+        return parse_json_object(state, j);
+      });
+
+      state->set_function("json_stringify", [](const sol::object &o) {
+        return lua_to_json(o).dump();
       });
     }
   }
