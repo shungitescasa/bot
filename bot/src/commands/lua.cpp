@@ -317,24 +317,8 @@ namespace bot::command::lua {
 
   Response LuaCommand::run(const InstanceBundle &bundle,
                            const Request &request) const {
-    sol::object response = this->handle(request.as_lua_table(this->luaState));
-
-    if (response.is<std::string>()) {
-      return {response.as<std::string>()};
-    } else if (response.is<sol::table>()) {
-      sol::table tbl = response.as<sol::table>();
-      std::vector<std::string> items;
-
-      for (auto &kv : tbl) {
-        sol::object value = kv.second;
-        if (value.is<std::string>()) {
-          items.push_back(value.as<std::string>());
-        }
-      }
-
-      return items;
-    }
-
-    return {};
+    sol::table r = request.as_lua_table(this->luaState);
+    sol::object response = this->handle(r);
+    return parse_lua_response(r, response);
   }
 }
