@@ -14,6 +14,9 @@
 #include "commands/request.hpp"
 #include "commands/response.hpp"
 #include "commands/response_error.hpp"
+#include "cpr/api.h"
+#include "cpr/cprtypes.h"
+#include "cpr/response.h"
 #include "schemas/user.hpp"
 #include "utils/chrono.hpp"
 #include "utils/string.hpp"
@@ -164,10 +167,43 @@ namespace bot::command::lua {
       });
     }
 
+    void add_net_library(std::shared_ptr<sol::state> state) {
+      state->set_function("net_get", [state](const std::string &url) {
+        sol::table t = state->create_table();
+
+        cpr::Response response = cpr::Get(cpr::Url{url});
+
+        t["code"] = response.status_code;
+        t["text"] = response.text;
+
+        return t;
+      });
+
+      state->set_function(
+          "net_get_with_headers",
+          [state](const std::string &url, const sol::table &headers) {
+            sol::table t = state->create_table();
+
+            cpr::Header h{};
+
+            for (auto &kv : headers) {
+              h[kv.first.as<std::string>()] = kv.second.as<std::string>();
+            }
+
+            cpr::Response response = cpr::Get(cpr::Url{url}, h);
+
+            t["code"] = response.status_code;
+            t["text"] = response.text;
+
+            return t;
+          });
+    }
+
     void add_base_libraries(std::shared_ptr<sol::state> state) {
       add_bot_library(state);
       add_time_library(state);
       add_json_library(state);
+      add_net_library(state);
     }
 
     void add_twitch_library(std::shared_ptr<sol::state> state,
