@@ -9,6 +9,50 @@
 #include "logger.hpp"
 
 namespace bot {
+  sol::table Configuration::as_lua_table(
+      std::shared_ptr<sol::state> luaState) const {
+    sol::table o = luaState->create_table();
+
+    // we parse only safe-to-leak parts of configuration
+
+    // --- COMMAND
+    sol::table cmds = luaState->create_table();
+    cmds["join_allowed"] = this->commands.join_allowed;
+    cmds["join_allow_from_other_chats"] =
+        this->commands.join_allow_from_other_chats;
+    o["commands"] = cmds;
+
+    // --- OWNER
+    sol::table owner = luaState->create_table();
+    if (this->owner.name.has_value()) {
+      owner["name"] = this->owner.name.value();
+    } else {
+      owner["name"] = sol::nil;
+    }
+    if (this->owner.id.has_value()) {
+      owner["id"] = this->owner.id.value();
+    } else {
+      owner["id"] = sol::nil;
+    }
+    o["owner"] = owner;
+
+    // --- URL
+    sol::table url = luaState->create_table();
+    if (this->url.help.has_value()) {
+      url["help"] = this->url.help.value();
+    } else {
+      url["help"] = sol::nil;
+    }
+    if (this->url.paste_service.has_value()) {
+      url["paste_service"] = this->url.paste_service.value();
+    } else {
+      url["paste_service"] = sol::nil;
+    }
+    o["url"] = url;
+
+    return o;
+  }
+
   std::optional<Configuration> parse_configuration_from_file(
       const std::string &file_path) {
     std::ifstream ifs(file_path);

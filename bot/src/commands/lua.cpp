@@ -54,6 +54,17 @@ namespace bot::command::lua {
                           []() { return BOT_COMPILED_TIMESTAMP; });
 
       state->set_function("bot_get_version", []() { return BOT_VERSION; });
+
+      state->set_function("bot_config", [state]() {
+        std::optional<bot::Configuration> o_cfg =
+            bot::parse_configuration_from_file(".env");
+
+        if (!o_cfg.has_value()) {
+          return sol::make_object(*state, sol::nil);
+        }
+
+        return sol::make_object(*state, o_cfg->as_lua_table(state));
+      });
     }
 
     void add_time_library(std::shared_ptr<sol::state> state) {

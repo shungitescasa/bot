@@ -53,6 +53,8 @@ namespace bot {
       OwnerConfiguration owner;
       UrlConfiguration url;
       TokenConfiguration tokens;
+
+      sol::table as_lua_table(std::shared_ptr<sol::state> luaState) const;
   };
 
   std::optional<Configuration> parse_configuration_from_file(
