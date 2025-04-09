@@ -1,5 +1,9 @@
 #include "commands/lua.hpp"
 
+#include <sys/resource.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 #include <algorithm>
 #include <cmath>
 #include <memory>
