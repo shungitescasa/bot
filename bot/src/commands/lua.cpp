@@ -24,6 +24,7 @@
 #include "commands/response_error.hpp"
 #include "cpr/api.h"
 #include "cpr/cprtypes.h"
+#include "cpr/multipart.h"
 #include "cpr/response.h"
 #include "schemas/user.hpp"
 #include "utils/chrono.hpp"
@@ -236,6 +237,32 @@ namespace bot::command::lua {
             }
 
             cpr::Response response = cpr::Get(cpr::Url{url}, h);
+
+            t["code"] = response.status_code;
+            t["text"] = response.text;
+
+            return t;
+          });
+
+      state->set_function(
+          "net_post_multipart_with_headers",
+          [state](const std::string &url, const sol::table &body,
+                  const sol::table &headers) {
+            sol::table t = state->create_table();
+
+            cpr::Header h{};
+
+            for (auto &kv : headers) {
+              h[kv.first.as<std::string>()] = kv.second.as<std::string>();
+            }
+
+            cpr::Multipart multipart = {};
+            for (auto &kv : body) {
+              multipart.parts.push_back(
+                  {kv.first.as<std::string>(), kv.second.as<std::string>()});
+            }
+
+            cpr::Response response = cpr::Post(cpr::Url{url}, multipart, h);
 
             t["code"] = response.status_code;
             t["text"] = response.text;
