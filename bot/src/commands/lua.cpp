@@ -337,11 +337,19 @@ namespace bot::command::lua {
           });
     }
 
+    void add_string_library(std::shared_ptr<sol::state> state) {
+      state->set_function("str_split",
+                          [](const std::string &text, const char &delimiter) {
+                            return utils::string::split_text(text, delimiter);
+                          });
+    }
+
     void add_base_libraries(std::shared_ptr<sol::state> state) {
       add_bot_library(state);
       add_time_library(state);
       add_json_library(state);
       add_net_library(state);
+      add_string_library(state);
       add_l10n_library(state);
     }
 
