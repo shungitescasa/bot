@@ -1,6 +1,7 @@
 #pragma once
 
 #include <optional>
+#include <sol/sol.hpp>
 #include <string>
 
 #define GET_DATABASE_CONNECTION_URL(c)                                      \
@@ -30,6 +31,8 @@ namespace bot {
   struct CommandConfiguration {
       bool join_allowed = true;
       bool join_allow_from_other_chats = false;
+
+      std::optional<std::string> rpost_path = std::nullopt;
   };
 
   struct OwnerConfiguration {
@@ -40,6 +43,7 @@ namespace bot {
   struct UrlConfiguration {
       std::optional<std::string> help = std::nullopt;
       std::optional<std::string> paste_service = std::nullopt;
+      std::optional<std::string> randompost = std::nullopt;
   };
 
   struct TokenConfiguration {

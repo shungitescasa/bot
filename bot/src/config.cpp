@@ -20,6 +20,11 @@ namespace bot {
     cmds["join_allowed"] = this->commands.join_allowed;
     cmds["join_allow_from_other_chats"] =
         this->commands.join_allow_from_other_chats;
+    if (this->commands.rpost_path.has_value()) {
+      cmds["rpost_path"] = this->commands.rpost_path.value();
+    } else {
+      cmds["rpost_path"] = sol::nil;
+    }
     o["commands"] = cmds;
 
     // --- OWNER
@@ -47,6 +52,11 @@ namespace bot {
       url["paste_service"] = this->url.paste_service.value();
     } else {
       url["paste_service"] = sol::nil;
+    }
+    if (this->url.randompost.has_value()) {
+      url["randompost"] = this->url.randompost.value();
+    } else {
+      url["randompost"] = sol::nil;
     }
     o["url"] = url;
 
@@ -103,6 +113,8 @@ namespace bot {
         cmd_cfg.join_allowed = std::stoi(value);
       } else if (key == "commands.join_allow_from_other_chats") {
         cmd_cfg.join_allow_from_other_chats = std::stoi(value);
+      } else if (key == "commands.randompost.path") {
+        cmd_cfg.rpost_path = value;
       }
 
       else if (key == "owner.name") {
@@ -115,6 +127,8 @@ namespace bot {
         url_cfg.help = value;
       } else if (key == "url.chatters.paste_service") {
         url_cfg.paste_service = value;
+      } else if (key == "url.randompost") {
+        url_cfg.randompost = value;
       }
 
       else if (key == "token.github") {
