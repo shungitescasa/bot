@@ -25,6 +25,13 @@ namespace bot {
     } else {
       cmds["rpost_path"] = sol::nil;
     }
+    if (this->commands.paste_path.has_value()) {
+      cmds["paste_path"] = this->commands.paste_path.value();
+    } else {
+      cmds["paste_path"] = sol::nil;
+    }
+    cmds["paste_body_name"] = this->commands.paste_body_name;
+    cmds["paste_title_name"] = this->commands.paste_title_name;
     o["commands"] = cmds;
 
     // --- OWNER
@@ -115,6 +122,12 @@ namespace bot {
         cmd_cfg.join_allow_from_other_chats = std::stoi(value);
       } else if (key == "commands.randompost.path") {
         cmd_cfg.rpost_path = value;
+      } else if (key == "commands.paste_path") {
+        cmd_cfg.paste_path = value;
+      } else if (key == "paste_body_name") {
+        cmd_cfg.paste_body_name = value;
+      } else if (key == "paste_title_name") {
+        cmd_cfg.paste_title_name = value;
       }
 
       else if (key == "owner.name") {

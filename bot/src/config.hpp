@@ -33,6 +33,10 @@ namespace bot {
       bool join_allow_from_other_chats = false;
 
       std::optional<std::string> rpost_path = std::nullopt;
+
+      std::optional<std::string> paste_path = std::nullopt;
+      std::string paste_body_name = "paste";
+      std::string paste_title_name = "title";
   };
 
   struct OwnerConfiguration {
