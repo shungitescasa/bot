@@ -226,11 +226,64 @@ namespace bot::command::lua {
           });
     }
 
+    void add_l10n_library(std::shared_ptr<sol::state> state) {
+      state->set_function(
+          "l10n_custom_formatted_line_request",
+          [](const sol::table &request, const sol::table &lines,
+             const std::string &line_id, const sol::table &parameters) {
+            // TODO: use Localization class instead!!!
+
+            // TODO: convert the table to C++ struct for type safety later
+            std::string language = request["channel_preference"]["language"];
+
+            if (!lines[language].valid() || !lines[language][line_id].valid()) {
+            }
+
+            std::string line = lines[language][line_id];
+
+            std::vector<std::string> args;
+
+            for (auto &kv : parameters) {
+              args.push_back(kv.second.as<std::string>());
+            }
+
+            int pos = 0;
+            int index = 0;
+
+            while ((pos = line.find("%s", pos)) != std::string::npos) {
+              line.replace(pos, 2, args[index]);
+              pos += args[index].size();
+              ++index;
+
+              if (index >= args.size()) {
+                break;
+              }
+            }
+
+            std::map<std::string, std::string> token_map = {
+                {"{sender.alias_name}", request["sender"]["alias_name"]},
+                {"{source.alias_name}", request["channel"]["alias_name"]},
+                {"{default.prefix}", DEFAULT_PREFIX}};
+
+            for (const auto &pair : token_map) {
+              int pos = line.find(pair.first);
+
+              while (pos != std::string::npos) {
+                line.replace(pos, pair.first.length(), pair.second);
+                pos = line.find(pair.first, pos + pair.second.length());
+              }
+            }
+
+            return line;
+          });
+    }
+
     void add_base_libraries(std::shared_ptr<sol::state> state) {
       add_bot_library(state);
       add_time_library(state);
       add_json_library(state);
       add_net_library(state);
+      add_l10n_library(state);
     }
 
     void add_twitch_library(std::shared_ptr<sol::state> state,
