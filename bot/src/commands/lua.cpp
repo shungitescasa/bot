@@ -5,10 +5,14 @@
 #include <unistd.h>
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
+#include <ctime>
+#include <iomanip>
 #include <memory>
 #include <nlohmann/json.hpp>
 #include <sol/sol.hpp>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -82,6 +86,20 @@ namespace bot::command::lua {
       state->set_function("time_humanize", [](const int &timestamp) {
         return utils::chrono::format_timestamp(timestamp);
       });
+
+      state->set_function("time_format",
+                          [](const long &timestamp, const std::string &format) {
+                            std::time_t t = std::time(nullptr);
+                            t = timestamp;
+                            std::tm *now = std::localtime(&t);
+
+                            std::ostringstream oss;
+                            oss << std::put_time(now, format.c_str());
+
+                            std::string o = oss.str();
+
+                            return o;
+                          });
     }
 
     sol::object parse_json_object(std::shared_ptr<sol::state_view> state,
