@@ -101,6 +101,18 @@ namespace bot::command::lua {
 
                             return o;
                           });
+
+      state->set_function("time_parse", [](const std::string &datetime,
+                                           const std::string &format) {
+        std::tm tm = {};
+        std::istringstream iss(datetime);
+        iss >> std::get_time(&tm, format.c_str());
+        if (iss.fail()) {
+          throw std::runtime_error("datetime parse error");
+        }
+
+        return static_cast<long long>(std::mktime(&tm));
+      });
     }
 
     sol::object parse_json_object(std::shared_ptr<sol::state_view> state,
