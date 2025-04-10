@@ -180,6 +180,18 @@ namespace bot::command::lua {
       state->set_function("json_stringify", [](const sol::object &o) {
         return lua_to_json(o).dump();
       });
+
+      state->set_function("json_get_value", [state](const sol::object &body,
+                                                    const std::string &path) {
+        std::vector<std::string> parts = utils::string::split_text(path, '.');
+        nlohmann::json o = lua_to_json(body);
+
+        for (const std::string &path : parts) {
+          o = o[path];
+        }
+
+        return parse_json_object(state, o);
+      });
     }
 
     void add_net_library(std::shared_ptr<sol::state> state) {
