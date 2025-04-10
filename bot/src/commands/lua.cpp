@@ -75,7 +75,7 @@ namespace bot::command::lua {
       state->set_function("time_current", []() {
         return static_cast<long long>(
             std::chrono::duration_cast<std::chrono::seconds>(
-                std::chrono::steady_clock::now().time_since_epoch())
+                std::chrono::system_clock::now().time_since_epoch())
                 .count());
       });
 
