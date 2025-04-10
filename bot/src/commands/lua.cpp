@@ -378,7 +378,7 @@ namespace bot::command::lua {
     }
   }
 
-  std::string parse_lua_response(const sol::table &r, sol::object &res) {
+  Response parse_lua_response(const sol::table &r, sol::object &res) {
     if (res.get_type() == sol::type::function) {
       sol::function f = res.as<sol::function>();
       sol::object o = f(r);
@@ -389,9 +389,18 @@ namespace bot::command::lua {
       return {"🌑 " + std::to_string(res.as<double>())};
     } else if (res.get_type() == sol::type::boolean) {
       return {"🌑 " + std::to_string(res.as<bool>())};
+    } else if (res.get_type() == sol::type::table) {
+      sol::table t = res.as<sol::table>();
+      std::vector<std::string> o;
+      for (auto &kv : t) {
+        if (kv.second.is<std::string>()) {
+          o.push_back(kv.second.as<std::string>());
+        }
+      }
+      return {o};
     } else {
       // should it be ResponseException?
-      return "Empty or unsupported response";
+      return {"Empty or unsupported response"};
     }
   }
 
