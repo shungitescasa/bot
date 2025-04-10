@@ -128,6 +128,8 @@ namespace bot::command::lua {
           return sol::make_object(*state, j.get<unsigned int>());
         case nlohmann::json::value_t::number_float:
           return sol::make_object(*state, j.get<double>());
+        case nlohmann::json::value_t::boolean:
+          return sol::make_object(*state, j.get<bool>());
         case nlohmann::json::value_t::array: {
           sol::table a = state->create_table();
 
