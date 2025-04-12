@@ -76,6 +76,15 @@ namespace bot::command::lua {
       });
     }
 
+    void add_bot_library(std::shared_ptr<sol::state> state,
+                         const InstanceBundle &bundle) {
+      state->set_function("bot_username", [&bundle]() {
+        return bundle.irc_client.get_bot_username();
+      });
+
+      add_bot_library(state);
+    }
+
     void add_time_library(std::shared_ptr<sol::state> state) {
       state->set_function("time_current", []() {
         return static_cast<long long>(
