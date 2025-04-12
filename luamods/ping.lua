@@ -1,5 +1,7 @@
 return {
     name = "ping",
+    description =
+    "The `!ping` command checks to see if it's alive and gives a bunch of other data like memory usage, compiler version, etc.",
     delay_sec = 5,
     options = {},
     subcommands = {},
