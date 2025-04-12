@@ -507,9 +507,58 @@ namespace bot::command::lua {
 
                         o.add(u);
                       });
-
-        return o;
       });
+
+      state->set_function(
+          "twitch_get_users", [state, &bundle](const sol::table &names) {
+            std::vector<int> ids;
+            std::vector<std::string> logins;
+
+            for (auto &[k, v] : names) {
+              if (!v.is<sol::table>() || !k.is<std::string>()) {
+                continue;
+              }
+
+              sol::table t = v.as<sol::table>();
+              std::string name = k.as<std::string>();
+
+              if (name == "logins") {
+                for (auto &[_, x] : t) {
+                  if (x.is<std::string>()) {
+                    logins.push_back(x.as<std::string>());
+                  }
+                }
+              } else if (name == "ids") {
+                for (auto &[_, x] : t) {
+                  if (x.is<std::string>()) {
+                    ids.push_back(x.as<int>());
+                  }
+                }
+              } else {
+                throw std::runtime_error("Unknown key: " + name);
+              }
+            }
+
+            if (ids.empty() && logins.empty()) {
+              throw std::runtime_error("No IDs or logins to search for.");
+            }
+
+            auto users = bundle.helix_client.get_users(ids, logins);
+
+            sol::table o = state->create_table();
+
+            std::for_each(users.begin(), users.end(),
+                          [state, &o](const api::twitch::schemas::User &x) {
+                            sol::table u = state->create_table();
+
+                            u["id"] = x.id;
+                            u["login"] = x.login;
+
+                            o.add(u);
+                          });
+
+            return o;
+          });
     }
   }
 
