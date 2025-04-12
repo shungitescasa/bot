@@ -10,6 +10,7 @@
 
 #include "commands/command.hpp"
 #include "commands/response.hpp"
+#include "config.hpp"
 #include "schemas/user.hpp"
 
 void print_lua_object_type(const sol::object &obj);
@@ -25,6 +26,8 @@ namespace bot::command::lua {
                             const Request &request,
                             const InstanceBundle &bundle);
     void add_net_library(std::shared_ptr<sol::state> state);
+    void add_db_library(std::shared_ptr<sol::state> state,
+                        const Configuration &config);
     void add_irc_library(std::shared_ptr<sol::state> state,
                          const InstanceBundle &bundle);
 

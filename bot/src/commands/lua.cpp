@@ -22,6 +22,7 @@
 #include "commands/request.hpp"
 #include "commands/response.hpp"
 #include "commands/response_error.hpp"
+#include "config.hpp"
 #include "cpr/api.h"
 #include "cpr/cprtypes.h"
 #include "cpr/multipart.h"
@@ -351,6 +352,117 @@ namespace bot::command::lua {
                           [](const std::string &text, const char &delimiter) {
                             return utils::string::split_text(text, delimiter);
                           });
+    }
+
+    void add_db_library(std::shared_ptr<sol::state> state,
+                        const Configuration &cfg) {
+      state->set_function("db_execute", [state, cfg](
+                                            const std::string &query,
+                                            const sol::table &parameters) {
+        pqxx::connection conn(GET_DATABASE_CONNECTION_URL(cfg));
+        pqxx::params p;
+
+        for (const auto &kv : parameters) {
+          auto v = kv.second;
+          switch (v.get_type()) {
+            case sol::type::lua_nil: {
+              p.append(nullptr);
+              break;
+            }
+            case sol::type::string: {
+              p.append(v.as<std::string>());
+              break;
+            }
+            case sol::type::boolean: {
+              p.append(v.as<bool>());
+              break;
+            }
+            case sol::type::number: {
+              double num = v.as<double>();
+              if (std::floor(num) == num) {
+                p.append(static_cast<long long>(num));
+              } else {
+                p.append(num);
+              }
+              break;
+            }
+            default:
+              throw std::runtime_error("Unsupported Lua type for DB queries");
+          }
+        }
+
+        pqxx::work work(conn);
+
+        work.exec_params(query, p);
+
+        work.commit();
+        conn.close();
+      });
+
+      state->set_function("db_query", [state, cfg](
+                                          const std::string &query,
+                                          const sol::table &parameters) {
+        pqxx::connection conn(GET_DATABASE_CONNECTION_URL(cfg));
+        pqxx::params p;
+
+        for (const auto &kv : parameters) {
+          auto v = kv.second;
+          switch (v.get_type()) {
+            case sol::type::lua_nil: {
+              p.append(nullptr);
+              break;
+            }
+            case sol::type::string: {
+              p.append(v.as<std::string>());
+              break;
+            }
+            case sol::type::boolean: {
+              p.append(v.as<bool>());
+              break;
+            }
+            case sol::type::number: {
+              double num = v.as<double>();
+              if (std::floor(num) == num) {
+                p.append(static_cast<long long>(num));
+              } else {
+                p.append(num);
+              }
+              break;
+            }
+            default:
+              throw std::runtime_error("Unsupported Lua type for DB queries");
+          }
+        }
+
+        pqxx::work work(conn);
+        pqxx::result res = work.exec_params(query, p);
+
+        sol::table o = state->create_table();
+
+        for (const auto &row : res) {
+          sol::table r = state->create_table();
+
+          for (int i = 0; i < row.size(); i++) {
+            auto v = row[i];
+
+            sol::object obj;
+            if (v.is_null()) {
+              obj = sol::make_object(*state, sol::nil);
+            } else {
+              obj = sol::make_object(*state, v.as<std::string>());
+            }
+
+            r[res.column_name(i)] = obj;
+          }
+
+          o.add(r);
+        }
+
+        work.commit();
+        conn.close();
+
+        return o;
+      });
     }
 
     void add_base_libraries(std::shared_ptr<sol::state> state) {
