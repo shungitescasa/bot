@@ -15,6 +15,9 @@ namespace bot::api::twitch {
       std::vector<schemas::User> get_users(
           const std::vector<std::string> &logins) const;
       std::vector<schemas::User> get_users(const std::vector<int> &ids) const;
+      std::vector<schemas::User> get_users(
+          const std::vector<int> &ids,
+          const std::vector<std::string> logins) const;
 
       std::vector<schemas::User> get_chatters(const int &broadcaster_id,
                                               const int &moderator_id) const;

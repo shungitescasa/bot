@@ -1,5 +1,6 @@
 #include "helix_client.hpp"
 
+#include <algorithm>
 #include <nlohmann/json.hpp>
 #include <string>
 #include <vector>
@@ -10,6 +11,7 @@
 #include "cpr/response.h"
 #include "schemas/stream.hpp"
 #include "schemas/user.hpp"
+#include "utils/string.hpp"
 
 namespace bot::api::twitch {
   HelixClient::HelixClient(const std::string &token,
@@ -20,38 +22,30 @@ namespace bot::api::twitch {
 
   std::vector<schemas::User> HelixClient::get_users(
       const std::vector<std::string> &logins) const {
-    std::string s;
-
-    for (auto i = logins.begin(); i != logins.end(); i++) {
-      std::string start;
-      if (i == logins.begin()) {
-        start = "?";
-      } else {
-        start = "&";
-      }
-
-      s += start + "login=" + *i;
-    }
-
-    return this->get_users_by_query(s);
+    return this->get_users({}, logins);
   }
 
   std::vector<schemas::User> HelixClient::get_users(
       const std::vector<int> &ids) const {
-    std::string s;
+    return this->get_users(ids, {});
+  }
 
-    for (auto i = ids.begin(); i != ids.end(); i++) {
-      std::string start;
-      if (i == ids.begin()) {
-        start = "?";
-      } else {
-        start = "&";
-      }
+  std::vector<schemas::User> HelixClient::get_users(
+      const std::vector<int> &ids,
+      const std::vector<std::string> logins) const {
+    std::vector<std::string> params;
 
-      s += start + "id=" + std::to_string(*i);
-    }
+    std::for_each(ids.begin(), ids.end(), [&params](const int &id) {
+      params.push_back("id=" + std::to_string(id));
+    });
 
-    return this->get_users_by_query(s);
+    std::for_each(logins.begin(), logins.end(),
+                  [&params](const std::string &login) {
+                    params.push_back("login=" + login);
+                  });
+
+    return this->get_users_by_query("?" +
+                                    utils::string::join_vector(params, '&'));
   }
 
   std::vector<schemas::User> HelixClient::get_users_by_query(
