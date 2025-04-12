@@ -16,7 +16,6 @@
 #include "../modules/custom_command.hpp"
 #include "../modules/event.hpp"
 #include "../modules/help.hpp"
-#include "../modules/join.hpp"
 #include "../modules/mcsrv.hpp"
 #include "../modules/notify.hpp"
 #include "../modules/settings.hpp"
@@ -33,7 +32,6 @@ namespace bot {
     CommandLoader::CommandLoader() {
       this->add_command(std::make_unique<mod::Event>());
       this->add_command(std::make_unique<mod::Notify>());
-      this->add_command(std::make_unique<mod::Join>());
       this->add_command(std::make_unique<mod::CustomCommand>());
       this->add_command(std::make_unique<mod::Timer>());
       this->add_command(std::make_unique<mod::Help>());
