@@ -362,6 +362,20 @@ namespace bot::command::lua {
       add_l10n_library(state);
     }
 
+    void add_irc_library(std::shared_ptr<sol::state> state,
+                         const InstanceBundle &bundle) {
+      state->set_function("irc_join_channel",
+                          [&bundle](const std::string &channel_name) {
+                            return bundle.irc_client.join(channel_name);
+                          });
+
+      state->set_function("irc_send_message",
+                          [&bundle](const std::string &channel_name,
+                                    const std::string &message) {
+                            bundle.irc_client.say(channel_name, message);
+                          });
+    }
+
     void add_twitch_library(std::shared_ptr<sol::state> state,
                             const Request &request,
                             const InstanceBundle &bundle) {

@@ -25,6 +25,8 @@ namespace bot::command::lua {
                             const Request &request,
                             const InstanceBundle &bundle);
     void add_net_library(std::shared_ptr<sol::state> state);
+    void add_irc_library(std::shared_ptr<sol::state> state,
+                         const InstanceBundle &bundle);
 
     void add_base_libraries(std::shared_ptr<sol::state> state);
   }
