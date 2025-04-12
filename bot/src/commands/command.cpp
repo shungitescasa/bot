@@ -16,7 +16,6 @@
 #include "../modules/custom_command.hpp"
 #include "../modules/event.hpp"
 #include "../modules/help.hpp"
-#include "../modules/mcsrv.hpp"
 #include "../modules/notify.hpp"
 #include "../modules/settings.hpp"
 #include "../modules/timer.hpp"
@@ -37,7 +36,6 @@ namespace bot {
       this->add_command(std::make_unique<mod::Help>());
       this->add_command(std::make_unique<mod::Settings>());
       this->add_command(std::make_unique<mod::User>());
-      this->add_command(std::make_unique<mod::MinecraftServerCheck>());
 
       this->add_command(std::make_unique<mod::LuaExecution>());
       this->add_command(std::make_unique<mod::LuaRemoteExecution>());
