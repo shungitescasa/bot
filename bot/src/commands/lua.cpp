@@ -489,12 +489,39 @@ namespace bot::command::lua {
       });
     }
 
+    void add_array_library(std::shared_ptr<sol::state> state) {
+      state->set_function("array_contains", [](const sol::table &haystack,
+                                               const long long &needle) {
+        bool o = false;
+        for (auto &[_, v] : haystack) {
+          if (v.is<long long>()) {
+            o = v.as<long long>() == needle;
+            if (o) break;
+          }
+        }
+        return o;
+      });
+
+      state->set_function("array_contains", [](const sol::table &haystack,
+                                               const std::string &needle) {
+        bool o = false;
+        for (auto &[_, v] : haystack) {
+          if (v.is<std::string>()) {
+            o = v.as<std::string>() == needle;
+            if (o) break;
+          }
+        }
+        return o;
+      });
+    }
+
     void add_base_libraries(std::shared_ptr<sol::state> state) {
       add_bot_library(state);
       add_time_library(state);
       add_json_library(state);
       add_net_library(state);
       add_string_library(state);
+      add_array_library(state);
     }
 
     void add_chat_libraries(std::shared_ptr<sol::state> state,
