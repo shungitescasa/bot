@@ -19,7 +19,6 @@
 #include "../modules/notify.hpp"
 #include "../modules/settings.hpp"
 #include "../modules/timer.hpp"
-#include "../modules/user.hpp"
 #include "../utils/chrono.hpp"
 #include "commands/lua.hpp"
 #include "modules/lua.hpp"
@@ -35,7 +34,6 @@ namespace bot {
       this->add_command(std::make_unique<mod::Timer>());
       this->add_command(std::make_unique<mod::Help>());
       this->add_command(std::make_unique<mod::Settings>());
-      this->add_command(std::make_unique<mod::User>());
 
       this->add_command(std::make_unique<mod::LuaExecution>());
       this->add_command(std::make_unique<mod::LuaRemoteExecution>());
