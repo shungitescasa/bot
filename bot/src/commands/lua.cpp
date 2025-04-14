@@ -144,7 +144,7 @@ namespace bot::command::lua {
           sol::table a = state->create_table();
 
           for (int i = 0; i < j.size(); ++i) {
-            a[i] = parse_json_object(state, j[i]);
+            a[i + 1] = parse_json_object(state, j[i]);
           }
 
           return sol::make_object(*state, a);
