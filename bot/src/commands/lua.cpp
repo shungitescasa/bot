@@ -27,6 +27,7 @@
 #include "cpr/cprtypes.h"
 #include "cpr/multipart.h"
 #include "cpr/response.h"
+#include "schemas/channel.hpp"
 #include "schemas/user.hpp"
 #include "utils/chrono.hpp"
 #include "utils/string.hpp"
@@ -365,6 +366,16 @@ namespace bot::command::lua {
                           [](const std::string &text, const char &delimiter) {
                             return utils::string::split_text(text, delimiter);
                           });
+
+      state->set_function(
+          "str_to_feature", [state](const std::string &feature) {
+            auto f = schemas::string_to_channel_feature(feature);
+            if (f.has_value()) {
+              return sol::make_object(*state, (int)f.value());
+            } else {
+              return sol::make_object(*state, sol::lua_nil);
+            }
+          });
     }
 
     void add_db_library(std::shared_ptr<sol::state> state,
