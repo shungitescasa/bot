@@ -70,7 +70,7 @@ namespace bot::command::lua {
             bot::parse_configuration_from_file(".env");
 
         if (!o_cfg.has_value()) {
-          return sol::make_object(*state, sol::nil);
+          return sol::make_object(*state, sol::lua_nil);
         }
 
         return sol::make_object(*state, o_cfg->as_lua_table(state));
@@ -447,7 +447,7 @@ namespace bot::command::lua {
 
             sol::object obj;
             if (v.is_null()) {
-              obj = sol::make_object(*state, sol::nil);
+              obj = sol::make_object(*state, sol::lua_nil);
             } else {
               obj = sol::make_object(*state, v.as<std::string>());
             }

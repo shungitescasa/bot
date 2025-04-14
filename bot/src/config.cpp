@@ -23,12 +23,12 @@ namespace bot {
     if (this->commands.rpost_path.has_value()) {
       cmds["rpost_path"] = this->commands.rpost_path.value();
     } else {
-      cmds["rpost_path"] = sol::nil;
+      cmds["rpost_path"] = sol::lua_nil;
     }
     if (this->commands.paste_path.has_value()) {
       cmds["paste_path"] = this->commands.paste_path.value();
     } else {
-      cmds["paste_path"] = sol::nil;
+      cmds["paste_path"] = sol::lua_nil;
     }
     cmds["paste_body_name"] = this->commands.paste_body_name;
     cmds["paste_title_name"] = this->commands.paste_title_name;
@@ -39,12 +39,12 @@ namespace bot {
     if (this->owner.name.has_value()) {
       owner["name"] = this->owner.name.value();
     } else {
-      owner["name"] = sol::nil;
+      owner["name"] = sol::lua_nil;
     }
     if (this->owner.id.has_value()) {
       owner["id"] = this->owner.id.value();
     } else {
-      owner["id"] = sol::nil;
+      owner["id"] = sol::lua_nil;
     }
     o["owner"] = owner;
 
@@ -53,17 +53,17 @@ namespace bot {
     if (this->url.help.has_value()) {
       url["help"] = this->url.help.value();
     } else {
-      url["help"] = sol::nil;
+      url["help"] = sol::lua_nil;
     }
     if (this->url.paste_service.has_value()) {
       url["paste_service"] = this->url.paste_service.value();
     } else {
-      url["paste_service"] = sol::nil;
+      url["paste_service"] = sol::lua_nil;
     }
     if (this->url.randompost.has_value()) {
       url["randompost"] = this->url.randompost.value();
     } else {
-      url["randompost"] = sol::nil;
+      url["randompost"] = sol::lua_nil;
     }
     o["url"] = url;
 
