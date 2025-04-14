@@ -83,10 +83,7 @@ namespace bot {
 
     std::optional<Response> CommandLoader::run(const InstanceBundle &bundle,
                                                const Request &request) {
-      lua::library::add_bot_library(this->luaState, bundle);
-      lua::library::add_irc_library(this->luaState, bundle);
-      lua::library::add_twitch_library(this->luaState, request, bundle);
-      lua::library::add_db_library(this->luaState, bundle.configuration);
+      lua::library::add_chat_libraries(this->luaState, request, bundle);
 
       auto command = std::find_if(
           this->commands.begin(), this->commands.end(),

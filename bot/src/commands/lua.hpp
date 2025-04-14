@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+#include "bundle.hpp"
 #include "commands/command.hpp"
 #include "commands/response.hpp"
 #include "config.hpp"
@@ -32,6 +33,9 @@ namespace bot::command::lua {
                          const InstanceBundle &bundle);
 
     void add_base_libraries(std::shared_ptr<sol::state> state);
+    void add_chat_libraries(std::shared_ptr<sol::state> state,
+                            const Request &request,
+                            const InstanceBundle &bundle);
   }
 
   command::Response run_safe_lua_script(const Request &request,
