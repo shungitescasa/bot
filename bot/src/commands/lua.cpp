@@ -295,7 +295,8 @@ namespace bot::command::lua {
           });
     }
 
-    void add_l10n_library(std::shared_ptr<sol::state> state) {
+    void add_l10n_library(std::shared_ptr<sol::state> state,
+                          const InstanceBundle &bundle) {
       state->set_function(
           "l10n_custom_formatted_line_request",
           [](const sol::table &request, const sol::table &lines,
@@ -346,6 +347,17 @@ namespace bot::command::lua {
 
             return line;
           });
+
+      state->set_function("l10n_get_localization_names", [state, &bundle]() {
+        sol::table o = state->create_table();
+
+        auto locales = bundle.localization.get_loaded_localizations();
+
+        std::for_each(locales.begin(), locales.end(),
+                      [&o](const std::string &x) { o.add(x); });
+
+        return o;
+      });
     }
 
     void add_string_library(std::shared_ptr<sol::state> state) {
@@ -472,7 +484,6 @@ namespace bot::command::lua {
       add_json_library(state);
       add_net_library(state);
       add_string_library(state);
-      add_l10n_library(state);
     }
 
     void add_chat_libraries(std::shared_ptr<sol::state> state,
@@ -482,6 +493,7 @@ namespace bot::command::lua {
       lua::library::add_irc_library(state, bundle);
       lua::library::add_twitch_library(state, request, bundle);
       lua::library::add_db_library(state, bundle.configuration);
+      lua::library::add_l10n_library(state, bundle);
     }
 
     void add_irc_library(std::shared_ptr<sol::state> state,
