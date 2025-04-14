@@ -332,7 +332,8 @@ namespace bot::command::lua {
             std::map<std::string, std::string> token_map = {
                 {"{sender.alias_name}", request["sender"]["alias_name"]},
                 {"{source.alias_name}", request["channel"]["alias_name"]},
-                {"{default.prefix}", DEFAULT_PREFIX}};
+                {"{default.prefix}", DEFAULT_PREFIX},
+                {"{channel.prefix}", request["channel_preference"]["prefix"]}};
 
             for (const auto &pair : token_map) {
               int pos = line.find(pair.first);
