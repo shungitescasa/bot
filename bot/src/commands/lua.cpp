@@ -84,6 +84,20 @@ namespace bot::command::lua {
         return bundle.irc_client.get_bot_username();
       });
 
+      state->set_function("bot_get_loaded_command_names", [state, &bundle]() {
+        sol::table o = state->create_table();
+
+        const std::vector<std::unique_ptr<Command>> &commands =
+            bundle.command_loader.get_commands();
+
+        std::for_each(commands.begin(), commands.end(),
+                      [&o](const std::unique_ptr<Command> &command) {
+                        o.add(command->get_name());
+                      });
+
+        return o;
+      });
+
       add_bot_library(state);
     }
 

@@ -1,6 +1,15 @@
 #pragma once
 
+namespace bot {
+  namespace command {
+    class CommandLoader;
+  }
+
+  class InstanceBundle;
+}
+
 #include "api/twitch/helix_client.hpp"
+#include "commands/command.hpp"
 #include "config.hpp"
 #include "irc/client.hpp"
 #include "localization/localization.hpp"
@@ -11,5 +20,6 @@ namespace bot {
       const api::twitch::HelixClient &helix_client;
       const bot::loc::Localization &localization;
       const Configuration &configuration;
+      const command::CommandLoader &command_loader;
   };
 }
