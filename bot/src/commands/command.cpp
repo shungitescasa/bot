@@ -15,7 +15,6 @@
 #include "../bundle.hpp"
 #include "../modules/custom_command.hpp"
 #include "../modules/event.hpp"
-#include "../modules/help.hpp"
 #include "../modules/notify.hpp"
 #include "../modules/timer.hpp"
 #include "../utils/chrono.hpp"
@@ -31,7 +30,6 @@ namespace bot {
       this->add_command(std::make_unique<mod::Notify>());
       this->add_command(std::make_unique<mod::CustomCommand>());
       this->add_command(std::make_unique<mod::Timer>());
-      this->add_command(std::make_unique<mod::Help>());
 
       this->add_command(std::make_unique<mod::LuaExecution>());
       this->add_command(std::make_unique<mod::LuaRemoteExecution>());
