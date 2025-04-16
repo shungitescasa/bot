@@ -43,14 +43,10 @@ CREATE TABLE IF NOT EXISTS "actions" (
 CREATE TABLE IF NOT EXISTS "events" (
   "id" SERIAL NOT NULL UNIQUE PRIMARY KEY,
   "channel_id" INTEGER NOT NULL REFERENCES "channels"("id") ON DELETE CASCADE,
-  "target_alias_id" INTEGER,
-  "custom_alias_id" VARCHAR,
+  "name" VARCHAR NOT NULL,
   "event_type" INTEGER NOT NULL,
   "flags" INTEGER[] NOT NULL DEFAULT ARRAY[]::INTEGER[],
-  "message" VARCHAR NOT NULL,
-
-  CONSTRAINT check_target_alias_id CHECK (("target_alias_id" IS NULL AND "custom_alias_id" IS NOT NULL) OR ("target_alias_id" IS NOT NULL AND "custom_alias_id" IS NULL)),
-  CONSTRAINT check_event_type CHECK (("target_alias_id" IS NOT NULL AND "event_type" != 99) OR ("custom_alias_id" IS NOT NULL AND "event_type" = 99))
+  "message" VARCHAR NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS "event_subscriptions" (
