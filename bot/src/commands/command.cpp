@@ -13,7 +13,6 @@
 #include <string>
 
 #include "../bundle.hpp"
-#include "../modules/custom_command.hpp"
 #include "../modules/event.hpp"
 #include "../modules/notify.hpp"
 #include "../modules/timer.hpp"
@@ -28,7 +27,6 @@ namespace bot {
     CommandLoader::CommandLoader() {
       this->add_command(std::make_unique<mod::Event>());
       this->add_command(std::make_unique<mod::Notify>());
-      this->add_command(std::make_unique<mod::CustomCommand>());
       this->add_command(std::make_unique<mod::Timer>());
 
       this->add_command(std::make_unique<mod::LuaExecution>());
