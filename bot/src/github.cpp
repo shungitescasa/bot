@@ -18,7 +18,7 @@
 #include "logger.hpp"
 #include "nlohmann/json.hpp"
 #include "pqxx/internal/statement_parameters.hxx"
-#include "schemas/channel.hpp"
+#include "schemas/stream.hpp"
 #include "utils/string.hpp"
 
 namespace bot {
@@ -64,7 +64,7 @@ namespace bot {
     pqxx::work work(conn);
 
     pqxx::result repos =
-        work.exec("SELECT custom_alias_id FROM events WHERE event_type = 10");
+        work.exec("SELECT name FROM events WHERE event_type = 10");
 
     // Adding new repos
     for (const auto &repo : repos) {
@@ -104,9 +104,6 @@ namespace bot {
     pqxx::connection conn(GET_DATABASE_CONNECTION_URL(this->configuration));
     pqxx::work work(conn);
 
-    pqxx::result repos =
-        work.exec("SELECT custom_alias_id FROM events WHERE event_type = 10");
-
     std::unordered_map<std::string, std::vector<Commit>> new_commits;
 
     for (const std::string &id : this->ids) {
@@ -137,7 +134,7 @@ namespace bot {
                         [&sha](const std::string &x) { return x == sha; }))
           continue;
 
-        const std::string &commiter_name = commit["committer"]["login"];
+        const std::string &commiter_name = commit["author"]["login"];
         const std::string &message = commit["commit"]["message"];
 
         repo_commits.push_back({sha, commiter_name, message});
@@ -162,34 +159,46 @@ namespace bot {
       // don't notify on startup
       if (this->commits.at(pair.first).size() == 0) continue;
 
-      pqxx::result events = work.exec(
-          "SELECT id, channel_id, message, flags FROM events WHERE "
-          "custom_alias_id "
-          "= '" +
-          pair.first + "' AND event_type = 10");
+      pqxx::result events = work.exec_params(
+          "SELECT e.id, e.message, array_to_json(e.flags) AS flags, "
+          "c.alias_name AS "
+          "channel_name, c.alias_id AS channel_aid "
+          "FROM events e "
+          "INNER JOIN channels c ON c.id = e.channel_id "
+          "WHERE e.name = $1 AND e.event_type = 10",
+          pqxx::params{pair.first});
 
       for (const auto &event : events) {
-        schemas::Channel channel(
-            work.exec("SELECT * FROM channels WHERE id = " +
-                      std::to_string(event[1].as<int>()))[0]);
+        std::vector<std::string> names;
 
-        pqxx::result subscriber_ids = work.exec(
-            "SELECT user_id FROM event_subscriptions WHERE event_id = " +
-            std::to_string(event[0].as<int>()));
-
-        std::vector<std::string> subscriber_names;
-
-        for (const auto &subscriber_id : subscriber_ids) {
-          pqxx::result subscriber_name =
-              work.exec("SELECT alias_name FROM users WHERE id = " +
-                        std::to_string(subscriber_id[0].as<int>()));
-          subscriber_names.push_back(subscriber_name[0][0].as<std::string>());
+        bool massping_enabled = false;
+        if (!event[2].is_null()) {
+          nlohmann::json j = nlohmann::json::parse(event[2].as<std::string>());
+          massping_enabled = std::any_of(j.begin(), j.end(), [](const auto &x) {
+            return static_cast<int>(x) == static_cast<int>(schemas::MASSPING);
+          });
         }
 
-        // TODO: implement massping flag
+        if (massping_enabled) {
+          auto chatters = this->helix_client.get_chatters(
+              event[4].as<int>(), this->irc_client.get_bot_id());
+
+          std::for_each(chatters.begin(), chatters.end(),
+                        [&names](const auto &u) { names.push_back(u.login); });
+        } else {
+          pqxx::result subs = work.exec_params(
+              "SELECT u.alias_name FROM users u INNER JOIN event_subscriptions "
+              "es ON es.user_id = u.id WHERE es.event_id = $1",
+              pqxx::params{event[0].as<int>()});
+
+          std::for_each(subs.begin(), subs.end(), [&names](const pqxx::row &x) {
+            names.push_back(x[0].as<std::string>());
+          });
+        }
 
         for (const Commit &commit : pair.second) {
-          std::string message = event[2].as<std::string>();
+          std::string message = event[1].as<std::string>();
+          message = "🧑‍💻 " + message;
 
           // Replacing SHA placeholder
           std::size_t pos = message.find("%0");
@@ -205,21 +214,18 @@ namespace bot {
           pos = message.find("%2");
           if (pos != std::string::npos) message.replace(pos, 2, commit.message);
 
-          std::vector<std::vector<std::string>> ping_names =
-              utils::string::separate_by_length(subscriber_names,
-                                                500 - message.length());
-
-          if (ping_names.empty()) {
-            this->irc_client.say(channel.get_alias_name(), message);
-          } else {
-            for (const std::vector<std::string> &ping_names_vec : ping_names) {
-              std::string pings = utils::string::str(ping_names_vec.begin(),
-                                                     ping_names_vec.end(), ' ');
-
-              this->irc_client.say(channel.get_alias_name(),
-                                   message + " · " + pings);
-            }
+          if (!names.empty()) {
+            message += " · ";
           }
+
+          std::vector<std::string> parts =
+              utils::string::separate_by_length(message, names, "@", " ", 500);
+
+          std::for_each(parts.begin(), parts.end(),
+                        [&message, &event, this](const std::string &part) {
+                          this->irc_client.say(event[3].as<std::string>(),
+                                               message + part);
+                        });
         }
       }
     }

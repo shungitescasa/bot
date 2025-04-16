@@ -107,7 +107,7 @@ int main(int argc, char *argv[]) {
   bot::stream::StreamListenerClient stream_listener_client(helix_client, client,
                                                            cfg);
 
-  bot::GithubListener github_listener(cfg, client);
+  bot::GithubListener github_listener(cfg, client, helix_client);
 
   client.on<bot::irc::MessageType::Privmsg>(
       [&client, &command_loader, &localization, &cfg, &helix_client](

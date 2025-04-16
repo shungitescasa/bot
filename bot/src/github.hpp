@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "api/twitch/helix_client.hpp"
 #include "config.hpp"
 #include "irc/client.hpp"
 
@@ -17,9 +18,12 @@ namespace bot {
   class GithubListener {
     public:
       GithubListener(const Configuration &configuration,
-                     irc::Client &irc_client)
-          : configuration(configuration), irc_client(irc_client){};
-      ~GithubListener(){};
+                     irc::Client &irc_client,
+                     const api::twitch::HelixClient &helix_client)
+          : configuration(configuration),
+            irc_client(irc_client),
+            helix_client(helix_client) {};
+      ~GithubListener() {};
 
       void run();
 
@@ -35,5 +39,6 @@ namespace bot {
 
       irc::Client &irc_client;
       const Configuration &configuration;
+      const api::twitch::HelixClient &helix_client;
   };
 }
