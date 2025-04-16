@@ -32,4 +32,20 @@ namespace bot::schemas {
       return "custom";
     }
   }
+
+  std::optional<int> string_to_event_flag(const std::string &type) {
+    if (type == "massping") {
+      return MASSPING;
+    }
+
+    return std::nullopt;
+  }
+
+  std::optional<std::string> event_flag_to_string(const int &type) {
+    if (type == MASSPING) {
+      return "massping";
+    }
+
+    return std::nullopt;
+  }
 }

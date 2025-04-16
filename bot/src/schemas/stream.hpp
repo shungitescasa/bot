@@ -8,5 +8,7 @@ namespace bot::schemas {
   std::string event_type_to_string(const int &type);
 
   enum EventFlag { MASSPING };
+  std::optional<int> string_to_event_flag(const std::string &type);
+  std::optional<std::string> event_flag_to_string(const int &type);
 
 }
