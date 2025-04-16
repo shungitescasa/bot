@@ -563,8 +563,8 @@ namespace bot::command::lua {
     }
 
     void add_array_library(std::shared_ptr<sol::state> state) {
-      state->set_function("array_contains", [](const sol::table &haystack,
-                                               const long long &needle) {
+      state->set_function("array_contains_int", [](const sol::table &haystack,
+                                                   const long long &needle) {
         bool o = false;
         for (auto &[_, v] : haystack) {
           if (v.is<long long>()) {
