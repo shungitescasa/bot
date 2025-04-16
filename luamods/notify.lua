@@ -42,7 +42,8 @@ local lines = {
         ["empty_subs"] = "{sender.alias_name}: You do not have any event subscriptions in this channel.",
         ["sub"] =
         "{sender.alias_name}: You have successfully subscribed to event %s",
-        ["unsub"] = "{sender.alias_name}: You have successfully unsubscribed from event %s"
+        ["unsub"] = "{sender.alias_name}: You have successfully unsubscribed from event %s",
+        ["not_subbed"] = "{sender.alias_name}: You were not subscribed to event %s"
     },
     russian = {
         ["no_subcommand"] =
@@ -61,6 +62,7 @@ local lines = {
         ["sub"] =
         "{sender.alias_name}: Вы успешно подписались на событие %s",
         ["unsub"] = "{sender.alias_name}: Вы отписались от события %s",
+        ["not_subbed"] = "{sender.alias_name}: Вы не были подписаны на событие %s"
     },
 }
 
@@ -183,7 +185,7 @@ WHERE e.channel_id = $1 AND es.user_id = $2
         local events = db_query([[
 SELECT e.id, es.id AS sub_id
 FROM events e
-LEFT JOIN event_subscriptions es ON es.id = e.id AND es.user_id = $3
+LEFT JOIN event_subscriptions es ON es.event_id = e.id AND es.user_id = $3
 WHERE e.name = $1 AND e.event_type = $2
 ]],
             { data_name, data.type, request.sender.id })
@@ -204,6 +206,10 @@ WHERE e.name = $1 AND e.event_type = $2
 
             return l10n_custom_formatted_line_request(request, lines, "sub", { data_original })
         elseif scid == "unsub" then
+            if event.sub_id == nil then
+                return l10n_custom_formatted_line_request(request, lines, "not_subbed", { data_original })
+            end
+
             db_execute('DELETE FROM event_subscriptions WHERE id = $1', { event.sub_id })
             return l10n_custom_formatted_line_request(request, lines, "unsub", { data_original })
         end
