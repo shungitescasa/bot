@@ -30,6 +30,7 @@ return {
     description = "Add the bot to your channel.",
     delay_sec = 1,
     options = {},
+    aliases = {},
     subcommands = { "silent" },
     minimal_rights = "user",
     handle = function(request)

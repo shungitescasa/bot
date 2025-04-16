@@ -4,6 +4,7 @@ return {
     delay_sec = 5,
     options = {},
     subcommands = {},
+    aliases = {},
     minimal_rights = "moderator",
     handle = function(request)
         local chatters = twitch_get_chatters()

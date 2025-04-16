@@ -159,6 +159,7 @@ The `!event` command gives the ability to manage events.
 ]],
     delay_sec = 1,
     options = {},
+    aliases = {},
     subcommands = { "on", "off", "list", "edit", "settarget", "setmassping", "call", "view" },
     minimal_rights = "moderator",
     handle = function(request)
