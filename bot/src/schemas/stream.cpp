@@ -16,4 +16,20 @@ namespace bot::schemas {
       return EventType::CUSTOM;
     }
   }
+
+  std::string event_type_to_string(const int &type) {
+    if (type == LIVE) {
+      return "live";
+    } else if (type == OFFLINE) {
+      return "offline";
+    } else if (type == TITLE) {
+      return "title";
+    } else if (type == GAME) {
+      return "game";
+    } else if (type == GITHUB) {
+      return "github";
+    } else {
+      return "custom";
+    }
+  }
 }

@@ -28,6 +28,7 @@
 #include "cpr/multipart.h"
 #include "cpr/response.h"
 #include "schemas/channel.hpp"
+#include "schemas/stream.hpp"
 #include "schemas/user.hpp"
 #include "utils/chrono.hpp"
 #include "utils/string.hpp"
@@ -390,6 +391,64 @@ namespace bot::command::lua {
               return sol::make_object(*state, sol::lua_nil);
             }
           });
+
+      state->set_function("event_type_to_str", [](const int &v) {
+        return schemas::event_type_to_string(v);
+      });
+
+      state->set_function("str_to_event_type", [](const std::string &v) {
+        return (int)schemas::string_to_event_type(v);
+      });
+
+      state->set_function("str_to_event_flag", [state](const std::string &v) {
+        auto o = schemas::string_to_event_flag(v);
+        if (o.has_value()) {
+          return sol::make_object(*state, o.value());
+        } else {
+          return sol::make_object(*state, sol::lua_nil);
+        }
+      });
+
+      state->set_function("event_flag_to_str", [state](const int &v) {
+        auto o = schemas::event_flag_to_string(v);
+        if (o.has_value()) {
+          return sol::make_object(*state, o.value());
+        } else {
+          return sol::make_object(*state, sol::lua_nil);
+        }
+      });
+
+      state->set_function("str_make_parts", [state](
+                                                const std::string &base,
+                                                const sol::table &values,
+                                                const std::string &prefix,
+                                                const std::string &separator,
+                                                const long long &max_length) {
+        std::vector<std::string> lines = {""};
+        int index = 0;
+
+        for (auto &[_, v] : values) {
+          const std::string &m = lines.at(index);
+          std::string x = prefix + v.as<std::string>();
+
+          if (base.length() + m.length() + x.length() + separator.length() >=
+              max_length) {
+            index += 1;
+          }
+
+          if (index > lines.size() - 1) {
+            lines.push_back(x);
+          } else {
+            lines[index] = m + separator + x;
+          }
+        }
+
+        sol::table o = state->create_table();
+        std::for_each(lines.begin(), lines.end(),
+                      [&o, &base](const std::string &x) { o.add(base + x); });
+
+        return o;
+      });
     }
 
     void add_db_library(std::shared_ptr<sol::state> state,
@@ -581,6 +640,8 @@ namespace bot::command::lua {
 
                         o.add(u);
                       });
+
+        return o;
       });
 
       state->set_function(
