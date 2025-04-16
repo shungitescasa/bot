@@ -13,7 +13,6 @@
 #include <string>
 
 #include "../bundle.hpp"
-#include "../modules/event.hpp"
 #include "../modules/notify.hpp"
 #include "../modules/timer.hpp"
 #include "../utils/chrono.hpp"
@@ -25,7 +24,6 @@
 namespace bot {
   namespace command {
     CommandLoader::CommandLoader() {
-      this->add_command(std::make_unique<mod::Event>());
       this->add_command(std::make_unique<mod::Notify>());
       this->add_command(std::make_unique<mod::Timer>());
 
