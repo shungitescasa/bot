@@ -665,8 +665,8 @@ namespace bot::command::lua {
                 }
               } else if (name == "ids") {
                 for (auto &[_, x] : t) {
-                  if (x.is<std::string>()) {
-                    ids.push_back(x.as<int>());
+                  if (x.is<long long>()) {
+                    ids.push_back(x.as<long long>());
                   }
                 }
               } else {
