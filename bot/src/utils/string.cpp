@@ -1,5 +1,6 @@
 #include "string.hpp"
 
+#include <algorithm>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -82,6 +83,35 @@ namespace bot {
         if (!active.empty()) output.push_back(active);
 
         return output;
+      }
+
+      std::vector<std::string> separate_by_length(
+          const std::string &base, const std::vector<std::string> &values,
+          const std::string &prefix, const std::string &separator,
+          const long long &max_length) {
+        std::vector<std::string> lines = {""};
+        int index = 0;
+
+        std::for_each(values.begin(), values.end(),
+                      [&lines, &prefix, &separator, &base, &index,
+                       &max_length](const std::string &v) {
+                        const std::string &m = lines.at(index);
+                        std::string x = prefix + v;
+
+                        if (base.length() + m.length() + x.length() +
+                                separator.length() >=
+                            max_length) {
+                          index += 1;
+                        }
+
+                        if (index > lines.size() - 1) {
+                          lines.push_back(x);
+                        } else {
+                          lines[index] = m + separator + x;
+                        }
+                      });
+
+        return lines;
       }
     }
   }
