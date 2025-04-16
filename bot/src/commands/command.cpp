@@ -13,7 +13,6 @@
 #include <string>
 
 #include "../bundle.hpp"
-#include "../modules/timer.hpp"
 #include "../utils/chrono.hpp"
 #include "commands/lua.hpp"
 #include "modules/lua.hpp"
@@ -23,8 +22,6 @@
 namespace bot {
   namespace command {
     CommandLoader::CommandLoader() {
-      this->add_command(std::make_unique<mod::Timer>());
-
       this->add_command(std::make_unique<mod::LuaExecution>());
       this->add_command(std::make_unique<mod::LuaRemoteExecution>());
 
