@@ -15,15 +15,14 @@
 #include "../bundle.hpp"
 #include "../utils/chrono.hpp"
 #include "commands/lua.hpp"
-#include "modules/lua.hpp"
 #include "request.hpp"
 #include "response.hpp"
 
 namespace bot {
   namespace command {
     CommandLoader::CommandLoader() {
-      this->add_command(std::make_unique<mod::LuaExecution>());
-      this->add_command(std::make_unique<mod::LuaRemoteExecution>());
+      this->add_command(std::make_unique<lua::mod::LuaExecution>());
+      this->add_command(std::make_unique<lua::mod::LuaRemoteExecution>());
 
       this->luaState = std::make_shared<sol::state>();
       this->luaState->open_libraries(sol::lib::base, sol::lib::string,
