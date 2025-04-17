@@ -201,18 +201,18 @@ namespace bot {
           message = "🧑‍💻 " + message;
 
           // Replacing SHA placeholder
-          std::size_t pos = message.find("%0");
+          std::size_t pos = message.find("{sha}");
           if (pos != std::string::npos)
-            message.replace(pos, 2, commit.sha.substr(0, 7));
+            message.replace(pos, 5, commit.sha.substr(0, 7));
 
           // Replacing committer placeholder
-          pos = message.find("%1");
+          pos = message.find("{author}");
           if (pos != std::string::npos)
-            message.replace(pos, 2, commit.commiter_name);
+            message.replace(pos, 8, commit.commiter_name);
 
           // Replacing message placeholder
-          pos = message.find("%2");
-          if (pos != std::string::npos) message.replace(pos, 2, commit.message);
+          pos = message.find("{msg}");
+          if (pos != std::string::npos) message.replace(pos, 5, commit.message);
 
           if (!names.empty()) {
             message += " · ";
