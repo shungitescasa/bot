@@ -10,6 +10,16 @@
 #include "schemas/stream.hpp"
 
 namespace bot::stream {
+  enum StreamerType { TWITCH };
+
+  struct StreamerData {
+      int id;
+      StreamerType type;
+      bool is_live;
+      std::string title;
+      std::string game;
+  };
+
   class StreamListenerClient {
     public:
       StreamListenerClient(const api::twitch::HelixClient &helix_client,
@@ -17,7 +27,7 @@ namespace bot::stream {
                            const Configuration &configuration)
           : helix_client(helix_client),
             irc_client(irc_client),
-            configuration(configuration){};
+            configuration(configuration) {};
       ~StreamListenerClient() = default;
 
       void run();
@@ -27,15 +37,14 @@ namespace bot::stream {
     private:
       void check();
       void handler(const schemas::EventType &type,
-                   const api::twitch::schemas::Stream &stream);
+                   const api::twitch::schemas::Stream &stream,
+                   const StreamerData &data);
       void update_channel_ids();
 
       const api::twitch::HelixClient &helix_client;
       irc::Client &irc_client;
       const Configuration &configuration;
 
-      std::vector<int> ids;
-
-      std::set<int> online_ids;
+      std::vector<StreamerData> streamers;
   };
 }
