@@ -17,6 +17,13 @@ namespace bot::api::twitch::schemas {
             started_at(utils::chrono::string_to_time_point(
                 started_at, "%Y-%m-%dT%H:%M:%SZ")) {}
 
+      Stream(int user_id, std::string user_login, std::string game_name,
+             std::string title)
+          : user_id(user_id),
+            user_login(user_login),
+            game_name(game_name),
+            title(title) {}
+
       Stream(int user_id) : user_id(user_id) {}
 
       const int &get_user_id() const { return this->user_id; }

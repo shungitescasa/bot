@@ -25,6 +25,9 @@ namespace bot::api::twitch {
       std::vector<schemas::Stream> get_streams(
           const std::vector<int> &ids) const;
 
+      std::vector<schemas::Stream> get_channel_information(
+          const std::vector<int> &ids) const;
+
     private:
       std::vector<schemas::User> get_users_by_query(
           const std::string &query) const;

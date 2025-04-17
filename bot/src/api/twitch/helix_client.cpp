@@ -135,4 +135,36 @@ namespace bot::api::twitch {
 
     return streams;
   }
+
+  std::vector<schemas::Stream> HelixClient::get_channel_information(
+      const std::vector<int> &ids) const {
+    std::vector<std::string> s;
+
+    for (const int &id : ids) {
+      s.push_back("broadcaster_id=" + std::to_string(id));
+    }
+
+    cpr::Response response =
+        cpr::Get(cpr::Url{this->base_url + "/channels?" +
+                          utils::string::join_vector(s, '&')},
+                 cpr::Bearer{this->token},
+                 cpr::Header{{"Client-Id", this->client_id.c_str()}});
+
+    if (response.status_code != 200) {
+      return {};
+    }
+
+    std::vector<schemas::Stream> streams;
+
+    nlohmann::json j = nlohmann::json::parse(response.text);
+
+    for (const auto &d : j["data"]) {
+      schemas::Stream u{std::stoi(d["broadcaster_id"].get<std::string>()),
+                        d["broadcaster_login"], d["game_name"], d["title"]};
+
+      streams.push_back(u);
+    }
+
+    return streams;
+  }
 }
