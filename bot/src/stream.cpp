@@ -6,12 +6,12 @@
 #include <set>
 #include <string>
 #include <thread>
-#include <utility>
 #include <vector>
 
 #include "api/twitch/schemas/stream.hpp"
 #include "config.hpp"
 #include "logger.hpp"
+#include "nlohmann/json.hpp"
 #include "schemas/stream.hpp"
 #include "utils/string.hpp"
 
@@ -19,6 +19,7 @@ namespace bot::stream {
   void StreamListenerClient::listen_channel(const int &id) {
     this->ids.push_back(id);
   }
+
   void StreamListenerClient::unlisten_channel(const int &id) {
     auto x = std::find_if(this->ids.begin(), this->ids.end(),
                           [&](const auto &x) { return x == id; });
@@ -34,6 +35,7 @@ namespace bot::stream {
       this->online_ids.erase(y);
     }
   }
+
   void StreamListenerClient::run() {
     while (true) {
       this->update_channel_ids();
@@ -41,6 +43,7 @@ namespace bot::stream {
       std::this_thread::sleep_for(std::chrono::seconds(5));
     }
   }
+
   void StreamListenerClient::check() {
     auto streams = this->helix_client.get_streams(this->ids);
     auto now = std::chrono::system_clock::now();
@@ -88,97 +91,67 @@ namespace bot::stream {
     pqxx::connection conn(GET_DATABASE_CONNECTION_URL(this->configuration));
     pqxx::work work(conn);
 
-    pqxx::result events = work.exec(
-        "SELECT id, channel_id, message, flags FROM events WHERE event_type "
-        "= " +
-        std::to_string(type) +
-        " AND target_alias_id = " + std::to_string(stream.get_user_id()));
+    pqxx::result events = work.exec_params(
+        "SELECT e.id, e.message, array_to_json(e.flags) AS "
+        "flags, c.alias_name AS channel_aname, c.alias_id AS channel_aid FROM "
+        "events e "
+        "INNER JOIN channels c ON c.id = e.channel_id "
+        "WHERE e.event_type = $1 AND e.name = $2",
+        pqxx::params{static_cast<int>(type), stream.get_user_id()});
 
     for (const auto &event : events) {
-      pqxx::row channel = work.exec1(
-          "SELECT alias_id, alias_name, opted_out_at FROM channels WHERE id "
-          "= " +
-          std::to_string(event[1].as<int>()));
+      std::vector<std::string> names;
 
-      if (!channel[2].is_null()) {
-        continue;
+      bool massping_enabled = false;
+      if (!event[2].is_null()) {
+        nlohmann::json j = nlohmann::json::parse(event[2].as<std::string>());
+        massping_enabled = std::any_of(j.begin(), j.end(), [](const auto &x) {
+          return static_cast<int>(x) == static_cast<int>(schemas::MASSPING);
+        });
       }
 
-      pqxx::result subs = work.exec(
-          "SELECT user_id FROM event_subscriptions WHERE event_id = " +
-          std::to_string(event[0].as<int>()));
+      if (massping_enabled) {
+        auto chatters = this->helix_client.get_chatters(
+            event[4].as<int>(), this->irc_client.get_bot_id());
 
-      std::set<std::string> user_ids;
-      if (!subs.empty()) {
-        for (const auto &sub : subs) {
-          user_ids.insert(std::to_string(sub[0].as<int>()));
-        }
+        std::for_each(chatters.begin(), chatters.end(),
+                      [&names](const auto &x) { names.push_back(x.login); });
+      } else {
+        pqxx::result subs = work.exec_params(
+            "SELECT u.alias_name FROM users u "
+            "INNER JOIN events e ON e.id = $1 "
+            "INNER JOIN event_subscriptions es ON es.event_id = e.id "
+            "WHERE u.id = es.user_id",
+            pqxx::params{event[0].as<int>()});
 
-        pqxx::result users = work.exec(
-            "SELECT alias_name FROM users WHERE id IN (" +
-            utils::string::str(user_ids.begin(), user_ids.end(), ',') + ")");
-
-        user_ids.clear();
-
-        for (const auto &user : users) {
-          user_ids.insert(user[0].as<std::string>());
-        }
+        std::for_each(subs.begin(), subs.end(), [&names](const pqxx::row &x) {
+          names.push_back(x[0].as<std::string>());
+        });
       }
 
-      auto flags = event[3].as_array();
-      std::pair<pqxx::array_parser::juncture, std::string> elem;
-
-      do {
-        elem = flags.get_next();
-        if (elem.first == pqxx::array_parser::juncture::string_value) {
-          if (std::stoi(elem.second) == schemas::EventFlag::MASSPING) {
-            auto chatters = this->helix_client.get_chatters(
-                channel[0].as<int>(), this->irc_client.get_bot_id());
-
-            for (const auto &chatter : chatters) {
-              user_ids.insert(chatter.login);
-            }
-          }
-        }
-      } while (elem.first != pqxx::array_parser::juncture::done);
-
-      std::string base = "⚡ " + event[2].as<std::string>();
-      std::vector<std::string> msgs = {""};
-      int index = 0;
-
-      if (!user_ids.empty()) {
+      std::string base = "⚡ " + event[1].as<std::string>();
+      if (!names.empty()) {
         base.append(" · ");
       }
 
-      for (const auto &user_id : user_ids) {
-        const std::string &current_msg = msgs.at(index);
-        std::string x = "@" + user_id;
-
-        if (base.length() + current_msg.length() + 1 + x.length() >= 500) {
-          index += 1;
-        }
-
-        if (index > msgs.size() - 1) {
-          msgs.push_back(x);
-        } else {
-          msgs[index] = current_msg + " " + x;
-        }
-      }
+      std::vector<std::string> msgs =
+          utils::string::separate_by_length(base, names, "@", " ", 500);
 
       for (const auto &msg : msgs) {
-        this->irc_client.say(channel[1].as<std::string>(), base + msg);
+        this->irc_client.say(event[3].as<std::string>(), base + msg);
       }
     }
 
     work.commit();
     conn.close();
   }
+
   void StreamListenerClient::update_channel_ids() {
     pqxx::connection conn(GET_DATABASE_CONNECTION_URL(this->configuration));
     pqxx::work work(conn);
 
     pqxx::result ids =
-        work.exec("SELECT target_alias_id FROM events WHERE event_type < 10");
+        work.exec("SELECT name FROM events WHERE event_type < 10");
 
     for (const auto &row : ids) {
       int id = row[0].as<int>();
