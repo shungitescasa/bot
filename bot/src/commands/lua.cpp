@@ -377,10 +377,17 @@ namespace bot::command::lua {
     }
 
     void add_string_library(std::shared_ptr<sol::state> state) {
-      state->set_function("str_split",
-                          [](const std::string &text, const char &delimiter) {
-                            return utils::string::split_text(text, delimiter);
-                          });
+      state->set_function(
+          "str_split", [state](const std::string &text, const char &delimiter) {
+            sol::table o = state->create_table();
+            std::vector<std::string> parts =
+                utils::string::split_text(text, delimiter);
+
+            std::for_each(parts.begin(), parts.end(),
+                          [&o](const std::string &part) { o.add(part); });
+
+            return o;
+          });
 
       state->set_function(
           "str_to_feature", [state](const std::string &feature) {
