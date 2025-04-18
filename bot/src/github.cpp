@@ -64,7 +64,7 @@ namespace bot {
     pqxx::work work(conn);
 
     pqxx::result repos =
-        work.exec("SELECT name FROM events WHERE event_type = 10");
+        work.exec("SELECT name FROM events WHERE event_type = 40");
 
     // Adding new repos
     for (const auto &repo : repos) {
@@ -165,7 +165,7 @@ namespace bot {
           "channel_name, c.alias_id AS channel_aid "
           "FROM events e "
           "INNER JOIN channels c ON c.id = e.channel_id "
-          "WHERE e.name = $1 AND e.event_type = 10",
+          "WHERE e.name = $1 AND e.event_type = 40",
           pqxx::params{pair.first});
 
       for (const auto &event : events) {
