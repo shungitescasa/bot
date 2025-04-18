@@ -62,6 +62,9 @@ int main(int argc, char *argv[]) {
   bot::api::twitch::HelixClient helix_client(cfg.twitch_credentials.token,
                                              cfg.twitch_credentials.client_id);
 
+#ifdef BUILD_BETTERTTV
+  emotespp::BetterTTVWebsocketClient bttv_ws_client;
+#endif
   emotespp::SevenTVWebsocketClient seventv_emote_listener;
   emotespp::SevenTVAPIClient seventv_api_client;
 
@@ -115,9 +118,18 @@ int main(int argc, char *argv[]) {
 
   bot::GithubListener github_listener(cfg, client, helix_client);
 
-  bot::emotes::EmoteEventBundle emote_bundle{
-      client, helix_client, seventv_emote_listener, seventv_api_client, cfg};
+  bot::emotes::EmoteEventBundle emote_bundle{client,
+                                             helix_client,
+#ifdef BUILD_BETTERTTV
+                                             bttv_ws_client,
+#endif
+                                             seventv_emote_listener,
+                                             seventv_api_client,
+                                             cfg};
 
+  // ---------------
+  // 7TV !!!
+  // ---------------
   seventv_emote_listener.on_emote_create(
       [&emote_bundle](const std::string &channel_name,
                       const std::optional<std::string> &author_id,
@@ -146,6 +158,42 @@ int main(int argc, char *argv[]) {
       });
 
   seventv_emote_listener.start();
+
+#ifdef BUILD_BETTERTTV
+  // ----------------
+  // BETTERTTV
+  // ----------------
+
+  bttv_ws_client.on_emote_create(
+      [&emote_bundle](const std::string &channel_name,
+                      const std::optional<std::string> &author_id,
+                      const emotespp::Emote &emote) {
+        bot::emotes::handle_emote_event(emote_bundle,
+                                        bot::schemas::BTTV_EMOTE_CREATE,
+                                        channel_name, author_id, emote);
+      });
+
+  bttv_ws_client.on_emote_delete(
+      [&emote_bundle](const std::string &channel_name,
+                      const std::optional<std::string> &author_id,
+                      const emotespp::Emote &emote) {
+        bot::emotes::handle_emote_event(emote_bundle,
+                                        bot::schemas::BTTV_EMOTE_DELETE,
+                                        channel_name, author_id, emote);
+      });
+
+  bttv_ws_client.on_emote_update(
+      [&emote_bundle](const std::string &channel_name,
+                      const std::optional<std::string> &author_id,
+                      const emotespp::Emote &emote) {
+        bot::emotes::handle_emote_event(emote_bundle,
+                                        bot::schemas::BTTV_EMOTE_UPDATE,
+                                        channel_name, author_id, emote);
+      });
+
+  bttv_ws_client.start();
+
+#endif
 
   client.on<bot::irc::MessageType::Privmsg>(
       [&client, &command_loader, &localization, &cfg, &helix_client](

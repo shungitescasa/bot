@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <chrono>
 #include <exception>
+#include <map>
 #include <optional>
 #include <pqxx/pqxx>
 #include <string>
@@ -32,7 +33,12 @@ namespace bot::emotes {
     }
 
     bool is_stv = event_type >= schemas::EventType::STV_EMOTE_CREATE &&
-                  schemas::EventType::STV_EMOTE_UPDATE >= event_type;
+                  event_type <= schemas::EventType::STV_EMOTE_UPDATE;
+
+#ifdef BUILD_BETTERTTV
+    bool is_bttv = event_type >= schemas::EventType::BTTV_EMOTE_CREATE &&
+                   event_type <= schemas::EventType::BTTV_EMOTE_UPDATE;
+#endif
 
     if (is_stv) {
       std::optional<emotespp::EmoteSet> emote_set =
@@ -44,6 +50,12 @@ namespace bot::emotes {
       c_name = emote_set->owner.alias_id;
       prefix = "(7TV)";
     }
+#ifdef BUILD_BETTERTTV
+    else if (is_bttv) {
+      c_name = channel_name.substr(7);
+      prefix = "(BTTV)";
+    }
+#endif
 
     if (c_name.empty()) {
       return;
@@ -122,6 +134,96 @@ namespace bot::emotes {
     conn.close();
   }
 
+  void check_seventv_emotesets(const EmoteEventBundle *bundle,
+                               pqxx::work &work) {
+    pqxx::result events = work.exec(
+        "SELECT name FROM events WHERE event_type >= 10 AND event_type <= "
+        "12 GROUP BY name");
+
+    auto &ids = bundle->stv_ws_client.get_ids();
+
+    std::vector<std::string> names;
+    std::for_each(events.begin(), events.end(), [&names](const pqxx::row &r) {
+      names.push_back(r[0].as<std::string>());
+    });
+
+    // adding new emote sets
+    for (const std::string &name : names) {
+      std::optional<emotespp::User> stv_user =
+          bundle->stv_api_client.get_user_by_twitch_id(std::stoi(name));
+
+      if (!stv_user.has_value()) {
+        continue;
+      }
+
+      if (!std::any_of(ids.begin(), ids.end(),
+                       [&stv_user](const std::string &id) {
+                         return id == stv_user->emote_set_id;
+                       })) {
+        bundle->stv_ws_client.subscribe_emote_set(stv_user->emote_set_id);
+        log::info(
+            "emotes/thread/7tv",
+            "Subscribing to " + stv_user->emote_set_id + " (" + name + ")");
+      }
+    }
+
+    // removing old emote sets
+    std::for_each(
+        ids.begin(), ids.end(), [&names, &bundle](const std::string &id) {
+          std::optional<emotespp::EmoteSet> stv_set =
+              bundle->stv_api_client.get_emote_set(id);
+
+          if (!stv_set.has_value()) {
+            return;
+          }
+
+          if (!std::any_of(names.begin(), names.end(),
+                           [&stv_set](const std::string &id) {
+                             return id == stv_set->owner.alias_id;
+                           })) {
+            bundle->stv_ws_client.unsubscribe_emote_set(id);
+            log::info("emotes/thread/7tv", "Unsubscribing from " + id + " (" +
+                                               stv_set->owner.alias_id + ")");
+          }
+        });
+  }
+
+#ifdef BUILD_BETTERTTV
+  void check_betterttv_users(const EmoteEventBundle *bundle, pqxx::work &work) {
+    pqxx::result events = work.exec(
+        "SELECT name FROM events WHERE event_type >= 13 AND event_type <= "
+        "15 GROUP BY name");
+
+    const std::map<std::string, std::vector<emotespp::Emote>> &ids =
+        bundle->bttv_ws_client.get_ids();
+
+    std::vector<std::string> names;
+    std::for_each(events.begin(), events.end(), [&names](const pqxx::row &r) {
+      names.push_back("twitch:" + r[0].as<std::string>());
+    });
+
+    // adding new users
+    for (const std::string &name : names) {
+      if (!std::any_of(ids.begin(), ids.end(), [&name](const auto &pair) {
+            return pair.first == name;
+          })) {
+        bundle->bttv_ws_client.subscribe_emote_set(name);
+        log::info("emotes/thread/bttv", "Subscribing to " + name);
+      }
+    }
+
+    // removing old users
+    std::for_each(ids.begin(), ids.end(), [&names, &bundle](const auto &pair) {
+      if (!std::any_of(
+              names.begin(), names.end(),
+              [&pair](const std::string &id) { return id == pair.first; })) {
+        bundle->bttv_ws_client.unsubscribe_emote_set(pair.first);
+        log::info("emotes/thread/bttv", "Unsubscribing from " + pair.first);
+      }
+    });
+  }
+#endif
+
   void create_emote_thread(const EmoteEventBundle *bundle) {
     log::info("emotes/thread", "Started emote thread.");
 
@@ -130,57 +232,10 @@ namespace bot::emotes {
       pqxx::work work(conn);
 
       try {
-        pqxx::result events = work.exec(
-            "SELECT name FROM events WHERE event_type >= 10 AND event_type <= "
-            "12 GROUP BY name");
-
-        auto &ids = bundle->stv_ws_client.get_ids();
-
-        std::vector<std::string> names;
-        std::for_each(events.begin(), events.end(),
-                      [&names](const pqxx::row &r) {
-                        names.push_back(r[0].as<std::string>());
-                      });
-
-        // adding new emote sets
-        for (const std::string &name : names) {
-          std::optional<emotespp::User> stv_user =
-              bundle->stv_api_client.get_user_by_twitch_id(std::stoi(name));
-
-          if (!stv_user.has_value()) {
-            continue;
-          }
-
-          if (!std::any_of(ids.begin(), ids.end(),
-                           [&stv_user](const std::string &id) {
-                             return id == stv_user->emote_set_id;
-                           })) {
-            bundle->stv_ws_client.subscribe_emote_set(stv_user->emote_set_id);
-            log::info(
-                "emotes/thread",
-                "Subscribing to " + stv_user->emote_set_id + " (" + name + ")");
-          }
-        }
-
-        // removing old emote sets
-        std::for_each(
-            ids.begin(), ids.end(), [&names, &bundle](const std::string &id) {
-              std::optional<emotespp::EmoteSet> stv_set =
-                  bundle->stv_api_client.get_emote_set(id);
-
-              if (!stv_set.has_value()) {
-                return;
-              }
-
-              if (!std::any_of(names.begin(), names.end(),
-                               [&stv_set](const std::string &id) {
-                                 return id == stv_set->owner.alias_id;
-                               })) {
-                bundle->stv_ws_client.unsubscribe_emote_set(id);
-                log::info("emotes/thread", "Unsubscribing from " + id + " (" +
-                                               stv_set->owner.alias_id + ")");
-              }
-            });
+        check_seventv_emotesets(bundle, work);
+#ifdef BUILD_BETTERTTV
+        check_betterttv_users(bundle, work);
+#endif
       } catch (std::exception ex) {
         log::error("emotes/thread",
                    "Error occurred in emote thread: " + std::string(ex.what()));

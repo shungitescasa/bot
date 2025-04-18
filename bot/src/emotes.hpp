@@ -1,5 +1,6 @@
 #pragma once
 
+#include <emotespp/betterttv.hpp>
 #include <emotespp/seventv.hpp>
 #include <optional>
 #include <string>
@@ -13,6 +14,9 @@ namespace bot::emotes {
   struct EmoteEventBundle {
       irc::Client &irc_client;
       const api::twitch::HelixClient &helix_client;
+#ifdef BUILD_BETTERTTV
+      emotespp::BetterTTVWebsocketClient &bttv_ws_client;
+#endif
       emotespp::SevenTVWebsocketClient &stv_ws_client;
       const emotespp::SevenTVAPIClient &stv_api_client;
       const Configuration &configuration;

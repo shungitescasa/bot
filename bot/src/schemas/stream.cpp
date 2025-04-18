@@ -18,7 +18,17 @@ namespace bot::schemas {
       return EventType::STV_EMOTE_DELETE;
     } else if (type == "7tv_emote_update") {
       return EventType::STV_EMOTE_UPDATE;
-    } else {
+    }
+#ifdef BUILD_BETTERTTV
+    else if (type == "bttv_emote_add") {
+      return EventType::BTTV_EMOTE_CREATE;
+    } else if (type == "bttv_emote_delete") {
+      return EventType::BTTV_EMOTE_DELETE;
+    } else if (type == "bttv_emote_update") {
+      return EventType::BTTV_EMOTE_UPDATE;
+    }
+#endif
+    else {
       return EventType::CUSTOM;
     }
   }
@@ -40,7 +50,17 @@ namespace bot::schemas {
       return "7tv_emote_delete";
     } else if (type == STV_EMOTE_UPDATE) {
       return "7tv_emote_update";
-    } else {
+    }
+#ifdef BUILD_BETTERTTV
+    else if (type == BTTV_EMOTE_CREATE) {
+      return "bttv_emote_add";
+    } else if (type == BTTV_EMOTE_DELETE) {
+      return "bttv_emote_delete";
+    } else if (type == BTTV_EMOTE_UPDATE) {
+      return "bttv_emote_update";
+    }
+#endif
+    else {
       return "custom";
     }
   }

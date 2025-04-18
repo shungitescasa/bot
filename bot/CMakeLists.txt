@@ -28,6 +28,13 @@ set_target_properties(
   OUTPUT_NAME "${PROJECT_NAME}-bot"
 )
 
+# BetterTTV Emote support
+set(BUILD_BETTERTTV OFF BOOL "Enable BetterTTV emotes")
+if (BUILD_BETTERTTV)
+  message("-- Bulding BetterTTV parts")
+  target_compile_definitions(Bot PRIVATE BUILD_BETTERTTV=1)
+endif()
+
 # TLS for websocket connections
 set(USE_TLS ON CACHE BOOL "Enable TLS support")
 

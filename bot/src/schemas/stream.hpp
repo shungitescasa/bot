@@ -10,8 +10,13 @@ namespace bot::schemas {
     TITLE,
     GAME,
     STV_EMOTE_CREATE = 10,
-    STV_EMOTE_DELETE = 11,
-    STV_EMOTE_UPDATE = 12,
+    STV_EMOTE_DELETE,
+    STV_EMOTE_UPDATE,
+#ifdef BUILD_BETTERTTV
+    BTTV_EMOTE_CREATE,
+    BTTV_EMOTE_DELETE,
+    BTTV_EMOTE_UPDATE,
+#endif
     GITHUB = 40,
     CUSTOM = 99
   };
