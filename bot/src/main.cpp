@@ -1,3 +1,4 @@
+#include <emotespp/seventv.hpp>
 #include <memory>
 #include <optional>
 #include <pqxx/pqxx>
@@ -12,12 +13,14 @@
 #include "commands/lua.hpp"
 #include "commands/response.hpp"
 #include "config.hpp"
+#include "emotes.hpp"
 #include "github.hpp"
 #include "handlers.hpp"
 #include "irc/client.hpp"
 #include "irc/message.hpp"
 #include "localization/localization.hpp"
 #include "logger.hpp"
+#include "schemas/stream.hpp"
 #include "stream.hpp"
 #include "timer.hpp"
 
@@ -58,6 +61,9 @@ int main(int argc, char *argv[]) {
   bot::loc::Localization localization("localization");
   bot::api::twitch::HelixClient helix_client(cfg.twitch_credentials.token,
                                              cfg.twitch_credentials.client_id);
+
+  emotespp::SevenTVWebsocketClient seventv_emote_listener;
+  emotespp::SevenTVAPIClient seventv_api_client;
 
   client.join(client.get_bot_username());
 
@@ -109,6 +115,38 @@ int main(int argc, char *argv[]) {
 
   bot::GithubListener github_listener(cfg, client, helix_client);
 
+  bot::emotes::EmoteEventBundle emote_bundle{
+      client, helix_client, seventv_emote_listener, seventv_api_client, cfg};
+
+  seventv_emote_listener.on_emote_create(
+      [&emote_bundle](const std::string &channel_name,
+                      const std::optional<std::string> &author_id,
+                      const emotespp::Emote &emote) {
+        bot::emotes::handle_emote_event(emote_bundle,
+                                        bot::schemas::STV_EMOTE_CREATE,
+                                        channel_name, author_id, emote);
+      });
+
+  seventv_emote_listener.on_emote_delete(
+      [&emote_bundle](const std::string &channel_name,
+                      const std::optional<std::string> &author_id,
+                      const emotespp::Emote &emote) {
+        bot::emotes::handle_emote_event(emote_bundle,
+                                        bot::schemas::STV_EMOTE_DELETE,
+                                        channel_name, author_id, emote);
+      });
+
+  seventv_emote_listener.on_emote_update(
+      [&emote_bundle](const std::string &channel_name,
+                      const std::optional<std::string> &author_id,
+                      const emotespp::Emote &emote) {
+        bot::emotes::handle_emote_event(emote_bundle,
+                                        bot::schemas::STV_EMOTE_UPDATE,
+                                        channel_name, author_id, emote);
+      });
+
+  seventv_emote_listener.start();
+
   client.on<bot::irc::MessageType::Privmsg>(
       [&client, &command_loader, &localization, &cfg, &helix_client](
           const bot::irc::Message<bot::irc::MessageType::Privmsg> &message) {
@@ -130,6 +168,8 @@ int main(int argc, char *argv[]) {
   threads.push_back(std::thread(&bot::stream::StreamListenerClient::run,
                                 &stream_listener_client));
   threads.push_back(std::thread(&bot::GithubListener::run, &github_listener));
+  threads.push_back(
+      std::thread(bot::emotes::create_emote_thread, &emote_bundle));
 
   for (auto &thread : threads) {
     thread.join();

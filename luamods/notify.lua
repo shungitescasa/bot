@@ -13,7 +13,7 @@ local function parse_target(value)
         return data
     end
 
-    if data.type < 10 then
+    if data.type < 40 then
         local users = twitch_get_users({ logins = { data.target } })
         if #users == 0 then
             data.target = nil

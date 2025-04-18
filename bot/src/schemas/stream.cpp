@@ -12,6 +12,12 @@ namespace bot::schemas {
       return EventType::GAME;
     } else if (type == "github") {
       return EventType::GITHUB;
+    } else if (type == "7tv_emote_add") {
+      return EventType::STV_EMOTE_CREATE;
+    } else if (type == "7tv_emote_delete") {
+      return EventType::STV_EMOTE_DELETE;
+    } else if (type == "7tv_emote_update") {
+      return EventType::STV_EMOTE_UPDATE;
     } else {
       return EventType::CUSTOM;
     }
@@ -28,6 +34,12 @@ namespace bot::schemas {
       return "game";
     } else if (type == GITHUB) {
       return "github";
+    } else if (type == STV_EMOTE_CREATE) {
+      return "7tv_emote_add";
+    } else if (type == STV_EMOTE_DELETE) {
+      return "7tv_emote_delete";
+    } else if (type == STV_EMOTE_UPDATE) {
+      return "7tv_emote_update";
     } else {
       return "custom";
     }
