@@ -9,6 +9,10 @@ local function parse_target(value)
         type = str_to_event_type(parts[2])
     }
 
+    if event_type_to_str(data.type) ~= parts[2] then
+        data.type = nil
+    end
+
     if data.type == nil then
         return data
     end
