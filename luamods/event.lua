@@ -92,14 +92,31 @@ return {
 The `!event` command gives the ability to manage events.
 
 
-## Event types
+## Event types (and their placeholders)
 
 + live
 + offline
-+ title
-+ game
-+ github (Placeholders for messages: `%0` - Commit hash, `%1` - Committer name, `%2` - Commit message)
++ title *(`{new}` - new title, `{old}` - old title)*
++ game *(`{new}` - new game, `{old}` - old game)*
++ kick_live
++ kick_offline
++ kick_title *(`{new}` - new title, `{old}` - old title)*
++ kick_game *(`{new}` - new game, `{old}` - old game)*
++ github *(`{sha}` - commit ID, `{author}` - committer, `{msg}` - message)*
++ 7tv_new_emote *(`{emote}` - emote name, `{old_emote}` - original emote name, `{author}` - name of the person who added it)*
++ 7tv_deleted_emote *(`{emote}` - emote name, `{old_emote}` - original emote name, `{author}` - name of the person who added it)*
++ 7tv_updated_emote *(`{emote}` - new emote name, `{old_emote}` - previous emote name, `{author}` - name of the person who added it)*
 + custom
+
+## How to use placeholders?
+
+Some event types have placeholders that can enrich your event message. You can easily use them by simply inserting them into your message.
+Here are some basic examples to inspire you:
+
++ `!event on forsen:game Forsen is now playing {new} (previously, he played {old})`
++ `!event on torvalds/linux:github {author} made a new commit in linux kernel: {msg} (ID {sha})` - Please also note that the event name has the following format: **username/repository** *(https://github.com/ **username/repository**)*
++ `!event on forsen:7tv_new_emote {author} added a new 7TV emote: {emote}`
++ `!event on forsen:7tv_updated_emote {author} renamed a 7TV emote from {old_emote} to {emote}`
 
 ## Syntax
 
@@ -110,14 +127,6 @@ The `!event` command gives the ability to manage events.
 + `[name]` - Twitch username or event name *(custom type only)*.
 + `[type]` - [Event type](#event-types).
 + `[message]` - The message that will be sent with the event.
-
-
-> Events with types *category* and *title* use *{0}* and *{1}* placeholders
-> for old and new values respectively.
-> This means that the bot can show changes if you set them
-> (e.g. *forsen changed the title from **{0}** to **{1}*** will replace
-> with *forsen changed the game from **Just Chatting** to **PUBG***).
-
 
 ### Delete the event
 
