@@ -154,7 +154,7 @@ The `!cmd` command gives the ability to create their own chat commands.
 		table.remove(parts, 1)
 
 		local cmds = db_query(
-			'SELECT id, name, array_to_json(aliases) as aliases, message FROM custom_commands WHERE name = $1 AND channel_id = $2',
+			'SELECT id, name, message FROM custom_commands WHERE name = $1 AND channel_id = $2',
 			{ name, request.channel.id })
 
 		if scid == "new" then
@@ -222,11 +222,11 @@ The `!cmd` command gives the ability to create their own chat commands.
 
 			local new_alias = parts[1]
 
-			local cmd_alias = db_query('SELECT name FROM custom_commands WHERE $1 = ANY(aliases) AND channel_id = $2',
-				{ new_alias, request.channel.id })
+			local cmd_alias = db_query('SELECT name FROM custom_command_aliases WHERE name = $1 AND command_id = $2',
+				{ new_alias, cmd.id })
 
 			if #cmd_alias > 0 then
-				return l10n_custom_formatted_line_request(request, lines, "namesake_alias", { cmd_alias[1].name })
+				return l10n_custom_formatted_line_request(request, lines, "namesake_alias", { new_alias })
 			end
 
 			local internal_commands = bot_get_loaded_command_names()
@@ -234,7 +234,7 @@ The `!cmd` command gives the ability to create their own chat commands.
 				return l10n_custom_formatted_line_request(request, lines, "namesake", {})
 			end
 
-			db_execute('UPDATE custom_commands SET aliases = array_append(aliases, $1) WHERE id = $2',
+			db_execute('INSERT INTO custom_command_aliases(name, command_id) VALUES ($1, $2)',
 				{ new_alias, cmd.id })
 
 			return l10n_custom_formatted_line_request(request, lines, "alias_command", { new_alias, name })
@@ -245,19 +245,27 @@ The `!cmd` command gives the ability to create their own chat commands.
 
 			local old_alias = parts[1]
 
-			local cmd_alias = db_query('SELECT name FROM custom_commands WHERE $1 = ANY(aliases) AND channel_id = $2',
-				{ old_alias, request.channel.id })
+			local cmd_alias = db_query('SELECT id FROM custom_command_aliases WHERE name = $1 AND command_id = $2',
+				{ old_alias, cmd.id })
 
 			if #cmd_alias == 0 then
 				return l10n_custom_formatted_line_request(request, lines, "no_cmd_alias", { old_alias })
 			end
 
-			db_execute('UPDATE custom_commands SET aliases = array_remove(aliases, $1) WHERE id = $2',
-				{ old_alias, cmd.id })
+			db_execute('DELETE FROM custom_command_aliases WHERE id = $1',
+				{ cmd_alias[1].id })
 
 			return l10n_custom_formatted_line_request(request, lines, "delalias_command", { old_alias, name })
 		elseif scid == "view" then
-			local aliases = json_parse(cmd.aliases)
+			local aliases_db = db_query('SELECT name FROM custom_command_aliases WHERE command_id = $1',
+				{ cmd.id })
+
+			local aliases = {}
+
+			for i = 1, #aliases_db, 1 do
+				table.insert(aliases, aliases_db[i].name)
+			end
+
 			local aliases_str = table.concat(aliases, ', ')
 
 			if #aliases_str == 0 then

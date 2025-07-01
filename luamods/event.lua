@@ -56,9 +56,9 @@ local lines = {
         ["off"] = "{sender.alias_name}: Successfully deleted event %s",
         ["edit"] = "{sender.alias_name}: Edited a message for event %s",
         ["settarget"] = "{sender.alias_name}: Changed event target from %s to %s",
-        ["flag_disabled"] = "{sender.alias_name}: Flag %s has been disabled for event %s",
-        ["flag_enabled"] = "{sender.alias_name}: Flag %s has been enabled for event %s",
-        ["view"] = "{sender.alias_name}: ID %s | %s | %s subs | Flags: %s | %s"
+        ["massping_disabled"] = "{sender.alias_name}: Massping has been disabled for event %s",
+        ["massping_enabled"] = "{sender.alias_name}: Massping has been enabled for event %s",
+        ["view"] = "{sender.alias_name}: ID %s | %s | %s subs | Massping: %s | %s"
     },
     russian = {
         ["no_subcommand"] =
@@ -262,7 +262,7 @@ Here are some basic examples to inspire you:
         end
 
         local events = db_query(
-            'SELECT id, message, array_to_json(flags) as flags FROM events WHERE name = $1 AND event_type = $2',
+            'SELECT id, message, is_massping FROM events WHERE name = $1 AND event_type = $2',
             { data_name, data.type })
 
         if scid == "on" then
@@ -332,26 +332,23 @@ Here are some basic examples to inspire you:
 
             return l10n_custom_formatted_line_request(request, lines, "settarget", { data_original, new_data_original })
         elseif scid == "setmassping" then
-            local flags = json_parse(event.flags)
-
             local line_id = ""
             local query = ""
-            if array_contains_int(flags, 0) then
-                line_id = "flag_disabled"
-                query = "UPDATE events SET flags = array_remove(flags, $1) WHERE id = $2"
+            if event.is_massping == "1" then
+                line_id = "massping_disabled"
+                query = "UPDATE events SET is_massping = 0 WHERE id = $1"
             else
-                line_id = "flag_enabled"
-                query = "UPDATE events SET flags = array_append(flags, $1) WHERE id = $2"
+                line_id = "massping_enabled"
+                query = "UPDATE events SET is_massping = 1 WHERE id = $1"
             end
 
-            db_execute(query, { 0, event.id })
+            db_execute(query, { event.id })
 
-            return l10n_custom_formatted_line_request(request, lines, line_id, { event_flag_to_str(0), data_original })
+            return l10n_custom_formatted_line_request(request, lines, line_id, { data_original })
         elseif scid == "call" then
-            local flags = json_parse(event.flags)
             local names = {}
 
-            if array_contains_int(flags, 0) then
+            if event.is_massping == "1" then
                 local chatters = twitch_get_chatters()
                 for i = 1, #chatters, 1 do
                     table.insert(names, chatters[i].login)
@@ -382,17 +379,13 @@ INNER JOIN events e ON e.id = es.event_id
 WHERE e.id = $1
 ]], { event.id })
 
-            local f = json_parse(event.flags)
-            local flags = {}
-            for i = 1, #f, 1 do
-                table.insert(flags, event_type_to_str(f[i]))
-            end
-            if #flags == 0 then
-                table.insert(flags, '-')
+            local massping_flag = "OFF"
+            if event.is_massping == "1" then
+                massping_flag = "ON"
             end
 
             return l10n_custom_formatted_line_request(request, lines, "view",
-                { event.id, data_original, subscription_count[1].count, table.concat(flags, ', '), event.message })
+                { event.id, data_original, subscription_count[1].count, massping_flag, event.message })
         end
     end
 }

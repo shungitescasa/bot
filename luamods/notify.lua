@@ -50,7 +50,7 @@ local lines = {
         ["namesake"] = "{sender.alias_name}: You have already subscribed to this event.",
         ["list"] =
         "{sender.alias_name}: You can use '{channel.prefix}event list' to find out which events you can subscribe to.",
-        ["subs"] = "{sender.alias_name}: %s",
+        ["subs"] = "{sender.alias_name}: Your subscriptions: %s",
         ["empty_subs"] = "{sender.alias_name}: You do not have any event subscriptions in this channel.",
         ["sub"] =
         "{sender.alias_name}: You have successfully subscribed to event %s",
@@ -69,7 +69,7 @@ local lines = {
         ["namesake"] = "{sender.alias_name}: Такое же событие уже существует.",
         ["list"] =
         "{sender.alias_name}: Вы можете использовать '{channel.prefix}event list', чтобы узнать на какие события Вы можете подписаться.",
-        ["subs"] = "{sender.alias_name}: %s",
+        ["subs"] = "{sender.alias_name}: Ваши подписки: %s",
         ["empty_subs"] = "{sender.alias_name}: Вы не подписаны на какие-либо события в этом канале.",
         ["sub"] =
         "{sender.alias_name}: Вы успешно подписались на событие %s",
@@ -197,10 +197,10 @@ WHERE e.channel_id = $1 AND es.user_id = $2
         local events = db_query([[
 SELECT e.id, es.id AS sub_id
 FROM events e
-LEFT JOIN event_subscriptions es ON es.event_id = e.id AND es.user_id = $3
-WHERE e.name = $1 AND e.event_type = $2
+LEFT JOIN event_subscriptions es ON es.event_id = e.id AND es.user_id = $1
+WHERE e.name = $2 AND e.event_type = $3
 ]],
-            { data_name, data.type, request.sender.id })
+            { request.sender.id, data_name, data.type })
 
         if #events == 0 then
             return l10n_custom_formatted_line_request(request, lines, "not_found", { data_original })
