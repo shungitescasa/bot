@@ -112,13 +112,13 @@ Available languages at the moment: **english**, **russian**.
                 return l10n_custom_formatted_line_request(request, lines, "locale_not_exists", { value })
             end
 
-            db_execute('UPDATE channel_preferences SET locale = $1 WHERE channel_id = $2', { value, request.channel.id })
+            db_execute('UPDATE channel_preferences SET locale = $1 WHERE id = $2', { value, request.channel.id })
             request['channel_preference']['language'] = value
 
             return l10n_custom_formatted_line_request(request, lines, "set_locale", {})
         elseif request.subcommand_id == "prefix" then
             value = value:gsub("&nbsp;", " ")
-            db_execute('UPDATE channel_preferences SET prefix = $1 WHERE channel_id = $2', { value, request.channel.id })
+            db_execute('UPDATE channel_preferences SET prefix = $1 WHERE id = $2', { value, request.channel.id })
             return l10n_custom_formatted_line_request(request, lines, "set_prefix", { value })
         elseif request.subcommand_id == "feature" then
             local feature = str_to_feature(value)
@@ -133,13 +133,13 @@ Available languages at the moment: **english**, **russian**.
 
             if array_contains(channel_features, value) then
                 line_id = "feature_disabled"
-                query = 'UPDATE channel_preferences SET features = array_remove(features, $1) WHERE channel_id = $2'
+                query = 'UPDATE channel_preferences SET ' .. feature_to_str(feature) .. ' = 0 WHERE id = $1'
             else
                 line_id = "feature_enabled"
-                query = 'UPDATE channel_preferences SET features = array_append(features, $1) WHERE channel_id = $2'
+                query = 'UPDATE channel_preferences SET ' .. feature_to_str(feature) .. ' = 1 WHERE id = $1'
             end
 
-            db_execute(query, { feature, request.channel.id })
+            db_execute(query, { request.channel.id })
 
             return l10n_custom_formatted_line_request(request, lines, line_id, { value })
         end
