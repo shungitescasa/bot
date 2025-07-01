@@ -104,7 +104,7 @@ return {
             )
         else
             local db_channel = db_query('SELECT id FROM channels WHERE alias_id = $1', { channel_id })[1]
-            db_execute('INSERT IGNORE INTO channel_preferences(channel_id, is_channel_silenced) VALUES ($1, $2)',
+            db_execute('INSERT IGNORE INTO channel_preferences(id, silent_mode) VALUES ($1, $2)',
                 { db_channel.id, silent_mode })
         end
 

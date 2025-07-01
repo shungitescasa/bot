@@ -50,9 +50,13 @@ namespace bot::schemas {
       std::optional<std::chrono::system_clock::time_point> opted_out_at;
   };
 
-  enum ChannelFeature { MARKOV_RESPONSES, RANDOM_MARKOV_RESPONSES };
-  const std::vector<ChannelFeature> FEATURES = {MARKOV_RESPONSES,
-                                                RANDOM_MARKOV_RESPONSES};
+  enum ChannelFeature {
+    MARKOV_RESPONSES,
+    RANDOM_MARKOV_RESPONSES,
+    SILENT_MODE
+  };
+  const std::vector<ChannelFeature> FEATURES = {
+      MARKOV_RESPONSES, RANDOM_MARKOV_RESPONSES, SILENT_MODE};
   std::optional<ChannelFeature> string_to_channel_feature(
       const std::string &value);
   std::optional<std::string> channelfeature_to_string(

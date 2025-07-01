@@ -9,6 +9,8 @@ namespace bot::schemas {
       return MARKOV_RESPONSES;
     } else if (value == "random_markov_responses") {
       return RANDOM_MARKOV_RESPONSES;
+    } else if (value == "silent_mode") {
+      return SILENT_MODE;
     } else {
       return std::nullopt;
     }
@@ -21,6 +23,8 @@ namespace bot::schemas {
         return "markov_responses";
       case RANDOM_MARKOV_RESPONSES:
         return "random_markov_responses";
+      case SILENT_MODE:
+        return "silent_mode";
       default:
         std::nullopt;
     }
