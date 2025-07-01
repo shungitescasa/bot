@@ -20,19 +20,19 @@ namespace bot::schemas {
       return EventType::KICK_GAME;
     } else if (type == "github") {
       return EventType::GITHUB;
-    } else if (type == "7tv_emote_add") {
+    } else if (type == "7tv_new_emote") {
       return EventType::STV_EMOTE_CREATE;
-    } else if (type == "7tv_emote_delete") {
+    } else if (type == "7tv_deleted_emote") {
       return EventType::STV_EMOTE_DELETE;
-    } else if (type == "7tv_emote_update") {
+    } else if (type == "7tv_updated_emote") {
       return EventType::STV_EMOTE_UPDATE;
     }
 #ifdef BUILD_BETTERTTV
-    else if (type == "bttv_emote_add") {
+    else if (type == "bttv_new_emote") {
       return EventType::BTTV_EMOTE_CREATE;
-    } else if (type == "bttv_emote_delete") {
+    } else if (type == "bttv_deleted_emote") {
       return EventType::BTTV_EMOTE_DELETE;
-    } else if (type == "bttv_emote_update") {
+    } else if (type == "bttv_updated_emote") {
       return EventType::BTTV_EMOTE_UPDATE;
     }
 #endif
@@ -61,19 +61,19 @@ namespace bot::schemas {
     } else if (type == GITHUB) {
       return "github";
     } else if (type == STV_EMOTE_CREATE) {
-      return "7tv_emote_add";
+      return "7tv_new_emote";
     } else if (type == STV_EMOTE_DELETE) {
-      return "7tv_emote_delete";
+      return "7tv_deleted_emote";
     } else if (type == STV_EMOTE_UPDATE) {
-      return "7tv_emote_update";
+      return "7tv_updated_emote";
     }
 #ifdef BUILD_BETTERTTV
     else if (type == BTTV_EMOTE_CREATE) {
-      return "bttv_emote_add";
+      return "bttv_new_emote";
     } else if (type == BTTV_EMOTE_DELETE) {
-      return "bttv_emote_delete";
+      return "bttv_deleted_emote";
     } else if (type == BTTV_EMOTE_UPDATE) {
-      return "bttv_emote_update";
+      return "bttv_updated_emote";
     }
 #endif
     else {
