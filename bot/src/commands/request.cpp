@@ -150,7 +150,11 @@ namespace bot::command {
     std::string fullmsg = irc_message.message;
     const std::string &prefix = pref.get_prefix();
 
-    if (fullmsg.empty() || fullmsg.substr(0, prefix.length()) != prefix) {
+    if (fullmsg.empty() || fullmsg.substr(0, prefix.length()) != prefix ||
+        std::any_of(pref.get_features().begin(), pref.get_features().end(),
+                    [](const schemas::ChannelFeature &f) {
+                      return f == schemas::ChannelFeature::SILENT_MODE;
+                    })) {
       return std::nullopt;
     }
 
