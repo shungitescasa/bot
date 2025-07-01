@@ -64,7 +64,7 @@ FetchContent_MakeAvailable(cpr)
 FetchContent_Declare(
   pqxx
   GIT_REPOSITORY https://github.com/jtv/libpqxx.git
-  GIT_TAG 7.9.2
+  GIT_TAG 7.10.1
 )
 FetchContent_MakeAvailable(pqxx)
 
@@ -72,7 +72,7 @@ FetchContent_MakeAvailable(pqxx)
 FetchContent_Declare(
   ixwebsocket
   GIT_REPOSITORY https://github.com/machinezone/IXWebSocket
-  GIT_TAG v11.4.5
+  GIT_TAG v11.4.6
 )
 FetchContent_MakeAvailable(ixwebsocket)
 
@@ -86,6 +86,14 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(sol)
 
+# emotespp
+FetchContent_Declare(
+  emotespp
+  GIT_REPOSITORY https://git.shungites.casa/emotespp.git
+  GIT_TAG master
+)
+FetchContent_MakeAvailable(emotespp)
+
 target_link_libraries(Bot PRIVATE
     ixwebsocket::ixwebsocket
     pqxx
@@ -93,5 +101,6 @@ target_link_libraries(Bot PRIVATE
     cpr::cpr
     lua
     sol2::sol2
+    emotespp
 )
 
