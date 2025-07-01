@@ -17,6 +17,7 @@
 #include <string>
 #include <vector>
 
+#include "api/kick.hpp"
 #include "api/twitch/schemas/user.hpp"
 #include "bundle.hpp"
 #include "commands/request.hpp"
@@ -610,6 +611,7 @@ namespace bot::command::lua {
       lua::library::add_bot_library(state, bundle);
       lua::library::add_irc_library(state, bundle);
       lua::library::add_twitch_library(state, request, bundle);
+      lua::library::add_kick_library(state, bundle);
       lua::library::add_db_library(state, bundle.configuration);
       lua::library::add_l10n_library(state, bundle);
     }
@@ -695,6 +697,29 @@ namespace bot::command::lua {
 
                             u["id"] = x.id;
                             u["login"] = x.login;
+
+                            o.add(u);
+                          });
+
+            return o;
+          });
+    }
+
+    void add_kick_library(std::shared_ptr<sol::state> state,
+                          const InstanceBundle &bundle) {
+      state->set_function(
+          "kick_get_channels", [state, &bundle](const std::string &slug) {
+            std::vector<api::KickChannel> channels =
+                bundle.kick_api_client.get_channels(slug);
+
+            sol::table o = state->create_table();
+
+            std::for_each(channels.begin(), channels.end(),
+                          [state, &o](const api::KickChannel &x) {
+                            sol::table u = state->create_table();
+
+                            u["id"] = x.broadcaster_user_id;
+                            u["login"] = x.slug;
 
                             o.add(u);
                           });

@@ -7,6 +7,7 @@
 #include <thread>
 #include <vector>
 
+#include "api/kick.hpp"
 #include "api/twitch/helix_client.hpp"
 #include "bundle.hpp"
 #include "commands/command.hpp"
@@ -62,6 +63,9 @@ int main(int argc, char *argv[]) {
   bot::api::twitch::HelixClient helix_client(cfg.twitch_credentials.token,
                                              cfg.twitch_credentials.client_id);
 
+  bot::api::KickAPIClient kick_api_client(cfg.kick_credentials.client_id,
+                                          cfg.kick_credentials.client_secret);
+
 #ifdef BUILD_BETTERTTV
   emotespp::BetterTTVWebsocketClient bttv_ws_client;
 #endif
@@ -113,8 +117,8 @@ int main(int argc, char *argv[]) {
 
   conn.close();
 
-  bot::stream::StreamListenerClient stream_listener_client(helix_client, client,
-                                                           cfg);
+  bot::stream::StreamListenerClient stream_listener_client(
+      helix_client, kick_api_client, client, cfg);
 
   bot::GithubListener github_listener(cfg, client, helix_client);
 
@@ -196,10 +200,11 @@ int main(int argc, char *argv[]) {
 #endif
 
   client.on<bot::irc::MessageType::Privmsg>(
-      [&client, &command_loader, &localization, &cfg, &helix_client](
+      [&client, &command_loader, &localization, &cfg, &helix_client,
+       &kick_api_client](
           const bot::irc::Message<bot::irc::MessageType::Privmsg> &message) {
-        bot::InstanceBundle bundle{client, helix_client, localization, cfg,
-                                   command_loader};
+        bot::InstanceBundle bundle{client,       helix_client, kick_api_client,
+                                   localization, cfg,          command_loader};
 
         pqxx::connection conn(GET_DATABASE_CONNECTION_URL(cfg));
 
@@ -218,6 +223,8 @@ int main(int argc, char *argv[]) {
   threads.push_back(std::thread(&bot::GithubListener::run, &github_listener));
   threads.push_back(
       std::thread(bot::emotes::create_emote_thread, &emote_bundle));
+  threads.push_back(std::thread(&bot::api::KickAPIClient::refresh_token_thread,
+                                &kick_api_client));
 
   for (auto &thread : threads) {
     thread.join();

@@ -28,6 +28,8 @@ namespace bot::command::lua {
     void add_twitch_library(std::shared_ptr<sol::state> state,
                             const Request &request,
                             const InstanceBundle &bundle);
+    void add_kick_library(std::shared_ptr<sol::state> state,
+                          const InstanceBundle &bundle);
     void add_net_library(std::shared_ptr<sol::state> state);
     void add_db_library(std::shared_ptr<sol::state> state,
                         const Configuration &config);

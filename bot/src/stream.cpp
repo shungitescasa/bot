@@ -7,6 +7,7 @@
 #include <thread>
 #include <vector>
 
+#include "api/kick.hpp"
 #include "api/twitch/schemas/stream.hpp"
 #include "config.hpp"
 #include "logger.hpp"
@@ -15,15 +16,19 @@
 #include "utils/string.hpp"
 
 namespace bot::stream {
-  void StreamListenerClient::listen_channel(const int &id) {
-    this->streamers.push_back({id, TWITCH, false, "", ""});
+  void StreamListenerClient::listen_channel(const int &id,
+                                            const StreamerType &type) {
+    this->streamers.push_back({id, type, false, "", ""});
     log::info("TwitchStreamListener",
               "Listening stream events for ID " + std::to_string(id));
   }
 
-  void StreamListenerClient::unlisten_channel(const int &id) {
+  void StreamListenerClient::unlisten_channel(const int &id,
+                                              const StreamerType &type) {
     auto x = std::find_if(this->streamers.begin(), this->streamers.end(),
-                          [&id](const StreamerData &x) { return x.id == id; });
+                          [&id, &type](const StreamerData &x) {
+                            return x.id == id && x.type == type;
+                          });
 
     if (x != this->streamers.end()) {
       this->streamers.erase(x);
@@ -39,15 +44,18 @@ namespace bot::stream {
   }
 
   void StreamListenerClient::check() {
-    std::vector<int> twitch_ids;
+    std::vector<int> twitch_ids, kick_ids;
 
     std::for_each(this->streamers.begin(), this->streamers.end(),
-                  [&twitch_ids](const StreamerData &data) {
+                  [&twitch_ids, &kick_ids](const StreamerData &data) {
                     if (data.type == TWITCH) {
                       twitch_ids.push_back(data.id);
+                    } else if (data.type == KICK) {
+                      kick_ids.push_back(data.id);
                     }
                   });
 
+    auto kick_streams = this->kick_api_client.get_channels(kick_ids);
     auto twitch_streams = this->helix_client.get_streams(twitch_ids);
     auto now = std::chrono::system_clock::now();
     auto now_time_it = std::chrono::system_clock::to_time_t(now);
@@ -79,18 +87,54 @@ namespace bot::stream {
       }
     }
 
-    // removing ended livestreams
-    for (StreamerData &data : this->streamers) {
-      if (data.type != TWITCH) {
+    for (const api::KickChannel &channel : kick_streams) {
+      auto data = std::find_if(this->streamers.begin(), this->streamers.end(),
+                               [&channel](const StreamerData &data) {
+                                 return data.type == KICK &&
+                                        data.id == channel.broadcaster_user_id;
+                               });
+
+      if (data == this->streamers.end()) {
         continue;
       }
 
-      if (data.is_live &&
-          !std::any_of(
-              twitch_streams.begin(), twitch_streams.end(),
-              [&data](const auto &s) { return s.get_user_id() == data.id; })) {
+      if (!data->is_live && channel.is_live) {
+        data->is_live = true;
+
+        auto difference = now - channel.start_time;
+        auto difference_min =
+            std::chrono::duration_cast<std::chrono::minutes>(difference);
+
+        if (difference_min.count() < 1) {
+          this->handler(schemas::EventType::KICK_LIVE,
+                        {channel.broadcaster_user_id, channel.slug,
+                         channel.stream_game_name, channel.stream_title},
+                        *data);
+        }
+      }
+    }
+
+    // removing ended livestreams
+    for (StreamerData &data : this->streamers) {
+      bool in_twitch_streams = std::any_of(
+          twitch_streams.begin(), twitch_streams.end(), [&data](const auto &s) {
+            return s.get_user_id() == data.id && data.type == TWITCH;
+          });
+
+      bool in_kick_streams =
+          std::any_of(kick_streams.begin(), kick_streams.end(),
+                      [&data](const api::KickChannel &s) {
+                        return s.broadcaster_user_id == data.id &&
+                               data.type == KICK && s.is_live;
+                      });
+
+      if (data.type == TWITCH && data.is_live && !in_twitch_streams) {
         data.is_live = false;
         this->handler(schemas::EventType::OFFLINE,
+                      api::twitch::schemas::Stream{data.id}, data);
+      } else if (data.type == KICK && data.is_live && !in_kick_streams) {
+        data.is_live = false;
+        this->handler(schemas::EventType::KICK_OFFLINE,
                       api::twitch::schemas::Stream{data.id}, data);
       }
     }
@@ -124,6 +168,40 @@ namespace bot::stream {
         }
 
         data->game = stream.get_game_name();
+      }
+    }
+
+    for (const api::KickChannel &channel : kick_streams) {
+      auto data = std::find_if(this->streamers.begin(), this->streamers.end(),
+                               [&channel](const StreamerData &data) {
+                                 return data.type == KICK &&
+                                        data.id == channel.broadcaster_user_id;
+                               });
+
+      if (data == this->streamers.end()) {
+        continue;
+      }
+
+      api::twitch::schemas::Stream stream{
+          channel.broadcaster_user_id, channel.slug, channel.stream_game_name,
+          channel.stream_title};
+
+      if (channel.stream_title != data->title &&
+          !channel.stream_title.empty()) {
+        if (!data->title.empty()) {
+          this->handler(schemas::EventType::KICK_TITLE, stream, *data);
+        }
+
+        data->title = channel.stream_title;
+      }
+
+      if (channel.stream_game_name != data->game &&
+          !channel.stream_game_name.empty()) {
+        if (!data->game.empty()) {
+          this->handler(schemas::EventType::KICK_GAME, stream, *data);
+        }
+
+        data->game = channel.stream_game_name;
       }
     }
   }
@@ -179,17 +257,21 @@ namespace bot::stream {
 
       int pos = base.find("{old}");
       if (pos != std::string::npos) {
-        if (type == schemas::EventType::TITLE)
+        if (type == schemas::EventType::TITLE ||
+            type == schemas::EventType::KICK_TITLE)
           base.replace(pos, 5, data.title);
-        else if (type == schemas::EventType::GAME)
+        else if (type == schemas::EventType::GAME ||
+                 type == schemas::EventType::KICK_GAME)
           base.replace(pos, 5, data.game);
       }
 
       pos = base.find("{new}");
       if (pos != std::string::npos) {
-        if (type == schemas::EventType::TITLE)
+        if (type == schemas::EventType::TITLE ||
+            type == schemas::EventType::KICK_TITLE)
           base.replace(pos, 5, stream.get_title());
-        else if (type == schemas::EventType::GAME)
+        else if (type == schemas::EventType::GAME ||
+                 type == schemas::EventType::KICK_GAME)
           base.replace(pos, 5, stream.get_game_name());
       }
 
@@ -210,19 +292,25 @@ namespace bot::stream {
     pqxx::work work(conn);
 
     pqxx::result ids =
-        work.exec("SELECT name FROM events WHERE event_type < 10");
+        work.exec("SELECT name, event_type FROM events WHERE event_type < 10");
 
     for (const auto &row : ids) {
       int id = row[0].as<int>();
+      int event_type = row[1].as<int>();
+
+      StreamerType type = (event_type >= schemas::EventType::KICK_LIVE &&
+                           event_type <= schemas::EventType::KICK_GAME)
+                              ? StreamerType::KICK
+                              : StreamerType::TWITCH;
 
       if (std::any_of(this->streamers.begin(), this->streamers.end(),
-                      [&id](const StreamerData &x) {
-                        return x.type == TWITCH && x.id == id;
+                      [&id, &type](const StreamerData &x) {
+                        return x.type == type && x.id == id;
                       })) {
         continue;
       }
 
-      listen_channel(id);
+      listen_channel(id, type);
     }
 
     work.commit();

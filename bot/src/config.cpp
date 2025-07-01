@@ -81,6 +81,7 @@ namespace bot {
 
     Configuration cfg;
     TwitchCredentialsConfiguration ttv_crd_cfg;
+    KickCredentialsConfiguration kick_crd_cfg;
     DatabaseConfiguration db_cfg;
     CommandConfiguration cmd_cfg;
     OwnerConfiguration owner_cfg;
@@ -114,6 +115,12 @@ namespace bot {
         db_cfg.host = value;
       } else if (key == "db_port") {
         db_cfg.port = value;
+      }
+
+      else if (key == "kick.client_id") {
+        kick_crd_cfg.client_id = value;
+      } else if (key == "kick.client_secret") {
+        kick_crd_cfg.client_secret = value;
       }
 
       else if (key == "commands.join_allowed") {
@@ -153,6 +160,7 @@ namespace bot {
     cfg.owner = owner_cfg;
     cfg.commands = cmd_cfg;
     cfg.twitch_credentials = ttv_crd_cfg;
+    cfg.kick_credentials = kick_crd_cfg;
     cfg.database = db_cfg;
     cfg.tokens = token_cfg;
 

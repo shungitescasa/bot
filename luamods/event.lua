@@ -18,7 +18,15 @@ local function parse_target(value)
     end
 
     if data.type < 40 then
-        local users = twitch_get_users({ logins = { data.target } })
+        local users = {}
+
+        -- kick
+        if data.type >= 4 and data.type <= 7 then
+            users = kick_get_channels(data.target)
+        else
+            users = twitch_get_users({ logins = { data.target } })
+        end
+
         if #users == 0 then
             data.target = nil
             return data

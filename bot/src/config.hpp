@@ -28,6 +28,10 @@ namespace bot {
       std::string token;
   };
 
+  struct KickCredentialsConfiguration {
+      std::string client_id, client_secret;
+  };
+
   struct CommandConfiguration {
       bool join_allowed = true;
       bool join_allow_from_other_chats = false;
@@ -56,6 +60,7 @@ namespace bot {
 
   struct Configuration {
       TwitchCredentialsConfiguration twitch_credentials;
+      KickCredentialsConfiguration kick_credentials;
       DatabaseConfiguration database;
       CommandConfiguration commands;
       OwnerConfiguration owner;
