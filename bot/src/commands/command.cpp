@@ -6,15 +6,16 @@
 #include <fstream>
 #include <memory>
 #include <optional>
-#include <pqxx/pqxx>
 #include <sol/state.hpp>
 #include <sol/types.hpp>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 #include "../bundle.hpp"
 #include "../utils/chrono.hpp"
 #include "commands/lua.hpp"
+#include "database.hpp"
 #include "request.hpp"
 #include "response.hpp"
 
@@ -84,17 +85,18 @@ namespace bot {
         return std::nullopt;
       }
 
-      pqxx::work work(request.conn);
+      std::unique_ptr<db::BaseDatabase> conn =
+          db::create_connection(bundle.configuration);
 
-      pqxx::result action_query = work.exec(
-          "SELECT sent_at FROM actions WHERE user_id = " +
-          std::to_string(request.user.get_id()) +
-          " AND channel_id = " + std::to_string(request.channel.get_id()) +
-          " AND command = '" + request.command_id + "' ORDER BY sent_at DESC");
+      db::DatabaseRows actions = conn->exec(
+          "SELECT sent_at FROM actions WHERE user_id = $1 AND channel_id = $2 "
+          "AND command = $3 ORDER BY sent_at DESC",
+          {std::to_string(request.user.get_id()),
+           std::to_string(request.channel.get_id()), request.command_id});
 
-      if (!action_query.empty()) {
-        auto last_sent_at = utils::chrono::string_to_time_point(
-            action_query[0][0].as<std::string>());
+      if (!actions.empty()) {
+        auto last_sent_at =
+            utils::chrono::string_to_time_point(actions[0]["sent_at"]);
 
         auto now = std::chrono::system_clock::now();
         auto now_time_it = std::chrono::system_clock::to_time_t(now);
@@ -119,15 +121,12 @@ namespace bot {
         arguments += request.message.value();
       }
 
-      work.exec(
+      conn->exec(
           "INSERT INTO actions(user_id, channel_id, command, arguments, "
-          "full_message) VALUES (" +
-          std::to_string(request.user.get_id()) + ", " +
-          std::to_string(request.channel.get_id()) + ", '" +
-          request.command_id + "', '" + arguments + "', '" +
-          request.irc_message.message + "')");
-
-      work.commit();
+          "full_message) VALUES ($1, $2, $3, $4, $5)",
+          {std::to_string(request.user.get_id()),
+           std::to_string(request.channel.get_id()), request.command_id,
+           arguments, request.irc_message.message});
 
       return (*command)->run(bundle, request);
     }

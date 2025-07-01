@@ -28,6 +28,7 @@
 #include "cpr/cprtypes.h"
 #include "cpr/multipart.h"
 #include "cpr/response.h"
+#include "database.hpp"
 #include "schemas/channel.hpp"
 #include "schemas/stream.hpp"
 #include "schemas/user.hpp"
@@ -464,30 +465,31 @@ namespace bot::command::lua {
       state->set_function("db_execute", [state, cfg](
                                             const std::string &query,
                                             const sol::table &parameters) {
-        pqxx::connection conn(GET_DATABASE_CONNECTION_URL(cfg));
-        pqxx::params p;
+        std::unique_ptr<db::BaseDatabase> conn = db::create_connection(cfg);
+
+        std::vector<std::string> params;
 
         for (const auto &kv : parameters) {
           auto v = kv.second;
           switch (v.get_type()) {
             case sol::type::lua_nil: {
-              p.append(nullptr);
+              params.push_back("NULL");
               break;
             }
             case sol::type::string: {
-              p.append(v.as<std::string>());
+              params.push_back(v.as<std::string>());
               break;
             }
             case sol::type::boolean: {
-              p.append(v.as<bool>());
+              params.push_back(std::to_string(v.as<bool>()));
               break;
             }
             case sol::type::number: {
               double num = v.as<double>();
               if (std::floor(num) == num) {
-                p.append(static_cast<long long>(num));
+                params.push_back(std::to_string(static_cast<long long>(num)));
               } else {
-                p.append(num);
+                params.push_back(std::to_string(num));
               }
               break;
             }
@@ -496,41 +498,37 @@ namespace bot::command::lua {
           }
         }
 
-        pqxx::work work(conn);
-
-        work.exec_params(query, p);
-
-        work.commit();
-        conn.close();
+        conn->exec(query, params);
       });
 
       state->set_function("db_query", [state, cfg](
                                           const std::string &query,
                                           const sol::table &parameters) {
-        pqxx::connection conn(GET_DATABASE_CONNECTION_URL(cfg));
-        pqxx::params p;
+        std::unique_ptr<db::BaseDatabase> conn = db::create_connection(cfg);
+
+        std::vector<std::string> params;
 
         for (const auto &kv : parameters) {
           auto v = kv.second;
           switch (v.get_type()) {
             case sol::type::lua_nil: {
-              p.append(nullptr);
+              params.push_back("NULL");
               break;
             }
             case sol::type::string: {
-              p.append(v.as<std::string>());
+              params.push_back(v.as<std::string>());
               break;
             }
             case sol::type::boolean: {
-              p.append(v.as<bool>());
+              params.push_back(std::to_string(v.as<bool>()));
               break;
             }
             case sol::type::number: {
               double num = v.as<double>();
               if (std::floor(num) == num) {
-                p.append(static_cast<long long>(num));
+                params.push_back(std::to_string(static_cast<long long>(num)));
               } else {
-                p.append(num);
+                params.push_back(std::to_string(num));
               }
               break;
             }
@@ -539,32 +537,25 @@ namespace bot::command::lua {
           }
         }
 
-        pqxx::work work(conn);
-        pqxx::result res = work.exec_params(query, p);
+        db::DatabaseRows rows = conn->exec(query, params);
 
         sol::table o = state->create_table();
 
-        for (const auto &row : res) {
+        for (const db::DatabaseRow &row : rows) {
           sol::table r = state->create_table();
 
-          for (int i = 0; i < row.size(); i++) {
-            auto v = row[i];
-
-            sol::object obj;
-            if (v.is_null()) {
-              obj = sol::make_object(*state, sol::lua_nil);
+          for (const auto &[k, v] : row) {
+            sol::object val;
+            if (v.empty()) {
+              val = sol::make_object(*state, sol::lua_nil);
             } else {
-              obj = sol::make_object(*state, v.as<std::string>());
+              val = sol::make_object(*state, v);
             }
-
-            r[res.column_name(i)] = obj;
+            r[k] = val;
           }
 
           o.add(r);
         }
-
-        work.commit();
-        conn.close();
 
         return o;
       });

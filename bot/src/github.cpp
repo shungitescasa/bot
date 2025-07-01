@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <chrono>
 #include <iterator>
-#include <pqxx/pqxx>
+#include <memory>
 #include <string>
 #include <thread>
 #include <unordered_map>
@@ -14,10 +14,10 @@
 #include "cpr/api.h"
 #include "cpr/cprtypes.h"
 #include "cpr/response.h"
+#include "database.hpp"
 #include "irc/client.hpp"
 #include "logger.hpp"
 #include "nlohmann/json.hpp"
-#include "pqxx/internal/statement_parameters.hxx"
 #include "schemas/stream.hpp"
 #include "utils/string.hpp"
 
@@ -60,15 +60,15 @@ namespace bot {
   }
 
   void GithubListener::check_for_listeners() {
-    pqxx::connection conn(GET_DATABASE_CONNECTION_URL(this->configuration));
-    pqxx::work work(conn);
+    std::unique_ptr<db::BaseDatabase> conn =
+        db::create_connection(this->configuration);
 
-    pqxx::result repos =
-        work.exec("SELECT name FROM events WHERE event_type = 40");
+    db::DatabaseRows repos =
+        conn->exec("SELECT name FROM events WHERE event_type = 40");
 
     // Adding new repos
     for (const auto &repo : repos) {
-      std::string id = repo[0].as<std::string>();
+      std::string id = repo.at("name");
       if (std::any_of(this->ids.begin(), this->ids.end(),
                       [&id](const auto &x) { return x == id; }))
         continue;
@@ -81,9 +81,9 @@ namespace bot {
     std::vector<std::string> names_to_delete;
 
     for (const std::string &id : this->ids) {
-      if (std::any_of(repos.begin(), repos.end(), [&id](const pqxx::row &x) {
-            return x[0].as<std::string>() == id;
-          }))
+      if (std::any_of(
+              repos.begin(), repos.end(),
+              [&id](const db::DatabaseRow &x) { return x.at("name") == id; }))
         continue;
 
       names_to_delete.push_back(id);
@@ -94,16 +94,10 @@ namespace bot {
       this->ids.erase(id_pos);
       this->commits.erase(name);
     }
-
-    work.commit();
-    conn.close();
   }
 
   std::unordered_map<std::string, std::vector<Commit>>
   GithubListener::check_new_commits() {
-    pqxx::connection conn(GET_DATABASE_CONNECTION_URL(this->configuration));
-    pqxx::work work(conn);
-
     std::unordered_map<std::string, std::vector<Commit>> new_commits;
 
     for (const std::string &id : this->ids) {
@@ -144,60 +138,53 @@ namespace bot {
       std::this_thread::sleep_for(std::chrono::seconds(2));
     }
 
-    work.commit();
-    conn.close();
-
     return new_commits;
   }
 
   void GithubListener::notify_about_commits(
       const std::unordered_map<std::string, std::vector<Commit>> &new_commits) {
-    pqxx::connection conn(GET_DATABASE_CONNECTION_URL(this->configuration));
-    pqxx::work work(conn);
+    std::unique_ptr<db::BaseDatabase> conn =
+        db::create_connection(this->configuration);
 
     for (const auto &pair : new_commits) {
       // don't notify on startup
       if (this->commits.at(pair.first).size() == 0) continue;
 
-      pqxx::result events = work.exec_params(
-          "SELECT e.id, e.message, array_to_json(e.flags) AS flags, "
+      db::DatabaseRows events = conn->exec(
+          "SELECT e.id, e.message, is_massping, "
           "c.alias_name AS "
           "channel_name, c.alias_id AS channel_aid "
           "FROM events e "
           "INNER JOIN channels c ON c.id = e.channel_id "
           "WHERE e.name = $1 AND e.event_type = 40",
-          pqxx::params{pair.first});
+          {pair.first});
 
       for (const auto &event : events) {
         std::vector<std::string> names;
 
-        bool massping_enabled = false;
-        if (!event[2].is_null()) {
-          nlohmann::json j = nlohmann::json::parse(event[2].as<std::string>());
-          massping_enabled = std::any_of(j.begin(), j.end(), [](const auto &x) {
-            return static_cast<int>(x) == static_cast<int>(schemas::MASSPING);
-          });
-        }
+        bool massping_enabled = std::stoi(event.at("is_massping"));
 
         if (massping_enabled) {
           auto chatters = this->helix_client.get_chatters(
-              event[4].as<int>(), this->irc_client.get_bot_id());
+              std::stoi(event.at("channel_aid")),
+              this->irc_client.get_bot_id());
 
           std::for_each(chatters.begin(), chatters.end(),
                         [&names](const auto &u) { names.push_back(u.login); });
         } else {
-          pqxx::result subs = work.exec_params(
+          db::DatabaseRows subs = conn->exec(
               "SELECT u.alias_name FROM users u INNER JOIN event_subscriptions "
               "es ON es.user_id = u.id WHERE es.event_id = $1",
-              pqxx::params{event[0].as<int>()});
+              {event.at("id")});
 
-          std::for_each(subs.begin(), subs.end(), [&names](const pqxx::row &x) {
-            names.push_back(x[0].as<std::string>());
-          });
+          std::for_each(subs.begin(), subs.end(),
+                        [&names](const db::DatabaseRow &x) {
+                          names.push_back(x.at("alias_name"));
+                        });
         }
 
         for (const Commit &commit : pair.second) {
-          std::string message = event[1].as<std::string>();
+          std::string message = event.at("message");
           message = "🧑‍💻 " + message;
 
           // Replacing SHA placeholder
@@ -223,14 +210,13 @@ namespace bot {
 
           std::for_each(parts.begin(), parts.end(),
                         [&message, &event, this](const std::string &part) {
-                          this->irc_client.say(event[3].as<std::string>(),
+                          this->irc_client.say(event.at("channel_name"),
                                                message + part);
                         });
         }
       }
     }
 
-    work.commit();
-    conn.close();
+    conn->close();
   }
 }

@@ -43,6 +43,40 @@ file(GLOB_RECURSE SOURCE_FILES "src/*.cpp" "src/*.h" "src/*.hpp")
 target_sources(Bot PRIVATE ${SOURCE_FILES})
 target_include_directories(Bot PRIVATE src)
 
+# DATABASE
+option(USE_POSTGRES "Use PostgreSQL backend" OFF)
+option(USE_MARIADB "Use MariaDB backend" ON)
+
+if (USE_POSTGRES)
+  FetchContent_Declare(
+    pqxx
+    GIT_REPOSITORY https://github.com/jtv/libpqxx.git
+    GIT_TAG 7.10.1
+  )
+  FetchContent_MakeAvailable(pqxx)
+  target_compile_definitions(Bot PRIVATE USE_POSTGRES)
+  target_link_libraries(Bot PRIVATE pqxx)
+endif()
+
+# ev&doe it is mysql
+if (USE_MARIADB)
+  target_compile_definitions(Bot PRIVATE USE_MARIADB)
+
+  # searching for mysql
+  find_program(MYSQL_CONFIG_EXECUTABLE mysql_config REQUIRED)
+
+  execute_process(COMMAND ${MYSQL_CONFIG_EXECUTABLE} --cflags
+                  OUTPUT_VARIABLE MYSQL_CFLAGS
+                  OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+  execute_process(COMMAND ${MYSQL_CONFIG_EXECUTABLE} --libs
+                  OUTPUT_VARIABLE MYSQL_LIBS
+                  OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+  target_compile_options(Bot PRIVATE ${MYSQL_CFLAGS})
+  target_link_libraries(Bot PRIVATE ${MYSQL_LIBS})
+endif()
+
 # Getting libraries
 
 # json
@@ -59,14 +93,6 @@ FetchContent_Declare(
   GIT_TAG 1.10.5
 )
 FetchContent_MakeAvailable(cpr)
-
-# postgresql
-FetchContent_Declare(
-  pqxx
-  GIT_REPOSITORY https://github.com/jtv/libpqxx.git
-  GIT_TAG 7.10.1
-)
-FetchContent_MakeAvailable(pqxx)
 
 # websockets
 FetchContent_Declare(
@@ -96,7 +122,6 @@ FetchContent_MakeAvailable(emotespp)
 
 target_link_libraries(Bot PRIVATE
     ixwebsocket::ixwebsocket
-    pqxx
     nlohmann_json::nlohmann_json
     cpr::cpr
     lua

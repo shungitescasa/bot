@@ -4,13 +4,13 @@
 #include <chrono>
 #include <exception>
 #include <map>
+#include <memory>
 #include <optional>
-#include <pqxx/pqxx>
 #include <string>
 #include <thread>
 #include <vector>
 
-#include "config.hpp"
+#include "database.hpp"
 #include "logger.hpp"
 #include "schemas/stream.hpp"
 #include "utils/string.hpp"
@@ -61,48 +61,43 @@ namespace bot::emotes {
       return;
     }
 
-    pqxx::connection conn(GET_DATABASE_CONNECTION_URL(bundle.configuration));
-    pqxx::work work(conn);
+    std::unique_ptr<db::BaseDatabase> conn =
+        db::create_connection(bundle.configuration);
 
-    pqxx::result events = work.exec_params(
-        "SELECT e.id, e.message, array_to_json(e.flags) AS "
-        "flags, c.alias_name AS channel_aname, c.alias_id AS channel_aid FROM "
+    db::DatabaseRows events = conn->exec(
+        "SELECT e.id, e.message, is_massping, c.alias_name AS channel_aname, "
+        "c.alias_id AS channel_aid FROM "
         "events e "
         "INNER JOIN channels c ON c.id = e.channel_id "
         "WHERE e.event_type = $1 AND e.name = $2",
-        pqxx::params{static_cast<int>(event_type), c_name});
+        {std::to_string(static_cast<int>(event_type)), c_name});
 
-    for (const auto &event : events) {
+    for (const db::DatabaseRow &event : events) {
       std::vector<std::string> names;
 
-      bool massping_enabled = false;
-      if (!event[2].is_null()) {
-        nlohmann::json j = nlohmann::json::parse(event[2].as<std::string>());
-        massping_enabled = std::any_of(j.begin(), j.end(), [](const auto &x) {
-          return static_cast<int>(x) == static_cast<int>(schemas::MASSPING);
-        });
-      }
+      bool massping_enabled = std::stoi(event.at("is_massping"));
 
       if (massping_enabled) {
         auto chatters = bundle.helix_client.get_chatters(
-            event[4].as<int>(), bundle.irc_client.get_bot_id());
+            std::stoi(event.at("channel_aid")), bundle.irc_client.get_bot_id());
 
         std::for_each(chatters.begin(), chatters.end(),
                       [&names](const auto &x) { names.push_back(x.login); });
       } else {
-        pqxx::result subs = work.exec_params(
+        db::DatabaseRows subs = conn->exec(
             "SELECT u.alias_name FROM users u "
             "INNER JOIN events e ON e.id = $1 "
             "INNER JOIN event_subscriptions es ON es.event_id = e.id "
             "WHERE u.id = es.user_id",
-            pqxx::params{event[0].as<int>()});
+            {event.at("id")});
 
-        std::for_each(subs.begin(), subs.end(), [&names](const pqxx::row &x) {
-          names.push_back(x[0].as<std::string>());
-        });
+        std::for_each(subs.begin(), subs.end(),
+                      [&names](const db::DatabaseRow &x) {
+                        names.push_back(x.at("alias_name"));
+                      });
       }
 
-      std::string base = prefix + " " + event[1].as<std::string>();
+      std::string base = prefix + " " + event.at("message");
       if (!names.empty()) {
         base.append(" · ");
       }
@@ -126,26 +121,23 @@ namespace bot::emotes {
           utils::string::separate_by_length(base, names, "@", " ", 500);
 
       for (const auto &msg : msgs) {
-        bundle.irc_client.say(event[3].as<std::string>(), base + msg);
+        bundle.irc_client.say(event.at("channel_aname"), base + msg);
       }
     }
-
-    work.commit();
-    conn.close();
   }
 
   void check_seventv_emotesets(const EmoteEventBundle *bundle,
-                               pqxx::work &work) {
-    pqxx::result events = work.exec(
+                               std::unique_ptr<db::BaseDatabase> &conn) {
+    db::DatabaseRows events = conn->exec(
         "SELECT name FROM events WHERE event_type >= 10 AND event_type <= "
         "12 GROUP BY name");
 
     auto &ids = bundle->stv_ws_client.get_ids();
 
     std::vector<std::string> names;
-    std::for_each(events.begin(), events.end(), [&names](const pqxx::row &r) {
-      names.push_back(r[0].as<std::string>());
-    });
+    std::for_each(
+        events.begin(), events.end(),
+        [&names](const db::DatabaseRow &r) { names.push_back(r.at("name")); });
 
     // adding new emote sets
     for (const std::string &name : names) {
@@ -189,8 +181,9 @@ namespace bot::emotes {
   }
 
 #ifdef BUILD_BETTERTTV
-  void check_betterttv_users(const EmoteEventBundle *bundle, pqxx::work &work) {
-    pqxx::result events = work.exec(
+  void check_betterttv_users(const EmoteEventBundle *bundle,
+                             std::unique_ptr<db::BaseDatabase> &conn) {
+    db::DatabaseRows events = conn->exec(
         "SELECT name FROM events WHERE event_type >= 13 AND event_type <= "
         "15 GROUP BY name");
 
@@ -198,9 +191,10 @@ namespace bot::emotes {
         bundle->bttv_ws_client.get_ids();
 
     std::vector<std::string> names;
-    std::for_each(events.begin(), events.end(), [&names](const pqxx::row &r) {
-      names.push_back("twitch:" + r[0].as<std::string>());
-    });
+    std::for_each(events.begin(), events.end(),
+                  [&names](const db::DatabaseRow &r) {
+                    names.push_back("twitch:" + r.at("name"));
+                  });
 
     // adding new users
     for (const std::string &name : names) {
@@ -228,21 +222,20 @@ namespace bot::emotes {
     log::info("emotes/thread", "Started emote thread.");
 
     while (true) {
-      pqxx::connection conn(GET_DATABASE_CONNECTION_URL(bundle->configuration));
-      pqxx::work work(conn);
+      std::unique_ptr<db::BaseDatabase> conn =
+          db::create_connection(bundle->configuration);
 
       try {
-        check_seventv_emotesets(bundle, work);
+        check_seventv_emotesets(bundle, conn);
 #ifdef BUILD_BETTERTTV
-        check_betterttv_users(bundle, work);
+        check_betterttv_users(bundle, conn);
 #endif
       } catch (std::exception ex) {
         log::error("emotes/thread",
                    "Error occurred in emote thread: " + std::string(ex.what()));
       }
 
-      work.commit();
-      conn.close();
+      conn->close();
 
       std::this_thread::sleep_for(std::chrono::seconds(30));
     }

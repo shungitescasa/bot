@@ -2,8 +2,8 @@
 
 #include <algorithm>
 #include <exception>
+#include <memory>
 #include <optional>
-#include <pqxx/pqxx>
 #include <random>
 #include <string>
 #include <vector>
@@ -11,12 +11,12 @@
 #include "bundle.hpp"
 #include "commands/command.hpp"
 #include "commands/request.hpp"
-#include "commands/request_util.hpp"
 #include "commands/response_error.hpp"
 #include "constants.hpp"
 #include "cpr/api.h"
 #include "cpr/multipart.h"
 #include "cpr/response.h"
+#include "database.hpp"
 #include "irc/message.hpp"
 #include "localization/line_id.hpp"
 #include "logger.hpp"
@@ -27,14 +27,9 @@
 namespace bot::handlers {
   void handle_private_message(
       const InstanceBundle &bundle, command::CommandLoader &command_loader,
-      const irc::Message<irc::MessageType::Privmsg> &message,
-      pqxx::connection &conn) {
-    if (utils::string::string_contains_sql_injection(message.message)) {
-      log::warn("PrivateMessageHandler",
-                "Received the message in #" + message.source.login +
-                    " with SQL injection: " + message.message);
-      return;
-    }
+      const irc::Message<irc::MessageType::Privmsg> &message) {
+    std::unique_ptr<db::BaseDatabase> conn =
+        db::create_connection(bundle.configuration);
 
     std::optional<command::Request> request =
         command::generate_request(command_loader, message, conn);
@@ -60,28 +55,27 @@ namespace bot::handlers {
       }
     }
 
-    pqxx::work work(conn);
-    pqxx::result channels =
-        work.exec("SELECT * FROM channels WHERE alias_id = " +
-                  std::to_string(message.source.id));
+    db::DatabaseRows channels =
+        conn->exec("SELECT * FROM channels WHERE alias_id = $1",
+                   {std::to_string(message.source.id)});
 
     if (!channels.empty()) {
       schemas::Channel channel(channels[0]);
 
-      pqxx::result channel_preferences = work.exec(
+      db::DatabaseRows channel_preferences = conn->exec(
           "SELECT * FROM channel_preferences WHERE "
-          "channel_id = " +
-          std::to_string(channel.get_id()));
+          "id = $1",
+          {std::to_string(channel.get_id())});
 
       schemas::ChannelPreferences preference(channel_preferences[0]);
 
-      pqxx::result cmds =
-          work.exec("SELECT message FROM custom_commands WHERE name = '" +
-                    message.message + "' AND channel_id = '" +
-                    std::to_string(channel.get_id()) + "'");
+      db::DatabaseRows cmds = conn->exec(
+          "SELECT message FROM custom_commands WHERE name = $1 AND channel_id "
+          "= $2",
+          {message.message, std::to_string(channel.get_id())});
 
       if (!cmds.empty()) {
-        std::string msg = cmds[0][0].as<std::string>();
+        std::string msg = cmds[0].at("message");
 
         bundle.irc_client.say(message.source.login, msg);
       } else {
@@ -89,7 +83,7 @@ namespace bot::handlers {
       }
     }
 
-    work.commit();
+    conn->close();
   }
 
   void make_markov_response(

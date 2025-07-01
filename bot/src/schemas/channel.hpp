@@ -1,30 +1,30 @@
 #pragma once
 
+#include <algorithm>
 #include <chrono>
 #include <optional>
-#include <pqxx/pqxx>
 #include <sol/sol.hpp>
 #include <string>
 #include <vector>
 
 #include "../constants.hpp"
 #include "../utils/chrono.hpp"
-#include "../utils/string.hpp"
+#include "database.hpp"
 
 namespace bot::schemas {
   class Channel {
     public:
-      Channel(const pqxx::row &row) {
-        this->id = row[0].as<int>();
-        this->alias_id = row[1].as<int>();
-        this->alias_name = row[2].as<std::string>();
+      Channel(const db::DatabaseRow &row) {
+        this->id = std::stoi(row.at("id"));
+        this->alias_id = std::stoi(row.at("alias_id"));
+        this->alias_name = row.at("alias_name");
 
         this->joined_at =
-            utils::chrono::string_to_time_point(row[3].as<std::string>());
+            utils::chrono::string_to_time_point(row.at("joined_at"));
 
-        if (!row[4].is_null()) {
+        if (!row.at("opted_out_at").empty()) {
           this->opted_out_at =
-              utils::chrono::string_to_time_point(row[4].as<std::string>());
+              utils::chrono::string_to_time_point(row.at("opted_out_at"));
         }
       }
 
@@ -51,6 +51,8 @@ namespace bot::schemas {
   };
 
   enum ChannelFeature { MARKOV_RESPONSES, RANDOM_MARKOV_RESPONSES };
+  const std::vector<ChannelFeature> FEATURES = {MARKOV_RESPONSES,
+                                                RANDOM_MARKOV_RESPONSES};
   std::optional<ChannelFeature> string_to_channel_feature(
       const std::string &value);
   std::optional<std::string> channelfeature_to_string(
@@ -58,32 +60,22 @@ namespace bot::schemas {
 
   class ChannelPreferences {
     public:
-      ChannelPreferences(const pqxx::row &row) {
-        this->channel_id = row[0].as<int>();
+      ChannelPreferences(const db::DatabaseRow &row) {
+        this->channel_id = std::stoi(row.at("id"));
+        this->prefix =
+            row.at("prefix").empty() ? DEFAULT_PREFIX : row.at("prefix");
+        this->locale =
+            row.at("locale").empty() ? DEFAULT_LOCALE_ID : row.at("locale");
 
-        if (!row[1].is_null()) {
-          this->prefix = row[1].as<std::string>();
-        } else {
-          this->prefix = DEFAULT_PREFIX;
-        }
-
-        if (!row[2].is_null()) {
-          this->locale = row[2].as<std::string>();
-        } else {
-          this->locale = DEFAULT_LOCALE_ID;
-        }
-
-        if (!row[3].is_null()) {
-          std::string x = row[3].as<std::string>();
-          x = x.substr(1, x.length() - 2);
-          std::vector<std::string> split_text =
-              utils::string::split_text(x, ',');
-
-          for (const std::string &part : split_text) {
-            ChannelFeature feature = (ChannelFeature)std::stoi(part);
-            this->features.push_back(feature);
-          }
-        }
+        std::for_each(
+            FEATURES.begin(), FEATURES.end(),
+            [this, &row](const ChannelFeature &f) {
+              std::optional<std::string> feature = channelfeature_to_string(f);
+              if (feature.has_value() && row.find(*feature) != row.end() &&
+                  row.at(*feature) == "1") {
+                this->features.push_back(f);
+              }
+            });
       }
 
       ~ChannelPreferences() = default;

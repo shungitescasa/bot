@@ -5,6 +5,10 @@ namespace bot {
     class CommandLoader;
   }
 
+  namespace loc {
+    class Localization;
+  }
+
   class InstanceBundle;
 }
 

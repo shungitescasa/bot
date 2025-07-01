@@ -1,7 +1,7 @@
 #include <emotespp/seventv.hpp>
+#include <map>
 #include <memory>
 #include <optional>
-#include <pqxx/pqxx>
 #include <sol/state.hpp>
 #include <string>
 #include <thread>
@@ -14,6 +14,7 @@
 #include "commands/lua.hpp"
 #include "commands/response.hpp"
 #include "config.hpp"
+#include "database.hpp"
 #include "emotes.hpp"
 #include "github.hpp"
 #include "handlers.hpp"
@@ -74,48 +75,41 @@ int main(int argc, char *argv[]) {
 
   client.join(client.get_bot_username());
 
-  pqxx::connection conn(GET_DATABASE_CONNECTION_URL(cfg));
-  pqxx::work *work = new pqxx::work(conn);
+  std::unique_ptr<bot::db::BaseDatabase> conn = bot::db::create_connection(cfg);
 
-  pqxx::result rows = work->exec(
-      "SELECT alias_id FROM channels WHERE opted_out_at is null AND alias_id "
-      "!= " +
-      std::to_string(client.get_bot_id()));
+  bot::db::DatabaseRows rows = conn->exec(
+      "SELECT alias_id FROM channels WHERE opted_out_At IS NULL AND alias_id "
+      "!= "
+      "$1",
+      {std::to_string(client.get_bot_id())});
 
   std::vector<int> ids;
 
-  for (const auto &row : rows) {
-    ids.push_back(row[0].as<int>());
+  for (const bot::db::DatabaseRow &row : rows) {
+    ids.push_back(std::stoi(row.at("alias_id")));
   }
 
   auto helix_channels = helix_client.get_users(ids);
 
   // it could be optimized
   for (const auto &helix_channel : helix_channels) {
-    auto channel =
-        work->exec("SELECT id, alias_name FROM channels WHERE alias_id = " +
-                   std::to_string(helix_channel.id));
+    std::vector<std::map<std::string, std::string>> channels =
+        conn->exec("SELECT id, alias_name FROM channels WHERE alias_id = $1",
+                   {std::to_string(helix_channel.id)});
 
-    if (!channel.empty()) {
-      std::string name = channel[0][1].as<std::string>();
+    if (!channels.empty()) {
+      std::string name = channels[0]["alias_name"];
 
       if (name != helix_channel.login) {
-        work->exec("UPDATE channels SET alias_name = '" + helix_channel.login +
-                   "' WHERE id = " + std::to_string(channel[0][0].as<int>()));
-        work->commit();
-
-        delete work;
-        work = new pqxx::work(conn);
+        conn->exec("UPDATE channels SET alias_name = $1 WHERE id = $2",
+                   {helix_channel.login, channels[0][0]});
       }
 
       client.join(helix_channel.login);
     }
   }
 
-  work->commit();
-  delete work;
-
-  conn.close();
+  conn->close();
 
   bot::stream::StreamListenerClient stream_listener_client(
       helix_client, kick_api_client, client, cfg);
@@ -206,12 +200,7 @@ int main(int argc, char *argv[]) {
         bot::InstanceBundle bundle{client,       helix_client, kick_api_client,
                                    localization, cfg,          command_loader};
 
-        pqxx::connection conn(GET_DATABASE_CONNECTION_URL(cfg));
-
-        bot::handlers::handle_private_message(bundle, command_loader, message,
-                                              conn);
-
-        conn.close();
+        bot::handlers::handle_private_message(bundle, command_loader, message);
       });
 
   client.run();

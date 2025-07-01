@@ -2,26 +2,26 @@
 
 #include <chrono>
 #include <optional>
-#include <pqxx/pqxx>
 #include <sol/sol.hpp>
 #include <string>
 
 #include "../utils/chrono.hpp"
+#include "database.hpp"
 
 namespace bot::schemas {
   class User {
     public:
-      User(const pqxx::row &row) {
-        this->id = row[0].as<int>();
-        this->alias_id = row[1].as<int>();
-        this->alias_name = row[2].as<std::string>();
+      User(const db::DatabaseRow &row) {
+        this->id = std::stoi(row.at("id"));
+        this->alias_id = std::stoi(row.at("alias_id"));
+        this->alias_name = row.at("alias_name");
 
         this->joined_at =
-            utils::chrono::string_to_time_point(row[3].as<std::string>());
+            utils::chrono::string_to_time_point(row.at("joined_at"));
 
-        if (!row[4].is_null()) {
+        if (!row.at("opted_out_at").empty()) {
           this->opted_out_at =
-              utils::chrono::string_to_time_point(row[4].as<std::string>());
+              utils::chrono::string_to_time_point(row.at("opted_out_at"));
         }
       }
 
@@ -54,11 +54,11 @@ namespace bot::schemas {
 
   class UserRights {
     public:
-      UserRights(const pqxx::row &row) {
-        this->id = row[0].as<int>();
-        this->user_id = row[1].as<int>();
-        this->channel_id = row[2].as<int>();
-        this->level = static_cast<PermissionLevel>(row[3].as<int>());
+      UserRights(const db::DatabaseRow &row) {
+        this->id = std::stoi(row.at("id"));
+        this->user_id = std::stoi(row.at("user_id"));
+        this->channel_id = std::stoi(row.at("channel_id"));
+        this->level = static_cast<PermissionLevel>(std::stoi(row.at("level")));
       }
 
       ~UserRights() = default;

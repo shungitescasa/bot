@@ -2,14 +2,14 @@
 
 #include <algorithm>
 #include <chrono>
-#include <pqxx/pqxx>
+#include <memory>
 #include <string>
 #include <thread>
 #include <vector>
 
 #include "api/kick.hpp"
 #include "api/twitch/schemas/stream.hpp"
-#include "config.hpp"
+#include "database.hpp"
 #include "logger.hpp"
 #include "nlohmann/json.hpp"
 #include "schemas/stream.hpp"
@@ -209,48 +209,44 @@ namespace bot::stream {
   void StreamListenerClient::handler(const schemas::EventType &type,
                                      const api::twitch::schemas::Stream &stream,
                                      const StreamerData &data) {
-    pqxx::connection conn(GET_DATABASE_CONNECTION_URL(this->configuration));
-    pqxx::work work(conn);
+    std::unique_ptr<db::BaseDatabase> conn =
+        db::create_connection(this->configuration);
 
-    pqxx::result events = work.exec_params(
-        "SELECT e.id, e.message, array_to_json(e.flags) AS "
-        "flags, c.alias_name AS channel_aname, c.alias_id AS channel_aid FROM "
+    db::DatabaseRows events = conn->exec(
+        "SELECT e.id, e.message, is_massping, c.alias_name AS channel_aname, "
+        "c.alias_id AS channel_aid FROM "
         "events e "
         "INNER JOIN channels c ON c.id = e.channel_id "
         "WHERE e.event_type = $1 AND e.name = $2",
-        pqxx::params{static_cast<int>(type), stream.get_user_id()});
+        {std::to_string(static_cast<int>(type)),
+         std::to_string(stream.get_user_id())});
 
     for (const auto &event : events) {
       std::vector<std::string> names;
 
-      bool massping_enabled = false;
-      if (!event[2].is_null()) {
-        nlohmann::json j = nlohmann::json::parse(event[2].as<std::string>());
-        massping_enabled = std::any_of(j.begin(), j.end(), [](const auto &x) {
-          return static_cast<int>(x) == static_cast<int>(schemas::MASSPING);
-        });
-      }
+      bool massping_enabled = std::stoi(event.at("is_massping"));
 
       if (massping_enabled) {
         auto chatters = this->helix_client.get_chatters(
-            event[4].as<int>(), this->irc_client.get_bot_id());
+            std::stoi(event.at("channel_aid")), this->irc_client.get_bot_id());
 
         std::for_each(chatters.begin(), chatters.end(),
                       [&names](const auto &x) { names.push_back(x.login); });
       } else {
-        pqxx::result subs = work.exec_params(
+        db::DatabaseRows subs = conn->exec(
             "SELECT u.alias_name FROM users u "
             "INNER JOIN events e ON e.id = $1 "
             "INNER JOIN event_subscriptions es ON es.event_id = e.id "
             "WHERE u.id = es.user_id",
-            pqxx::params{event[0].as<int>()});
+            {event.at("id")});
 
-        std::for_each(subs.begin(), subs.end(), [&names](const pqxx::row &x) {
-          names.push_back(x[0].as<std::string>());
-        });
+        std::for_each(subs.begin(), subs.end(),
+                      [&names](const db::DatabaseRow &x) {
+                        names.push_back(x.at("alias_name"));
+                      });
       }
 
-      std::string base = "⚡ " + event[1].as<std::string>();
+      std::string base = "⚡ " + event.at("message");
       if (!names.empty()) {
         base.append(" · ");
       }
@@ -279,24 +275,23 @@ namespace bot::stream {
           utils::string::separate_by_length(base, names, "@", " ", 500);
 
       for (const auto &msg : msgs) {
-        this->irc_client.say(event[3].as<std::string>(), base + msg);
+        this->irc_client.say(event.at("channel_aname"), base + msg);
       }
     }
 
-    work.commit();
-    conn.close();
+    conn->close();
   }
 
   void StreamListenerClient::update_channel_ids() {
-    pqxx::connection conn(GET_DATABASE_CONNECTION_URL(this->configuration));
-    pqxx::work work(conn);
+    std::unique_ptr<db::BaseDatabase> conn =
+        db::create_connection(this->configuration);
 
-    pqxx::result ids =
-        work.exec("SELECT name, event_type FROM events WHERE event_type < 10");
+    db::DatabaseRows ids =
+        conn->exec("SELECT name, event_type FROM events WHERE event_type < 10");
 
     for (const auto &row : ids) {
-      int id = row[0].as<int>();
-      int event_type = row[1].as<int>();
+      int id = std::stoi(row.at("name"));
+      int event_type = std::stoi(row.at("event_type"));
 
       StreamerType type = (event_type >= schemas::EventType::KICK_LIVE &&
                            event_type <= schemas::EventType::KICK_GAME)
@@ -313,7 +308,6 @@ namespace bot::stream {
       listen_channel(id, type);
     }
 
-    work.commit();
-    conn.close();
+    conn->close();
   }
 }

@@ -2,7 +2,6 @@
 
 #include <memory>
 #include <optional>
-#include <pqxx/pqxx>
 #include <sol/state.hpp>
 #include <sol/table.hpp>
 #include <string>
@@ -10,6 +9,13 @@
 #include "../irc/message.hpp"
 #include "../schemas/channel.hpp"
 #include "../schemas/user.hpp"
+
+namespace bot::command {
+  struct Request;
+}
+
+#include "commands/command.hpp"
+#include "database.hpp"
 
 namespace bot::command {
   struct Request {
@@ -23,8 +29,11 @@ namespace bot::command {
       schemas::User user;
       schemas::UserRights user_rights;
 
-      pqxx::connection &conn;
-
       sol::table as_lua_table(std::shared_ptr<sol::state> luaState) const;
   };
+
+  std::optional<Request> generate_request(
+      const command::CommandLoader &command_loader,
+      const irc::Message<irc::MessageType::Privmsg> &irc_message,
+      std::unique_ptr<db::BaseDatabase> &conn);
 }
