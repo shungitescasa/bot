@@ -728,6 +728,114 @@ namespace bot::command::lua {
             return o;
           });
     }
+
+    void add_storage_library(std::shared_ptr<sol::state> state,
+                             const Request &request, const Configuration &cfg,
+                             const std::string &lua_id) {
+      state->set_function("storage_get", [state, &request, &cfg, &lua_id]() {
+        std::unique_ptr<db::BaseDatabase> conn = db::create_connection(cfg);
+        std::vector<std::string> params{std::to_string(request.user.get_id()),
+                                        lua_id};
+
+        db::DatabaseRows rows = conn->exec(
+            "SELECT value FROM lua_user_storage WHERE user_id = $1 AND "
+            "lua_id = $2",
+            params);
+
+        std::string value = "";
+
+        if (rows.empty()) {
+          conn->exec(
+              "INSERT INTO lua_user_storage(user_id, lua_id) VALUES ($1, "
+              "$2)",
+              params);
+        } else {
+          value = rows[0].at("value");
+        }
+
+        return value;
+      });
+
+      state->set_function("storage_put", [state, &request, &cfg,
+                                          &lua_id](const std::string &value) {
+        std::unique_ptr<db::BaseDatabase> conn = db::create_connection(cfg);
+        std::vector<std::string> params{std::to_string(request.user.get_id()),
+                                        lua_id};
+
+        db::DatabaseRows rows = conn->exec(
+            "SELECT id FROM lua_user_storage WHERE user_id = $1 AND "
+            "lua_id = $2",
+            params);
+
+        if (rows.empty()) {
+          params.push_back(value);
+          conn->exec(
+              "INSERT INTO lua_user_storage(user_id, lua_id, value) VALUES "
+              "($1, "
+              "$2, $3)",
+              params);
+        } else {
+          conn->exec("UPDATE lua_user_storage SET value = $1 WHERE id = $2",
+                     {value, rows[0].at("id")});
+        }
+
+        return true;
+      });
+
+      state->set_function("storage_channel_get", [state, &request, &cfg,
+                                                  &lua_id]() {
+        std::unique_ptr<db::BaseDatabase> conn = db::create_connection(cfg);
+        std::vector<std::string> params{
+            std::to_string(request.channel.get_id()), lua_id};
+
+        db::DatabaseRows rows = conn->exec(
+            "SELECT value FROM lua_channel_storage WHERE channel_id = $1 AND "
+            "lua_id = $2",
+            params);
+
+        std::string value = "";
+
+        if (rows.empty()) {
+          conn->exec(
+              "INSERT INTO lua_channel_storage(channel_id, lua_id) VALUES ($1, "
+              "$2)",
+              params);
+        } else {
+          value = rows[0].at("value");
+        }
+
+        return value;
+      });
+
+      state->set_function(
+          "storage_channel_put",
+          [state, &request, &cfg, &lua_id](const std::string &value) {
+            std::unique_ptr<db::BaseDatabase> conn = db::create_connection(cfg);
+            std::vector<std::string> params{
+                std::to_string(request.channel.get_id()), lua_id};
+
+            db::DatabaseRows rows = conn->exec(
+                "SELECT id FROM lua_channel_storage WHERE channel_id = $1 AND "
+                "lua_id = $2",
+                params);
+
+            if (rows.empty()) {
+              params.push_back(value);
+              conn->exec(
+                  "INSERT INTO lua_channel_storage(channel_id, lua_id, value) "
+                  "VALUES "
+                  "($1, "
+                  "$2, $3)",
+                  params);
+            } else {
+              conn->exec(
+                  "UPDATE lua_channel_storage SET value = $1 WHERE id = $2",
+                  {value, rows[0].at("id")});
+            }
+
+            return true;
+          });
+    }
   }
 
   Response parse_lua_response(const sol::table &r, sol::object &res,
@@ -761,12 +869,18 @@ namespace bot::command::lua {
 
   command::Response run_safe_lua_script(const Request &request,
                                         const InstanceBundle &bundle,
-                                        const std::string &script) {
+                                        const std::string &script,
+                                        std::string lua_id) {
     // shared_ptr is unnecessary here, but my library needs it.
     std::shared_ptr<sol::state> state = std::make_shared<sol::state>();
 
     state->open_libraries(sol::lib::base, sol::lib::table, sol::lib::string);
     library::add_base_libraries(state);
+
+    if (!lua_id.empty()) {
+      library::add_storage_library(state, request, bundle.configuration,
+                                   lua_id);
+    }
 
     sol::load_result s = state->load("return " + script);
     if (!s.valid()) {

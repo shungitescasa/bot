@@ -37,6 +37,9 @@ namespace bot::command::lua {
                          const InstanceBundle &bundle);
     void add_l10n_library(std::shared_ptr<sol::state> state,
                           const InstanceBundle &bundle);
+    void add_storage_library(std::shared_ptr<sol::state> state,
+                             const Request &request, const Configuration &cfg,
+                             const std::string &lua_id);
 
     void add_base_libraries(std::shared_ptr<sol::state> state);
     void add_chat_libraries(std::shared_ptr<sol::state> state,
@@ -46,7 +49,8 @@ namespace bot::command::lua {
 
   command::Response run_safe_lua_script(const Request &request,
                                         const InstanceBundle &bundle,
-                                        const std::string &script);
+                                        const std::string &script,
+                                        std::string lua_id = "");
 
   class LuaCommand : public Command {
     public:
@@ -133,7 +137,8 @@ namespace bot::command::lua {
 
           std::string script = response.text;
 
-          return command::lua::run_safe_lua_script(request, bundle, script);
+          return command::lua::run_safe_lua_script(request, bundle, script,
+                                                   url);
         }
     };
   }
