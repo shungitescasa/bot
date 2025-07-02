@@ -116,6 +116,10 @@ namespace bot::command::lua {
         return utils::chrono::format_timestamp(timestamp);
       });
 
+      state->set_function("time_humanize", [](const double &timestamp) {
+        return utils::chrono::format_timestamp(std::floor(timestamp));
+      });
+
       state->set_function("time_format",
                           [](const long &timestamp, const std::string &format) {
                             std::time_t t = std::time(nullptr);
