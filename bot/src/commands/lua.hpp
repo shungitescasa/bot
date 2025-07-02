@@ -114,7 +114,9 @@ namespace bot::command::lua {
 
           std::string url = request.message.value();
 
-          std::vector<std::string> mimeTypes = {"text/plain", "text/x-lua"};
+          std::vector<std::string> mimeTypes = {"text/plain", "text/x-lua",
+                                                "text/plain; charset=utf-8",
+                                                "text/x-lua; charset=utf-8"};
 
           cpr::Response response = cpr::Get(
               cpr::Url{url},
