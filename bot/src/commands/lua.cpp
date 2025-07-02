@@ -878,7 +878,8 @@ namespace bot::command::lua {
     // shared_ptr is unnecessary here, but my library needs it.
     std::shared_ptr<sol::state> state = std::make_shared<sol::state>();
 
-    state->open_libraries(sol::lib::base, sol::lib::table, sol::lib::string);
+    state->open_libraries(sol::lib::base, sol::lib::table, sol::lib::string,
+                          sol::lib::math);
     library::add_base_libraries(state);
 
     if (!lua_id.empty()) {
