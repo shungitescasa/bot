@@ -105,7 +105,7 @@ namespace bot {
         const command::Request &request, const LineId &line_id,
         const std::vector<std::string> &args) const {
       std::optional<std::string> o_line = this->get_formatted_line(
-          request.channel_preferences.get_locale(), line_id, args);
+          request.requester.channel_preferences.get_locale(), line_id, args);
 
       if (!o_line.has_value()) {
         return std::nullopt;
@@ -114,10 +114,11 @@ namespace bot {
       std::string line = o_line.value();
 
       std::map<std::string, std::string> token_map = {
-          {"{sender.alias_name}", request.user.get_alias_name()},
-          {"{source.alias_name}", request.channel.get_alias_name()},
+          {"{sender.alias_name}", request.requester.user.get_alias_name()},
+          {"{source.alias_name}", request.requester.channel.get_alias_name()},
           {"{default.prefix}", DEFAULT_PREFIX},
-          {"{channel.prefix}", request.channel_preferences.get_prefix()}};
+          {"{channel.prefix}",
+           request.requester.channel_preferences.get_prefix()}};
 
       for (const auto &pair : token_map) {
         int pos = line.find(pair.first);

@@ -641,7 +641,8 @@ namespace bot::command::lua {
       // TODO: ratelimits
       state->set_function("twitch_get_chatters", [state, &request, &bundle]() {
         auto chatters = bundle.helix_client.get_chatters(
-            request.channel.get_alias_id(), bundle.irc_client.get_bot_id());
+            request.requester.channel.get_alias_id(),
+            bundle.irc_client.get_bot_id());
 
         sol::table o = state->create_table();
 
@@ -738,8 +739,8 @@ namespace bot::command::lua {
                              const std::string &lua_id) {
       state->set_function("storage_get", [state, &request, &cfg, &lua_id]() {
         std::unique_ptr<db::BaseDatabase> conn = db::create_connection(cfg);
-        std::vector<std::string> params{std::to_string(request.user.get_id()),
-                                        lua_id};
+        std::vector<std::string> params{
+            std::to_string(request.requester.user.get_id()), lua_id};
 
         db::DatabaseRows rows = conn->exec(
             "SELECT value FROM lua_user_storage WHERE user_id = $1 AND "
@@ -763,8 +764,8 @@ namespace bot::command::lua {
       state->set_function("storage_put", [state, &request, &cfg,
                                           &lua_id](const std::string &value) {
         std::unique_ptr<db::BaseDatabase> conn = db::create_connection(cfg);
-        std::vector<std::string> params{std::to_string(request.user.get_id()),
-                                        lua_id};
+        std::vector<std::string> params{
+            std::to_string(request.requester.user.get_id()), lua_id};
 
         db::DatabaseRows rows = conn->exec(
             "SELECT id FROM lua_user_storage WHERE user_id = $1 AND "
@@ -790,7 +791,7 @@ namespace bot::command::lua {
                                                   &lua_id]() {
         std::unique_ptr<db::BaseDatabase> conn = db::create_connection(cfg);
         std::vector<std::string> params{
-            std::to_string(request.channel.get_id()), lua_id};
+            std::to_string(request.requester.channel.get_id()), lua_id};
 
         db::DatabaseRows rows = conn->exec(
             "SELECT value FROM lua_channel_storage WHERE channel_id = $1 AND "
@@ -816,7 +817,7 @@ namespace bot::command::lua {
           [state, &request, &cfg, &lua_id](const std::string &value) {
             std::unique_ptr<db::BaseDatabase> conn = db::create_connection(cfg);
             std::vector<std::string> params{
-                std::to_string(request.channel.get_id()), lua_id};
+                std::to_string(request.requester.channel.get_id()), lua_id};
 
             db::DatabaseRows rows = conn->exec(
                 "SELECT id FROM lua_channel_storage WHERE channel_id = $1 AND "

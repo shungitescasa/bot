@@ -209,7 +209,8 @@ namespace bot {
         auto arg =
             this->localizator
                 .get_localized_line(
-                    this->request.channel_preferences.get_locale(), arg_id)
+                    this->request.requester.channel_preferences.get_locale(),
+                    arg_id)
                 .value();
 
         this->line =

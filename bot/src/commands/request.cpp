@@ -27,16 +27,16 @@ namespace bot::command {
       o["message"] = sol::lua_nil;
     }
 
-    o["sender"] = this->user.as_lua_table(luaState);
-    o["channel"] = this->channel.as_lua_table(luaState);
-    o["channel_preference"] = this->channel_preferences.as_lua_table(luaState);
-    o["rights"] = this->user_rights.as_lua_table(luaState);
+    o["sender"] = requester.user.as_lua_table(luaState);
+    o["channel"] = requester.channel.as_lua_table(luaState);
+    o["channel_preference"] =
+        requester.channel_preferences.as_lua_table(luaState);
+    o["rights"] = requester.user_rights.as_lua_table(luaState);
 
     return o;
   }
 
-  std::optional<Request> generate_request(
-      const command::CommandLoader &command_loader,
+  std::optional<Requester> get_requester(
       const irc::Message<irc::MessageType::Privmsg> &irc_message,
       std::unique_ptr<db::BaseDatabase> &conn) {
     // fetching channel
@@ -146,12 +146,20 @@ namespace bot::command {
       user_right.set_level(level);
     }
 
+    return (Requester){channel, pref, user, user_right};
+  }
+
+  std::optional<Request> generate_request(
+      const command::CommandLoader &command_loader,
+      const irc::Message<irc::MessageType::Privmsg> &irc_message,
+      const Requester &requester, std::unique_ptr<db::BaseDatabase> &conn) {
     // --- FETCHING MESSAGES
     std::string fullmsg = irc_message.message;
-    const std::string &prefix = pref.get_prefix();
+    const std::string &prefix = requester.channel_preferences.get_prefix();
 
     if (fullmsg.empty() || fullmsg.substr(0, prefix.length()) != prefix ||
-        std::any_of(pref.get_features().begin(), pref.get_features().end(),
+        std::any_of(requester.channel_preferences.get_features().begin(),
+                    requester.channel_preferences.get_features().end(),
                     [](const schemas::ChannelFeature &f) {
                       return f == schemas::ChannelFeature::SILENT_MODE;
                     })) {
@@ -175,8 +183,7 @@ namespace bot::command {
 
     parts.erase(parts.begin());
 
-    Request req{command_id, std::nullopt, std::nullopt, irc_message,
-                channel,    pref,         user,         user_right};
+    Request req{command_id, std::nullopt, std::nullopt, irc_message, requester};
 
     if (parts.empty()) {
       return req;

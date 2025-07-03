@@ -50,7 +50,7 @@ void Client::run() {
       [this](const ix::WebSocketMessagePtr &msg) {
         switch (msg->type) {
           case ix::WebSocketMessageType::Message: {
-            log::debug("IRC", "Received message: " + msg->str);
+            log::info("IRC", "Received message: " + msg->str);
 
             std::vector<std::string> lines =
                 utils::string::split_text(msg->str, '\n');
@@ -120,7 +120,7 @@ void Client::run() {
 
 void Client::say(const std::string &channel_login, const std::string &message) {
   this->raw("PRIVMSG #" + channel_login + " :" + message);
-  log::debug("IRC", "Sent '" + message + "' in #" + channel_login);
+  log::info("IRC", "Sent '" + message + "' in #" + channel_login);
 }
 
 bool Client::join(const std::string &channel_login) {

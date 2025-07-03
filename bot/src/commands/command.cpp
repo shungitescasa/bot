@@ -81,7 +81,7 @@ namespace bot {
       }
 
       if ((*command)->get_permission_level() >
-          request.user_rights.get_level()) {
+          request.requester.user_rights.get_level()) {
         return std::nullopt;
       }
 
@@ -91,8 +91,9 @@ namespace bot {
       db::DatabaseRows actions = conn->exec(
           "SELECT sent_at FROM actions WHERE user_id = $1 AND channel_id = $2 "
           "AND command = $3 ORDER BY sent_at DESC",
-          {std::to_string(request.user.get_id()),
-           std::to_string(request.channel.get_id()), request.command_id});
+          {std::to_string(request.requester.user.get_id()),
+           std::to_string(request.requester.channel.get_id()),
+           request.command_id});
 
       if (!actions.empty()) {
         auto last_sent_at =
@@ -124,9 +125,9 @@ namespace bot {
       conn->exec(
           "INSERT INTO actions(user_id, channel_id, command, arguments, "
           "full_message) VALUES ($1, $2, $3, $4, $5)",
-          {std::to_string(request.user.get_id()),
-           std::to_string(request.channel.get_id()), request.command_id,
-           arguments, request.irc_message.message});
+          {std::to_string(request.requester.user.get_id()),
+           std::to_string(request.requester.channel.get_id()),
+           request.command_id, arguments, request.irc_message.message});
 
       return (*command)->run(bundle, request);
     }
