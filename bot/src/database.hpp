@@ -209,7 +209,7 @@ namespace bot::db {
         std::vector<MYSQL_BIND> bind_res(num_fields);
         std::vector<std::string> bufs(num_fields);
         std::vector<unsigned long> lengths_out(num_fields);
-        std::vector<my_bool> is_null(num_fields);
+        std::vector<bool *> is_null(num_fields);
 
         for (int i = 0; i < num_fields; i++) {
           bufs[i].resize(1024);
@@ -218,7 +218,7 @@ namespace bot::db {
           bind_res[i].buffer = bufs[i].data();
           bind_res[i].buffer_length = bufs[i].size();
           bind_res[i].length = &lengths_out[i];
-          bind_res[i].is_null = &is_null[i];
+          bind_res[i].is_null = reinterpret_cast<bool *>(&is_null[i]);
         }
 
         if (mysql_stmt_bind_result(stmt, bind_res.data())) {
