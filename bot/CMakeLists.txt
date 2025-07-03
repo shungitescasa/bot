@@ -115,7 +115,7 @@ FetchContent_MakeAvailable(sol)
 # emotespp
 FetchContent_Declare(
   emotespp
-  GIT_REPOSITORY https://git.shungites.casa/emotespp.git
+  GIT_REPOSITORY https://git.ilt.su/emotespp.git
   GIT_TAG master
 )
 FetchContent_MakeAvailable(emotespp)
