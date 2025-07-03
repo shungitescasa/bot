@@ -5,12 +5,14 @@
 #include <memory>
 #include <optional>
 #include <random>
+#include <regex>
 #include <string>
 #include <vector>
 
 #include "bundle.hpp"
 #include "commands/command.hpp"
 #include "commands/request.hpp"
+#include "commands/response.hpp"
 #include "commands/response_error.hpp"
 #include "constants.hpp"
 #include "cpr/api.h"
@@ -25,62 +27,136 @@
 #include "utils/string.hpp"
 
 namespace bot::handlers {
-  void handle_private_message(
+  std::optional<command::Response> run_command(
       const InstanceBundle &bundle, command::CommandLoader &command_loader,
-      const irc::Message<irc::MessageType::Privmsg> &message) {
-    std::unique_ptr<db::BaseDatabase> conn =
-        db::create_connection(bundle.configuration);
-
+      const irc::Message<irc::MessageType::Privmsg> &message,
+      const command::Requester &requester,
+      std::unique_ptr<db::BaseDatabase> &conn) {
     std::optional<command::Request> request =
-        command::generate_request(command_loader, message, conn);
+        command::generate_request(command_loader, message, requester, conn);
 
     if (request.has_value()) {
       try {
         auto response = command_loader.run(bundle, request.value());
 
-        if (response.has_value()) {
-          if (response->is_single()) {
-            bundle.irc_client.say(message.source.login, response->get_single());
-          } else if (response->is_multiple()) {
-            for (const std::string &msg : response->get_multiple()) {
-              bundle.irc_client.say(message.source.login, msg);
-            }
-          }
-
-          return;
-        }
+        return response;
       } catch (const std::exception &e) {
         bundle.irc_client.say(message.source.login, e.what());
         log::error("PrivMsg/" + request->command_id, e.what());
       }
     }
 
-    db::DatabaseRows channels =
-        conn->exec("SELECT * FROM channels WHERE alias_id = $1",
-                   {std::to_string(message.source.id)});
+    return std::nullopt;
+  }
 
-    if (!channels.empty()) {
-      schemas::Channel channel(channels[0]);
+  std::optional<std::string> handle_custom_commands(
+      const InstanceBundle &bundle, command::CommandLoader &command_loader,
+      std::unique_ptr<db::BaseDatabase> &conn,
+      const command::Requester &requester,
+      const irc::Message<irc::MessageType::Privmsg> &message) {
+    std::vector<std::string> parts =
+        utils::string::split_text(message.message, ' ');
 
-      db::DatabaseRows channel_preferences = conn->exec(
-          "SELECT * FROM channel_preferences WHERE "
-          "id = $1",
-          {std::to_string(channel.get_id())});
+    if (parts.empty()) {
+      return std::nullopt;
+    }
 
-      schemas::ChannelPreferences preference(channel_preferences[0]);
+    std::string cid = parts[0];
 
-      db::DatabaseRows cmds = conn->exec(
-          "SELECT message FROM custom_commands WHERE name = $1 AND channel_id "
-          "= $2",
-          {message.message, std::to_string(channel.get_id())});
+    db::DatabaseRows cmds = conn->exec(
+        "SELECT message FROM custom_commands WHERE name = $1 AND (channel_id "
+        "= $2 OR is_global = TRUE)",
+        {cid, std::to_string(requester.channel.get_id())});
 
-      if (!cmds.empty()) {
-        std::string msg = cmds[0].at("message");
+    if (cmds.empty()) {
+      return std::nullopt;
+    }
 
-        bundle.irc_client.say(message.source.login, msg);
-      } else {
-        make_markov_response(bundle, message, channel, preference);
+    parts.erase(parts.begin());
+
+    std::string initial_message = utils::string::join_vector(parts, ' ');
+
+    db::DatabaseRow cmd = cmds[0];
+    std::string msg = cmd.at("message");
+
+    // parsing values
+    std::regex pattern(R"(\{([^}]*)\})");
+    std::string output;
+    std::sregex_iterator iter(msg.begin(), msg.end(), pattern);
+    std::sregex_iterator end;
+
+    int last_pos = 0;
+    for (; iter != end; ++iter) {
+      auto m = *iter;
+      output += msg.substr(last_pos, m.position() - last_pos);
+
+      std::string inside = m[1].str();
+
+      int placeholder_pos = inside.find("$1");
+      if (placeholder_pos != std::string::npos) {
+        inside.replace(placeholder_pos, 3, initial_message);
       }
+
+      irc::Message<irc::MessageType::Privmsg> msg2 = message;
+      msg2.message = inside;
+
+      std::optional<command::Response> response =
+          run_command(bundle, command_loader, msg2, requester, conn);
+
+      std::string answer = inside;
+
+      if (response.has_value()) {
+        if (response->is_single()) {
+          answer = response->get_single();
+        } else if (response->is_multiple()) {
+          answer = "[multiple strings]";
+        }
+      }
+
+      output += answer;
+
+      last_pos = m.position() + m.length();
+    }
+
+    output += msg.substr(last_pos);
+
+    return output;
+  }
+
+  void handle_private_message(
+      const InstanceBundle &bundle, command::CommandLoader &command_loader,
+      const irc::Message<irc::MessageType::Privmsg> &message) {
+    std::unique_ptr<db::BaseDatabase> conn =
+        db::create_connection(bundle.configuration);
+
+    std::optional<command::Requester> requester =
+        command::get_requester(message, conn);
+
+    if (!requester.has_value()) {
+      return;
+    }
+
+    std::optional<command::Response> response =
+        run_command(bundle, command_loader, message, *requester, conn);
+
+    if (response.has_value()) {
+      if (response->is_single()) {
+        bundle.irc_client.say(message.source.login, response->get_single());
+      } else if (response->is_multiple()) {
+        for (const std::string &msg : response->get_multiple()) {
+          bundle.irc_client.say(message.source.login, msg);
+        }
+      }
+
+      return;
+    }
+
+    std::optional<std::string> custom_command_response = handle_custom_commands(
+        bundle, command_loader, conn, *requester, message);
+
+    if (custom_command_response.has_value()) {
+      bundle.irc_client.say(message.source.login, *custom_command_response);
+      return;
     }
 
     conn->close();

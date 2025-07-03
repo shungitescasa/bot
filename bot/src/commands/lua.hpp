@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <sol/sol.hpp>
 #include <sol/state.hpp>
 #include <sol/table.hpp>
@@ -15,6 +16,7 @@
 #include "config.hpp"
 #include "cpr/api.h"
 #include "schemas/user.hpp"
+#include "utils/string.hpp"
 
 void print_lua_object_type(const sol::object &obj);
 
@@ -112,7 +114,22 @@ namespace bot::command::lua {
                 request, bundle.localization, command::CommandArgument::VALUE);
           }
 
-          std::string url = request.message.value();
+          std::vector<std::string> parts =
+              utils::string::split_text(request.message.value(), ' ');
+
+          std::string url = parts[0];
+
+          parts.erase(parts.begin());
+
+          std::string m = utils::string::join_vector(parts, ' ');
+
+          command::Request r = request;
+
+          if (m.empty()) {
+            r.message = std::nullopt;
+          } else {
+            r.message = m;
+          }
 
           std::vector<std::string> mimeTypes = {"text/plain", "text/x-lua",
                                                 "text/plain; charset=utf-8",
@@ -139,8 +156,7 @@ namespace bot::command::lua {
 
           std::string script = response.text;
 
-          return command::lua::run_safe_lua_script(request, bundle, script,
-                                                   url);
+          return command::lua::run_safe_lua_script(r, bundle, script, url);
         }
     };
   }
