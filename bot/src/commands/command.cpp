@@ -18,6 +18,7 @@
 #include "database.hpp"
 #include "request.hpp"
 #include "response.hpp"
+#include "utils/string.hpp"
 
 namespace bot {
   namespace command {
@@ -122,14 +123,24 @@ namespace bot {
         arguments += request.message.value();
       }
 
+      Response response = (*command)->run(bundle, request);
+
+      std::string response_action;
+      if (response.is_single()) {
+        response_action = response.get_single();
+      } else if (response.is_multiple()) {
+        auto &v = response.get_multiple();
+        response_action = utils::string::str(v.begin(), v.end(), '\n');
+      }
+
       conn->exec(
           "INSERT INTO actions(user_id, channel_id, command, arguments, "
-          "full_message) VALUES ($1, $2, $3, $4, $5)",
+          "response) VALUES ($1, $2, $3, $4, $5)",
           {std::to_string(request.requester.user.get_id()),
            std::to_string(request.requester.channel.get_id()),
-           request.command_id, arguments, request.irc_message.message});
+           request.command_id, arguments, response_action});
 
-      return (*command)->run(bundle, request);
+      return response;
     }
   }
 }

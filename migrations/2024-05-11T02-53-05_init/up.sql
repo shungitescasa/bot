@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS actions (
   channel_id INTEGER NOT NULL REFERENCES channels(id) ON DELETE CASCADE,
   command TEXT NOT NULL,
   arguments TEXT,
-  full_message TEXT NOT NULL,
+  response TEXT,
   sent_at TIMESTAMP NOT NULL DEFAULT UTC_TIMESTAMP
 );
 
