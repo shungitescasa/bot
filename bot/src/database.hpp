@@ -209,10 +209,10 @@ namespace bot::db {
         std::vector<MYSQL_BIND> bind_res(num_fields);
         std::vector<std::string> bufs(num_fields);
         std::vector<unsigned long> lengths_out(num_fields);
-#if MYSQL_VERSION_ID >= 80000
-        std::vector<bool *> is_null(num_fields);
-#else
+#ifdef MARIADB_BASE_VERSION
         std::vector<my_bool> is_null(num_fields);
+#else
+        std::vector<bool *> is_null(num_fields);
 #endif
 
         for (int i = 0; i < num_fields; i++) {
@@ -222,10 +222,10 @@ namespace bot::db {
           bind_res[i].buffer = bufs[i].data();
           bind_res[i].buffer_length = bufs[i].size();
           bind_res[i].length = &lengths_out[i];
-#if MYSQL_VERSION_ID >= 80000
-          bind_res[i].is_null = reinterpret_cast<bool *>(&is_null[i]);
-#else
+#ifdef MARIADB_BASE_VERSION
           bind_res[i].is_null = &is_null[i];
+#else
+          bind_res[i].is_null = reinterpret_cast<bool *>(&is_null[i]);
 #endif
         }
 
