@@ -29,28 +29,28 @@ namespace bot::log {
     std::time_t current_time = std::time(nullptr);
     std::tm *local_time = std::localtime(&current_time);
 
-    line << "[" << std::put_time(local_time, "%H:%M:%S") << "] ";
+    line << "[" << std::put_time(local_time, "%H:%M:%S") << " ";
 
     std::string level_str;
 
     switch (level) {
       case DEBUG:
-        level_str = "DEBUG";
+        level_str = "\x1B[42mDEBUG\033[0m";
         break;
       case WARN:
-        level_str = "WARN";
+        level_str = "\x1B[43mWARN\033[0m";
         break;
       case ERROR:
-        level_str = "ERROR";
+        level_str = "\x1B[41mERROR\033[0m";
         break;
       default:
-        level_str = "INFO";
+        level_str = "\x1B[44mINFO\033[0m";
         break;
     }
 
-    line << level_str << " - ";
+    line << level_str << " ";
 
-    line << source << ": " << message << "\n";
+    line << source << "] " << message << "\n";
 
 #ifdef DEBUG_MODE
     std::cout << line.str();
