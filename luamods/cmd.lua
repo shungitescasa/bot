@@ -2,6 +2,7 @@ local lines = {
 	english = {
 		["no_subcommand"] = "{sender.alias_name}: No subcommand provided. Use '{channel.prefix}help cmd' for more info.",
 		["no_message"] = "{sender.alias_name}: No message provided.",
+		["not_enough_rights"] = "{sender.alias_name}: You do not have enough rights to perform this command.",
 		["command_list"] = "{sender.alias_name}: %s",
 		["namesake"] = "{sender.alias_name}: A command with the same name already exists.",
 		["new_cmd"] = "{sender.alias_name}: Created a new command! Use %s to run it.",
@@ -15,12 +16,15 @@ local lines = {
 		["alias_command"] = "{sender.alias_name}: Successfully created alias %s for %s command.",
 		["no_cmd_alias"] = "{sender.alias_name}: There is no command with alias %s",
 		["delalias_command"] = "{sender.alias_name}: Successfully removed alias %s from %s command.",
+		["setglobal_command"] = "{sender.alias_name}: Command %s is now available in all chats.",
+		["delglobal_command"] = "{sender.alias_name}: Command %s is now available only in this chat.",
 		["view_command"] = "{sender.alias_name}: ID %s | %s | Aliases: %s | %s",
 	},
 	russian = {
 		["no_subcommand"] =
 		"{sender.alias_name}: Нет подкоманды. Используйте '{channel.prefix}help cmd', чтобы получить больше информации.",
 		["no_message"] = "{sender.alias_name}: Сообщение не предоставлено.",
+		["not_enough_rights"] = "{sender.alias_name}: У вас недостаточно прав для выполнения этой команды.",
 		["command_list"] = "{sender.alias_name}: %s",
 		["namesake"] = "{sender.alias_name}: Команда с таким же именем уже существует.",
 		["new_cmd"] = "{sender.alias_name}: Создана новая команда! Используйте %s для её запуска.",
@@ -34,6 +38,8 @@ local lines = {
 		["alias_command"] = "{sender.alias_name}: Успешно привязал алиас %s к команде %s",
 		["no_cmd_alias"] = "{sender.alias_name}: Нет команд с алиасом %s",
 		["delalias_command"] = "{sender.alias_name}: Успешно удалил алиас %s от команды %s",
+		["setglobal_command"] = "{sender.alias_name}: Команда %s доступна во всех чатах.",
+		["delglobal_command"] = "{sender.alias_name}: Команда %s доступна только в этом чате.",
 		["view_command"] = "{sender.alias_name}: ID %s | %s | Алиасы: %s | %s",
 	},
 }
@@ -124,7 +130,7 @@ The `!cmd` command gives the ability to create their own chat commands.
 ]],
 	delay_sec = 1,
 	options = {},
-	subcommands = { "new", "delete", "edit", "rename", "alias", "delalias", "view", "list" },
+	subcommands = { "new", "delete", "edit", "rename", "alias", "delalias", "view", "list", "setglobal" },
 	aliases = { "scmd" },
 	minimal_rights = "moderator",
 	handle = function(request)
@@ -154,7 +160,7 @@ The `!cmd` command gives the ability to create their own chat commands.
 		table.remove(parts, 1)
 
 		local cmds = db_query(
-			'SELECT id, name, message FROM custom_commands WHERE name = $1 AND channel_id = $2',
+			'SELECT id, name, message, is_global FROM custom_commands WHERE name = $1 AND channel_id = $2',
 			{ name, request.channel.id })
 
 		if scid == "new" then
@@ -256,6 +262,25 @@ The `!cmd` command gives the ability to create their own chat commands.
 				{ cmd_alias[1].id })
 
 			return l10n_custom_formatted_line_request(request, lines, "delalias_command", { old_alias, name })
+		elseif scid == "setglobal" then
+			local cfg = bot_config()
+			if cfg == nil or cfg.owner == nil or request.sender.alias_id ~= cfg.owner.id then
+				return l10n_custom_formatted_line_request(request, lines, "not_enough_rights", {})
+			end
+
+			local line_id = ""
+			local query = ""
+			if cmd.is_global == "1" then
+				line_id = "delglobal_command"
+				query = "UPDATE custom_commands SET is_global = FALSE WHERE id = $1"
+			else
+				line_id = "setglobal_command"
+				query = "UPDATE custom_commands SET is_global = TRUE WHERE id = $1"
+			end
+
+			db_execute(query, { cmd.id })
+
+			return l10n_custom_formatted_line_request(request, lines, line_id, { name })
 		elseif scid == "view" then
 			local aliases_db = db_query('SELECT name FROM custom_command_aliases WHERE command_id = $1',
 				{ cmd.id })
