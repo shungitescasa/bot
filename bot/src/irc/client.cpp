@@ -63,7 +63,12 @@ void Client::run() {
                                         }),
                          line.end());
 
-              std::optional<MessageType> type = define_message_type(line);
+              std::optional<IRCMessage> m = IRCMessage::from_string(line);
+              if (!m.has_value()) {
+                break;
+              }
+
+              std::optional<MessageType> type = define_message_type(m->command);
 
               if (!type.has_value()) {
                 break;
@@ -73,7 +78,7 @@ void Client::run() {
 
               if (m_type == MessageType::Privmsg) {
                 std::optional<Message<MessageType::Privmsg>> message =
-                    parse_message<MessageType::Privmsg>(line);
+                    parse_message<MessageType::Privmsg>(*m);
 
                 if (message.has_value()) {
                   this->onPrivmsg(message.value());
@@ -81,9 +86,11 @@ void Client::run() {
               } else if (m_type == MessageType::Ping) {
                 // as the docs say, the message should be the same as the one
                 // from the ping
-                std::string response_text = msg->str.substr(4, msg->str.size());
-
-                this->raw("PONG" + response_text);
+                std::string text;
+                if (!m->params.empty()) {
+                  text = " :" + m->params.at(0);
+                }
+                this->raw("PONG" + text);
               }
             }
 

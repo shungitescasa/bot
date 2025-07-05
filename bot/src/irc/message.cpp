@@ -6,22 +6,11 @@
 
 namespace bot::irc {
   std::optional<MessageType> define_message_type(const std::string &msg) {
-    std::vector<std::string> parts = utils::string::split_text(msg, ' ');
-    int i;
-
-    if (msg[0] == '@') {
-      i = 2;
-    } else if (msg[0] == ':') {
-      i = 1;
-    } else {
-      return std::nullopt;
-    }
-
-    if (parts[i] == "NOTICE") {
+    if (msg == "NOTICE") {
       return MessageType::Notice;
-    } else if (parts[i] == "PRIVMSG") {
+    } else if (msg == "PRIVMSG") {
       return MessageType::Privmsg;
-    } else if (parts[i] == "PING") {
+    } else if (msg == "PING") {
       return MessageType::Ping;
     }
 

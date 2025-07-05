@@ -48,77 +48,30 @@ namespace bot {
     };
 
     template <MessageType T>
-    std::optional<Message<T>> parse_message(const std::string &msg) {
-      std::vector<std::string> parts = utils::string::split_text(msg, ' ');
-
-      if (T == MessageType::Privmsg) {
+    std::optional<Message<T>> parse_message(const IRCMessage &msg) {
+      if (T == MessageType::Privmsg && msg.command == "PRIVMSG") {
         MessageSender sender;
         MessageSource source;
 
-        Message<MessageType::Privmsg> message;
-
-        std::string tags = parts[0];
-        tags = tags.substr(1, tags.length());
-        parts.erase(parts.begin());
-
-        std::string user = parts[0];
-        user = user.substr(1, user.length());
-
-        std::vector<std::string> user_parts =
-            utils::string::split_text(user, '!');
-
-        sender.login = user_parts[0];
-
-        parts.erase(parts.begin(), parts.begin() + 2);
-
-        std::string channel_login = parts[0];
-        source.login = channel_login.substr(1, channel_login.length());
-
-        parts.erase(parts.begin());
-
-        std::string chat_message = utils::string::join_vector(parts, ' ');
-        message.message = chat_message.substr(1, chat_message.length());
-
-        std::vector<std::string> tags_parts =
-            utils::string::split_text(tags, ';');
-
-        for (const std::string &tag : tags_parts) {
-          std::istringstream iss(tag);
-          std::string key;
-          std::string value;
-
-          std::getline(iss, key, '=');
-          std::getline(iss, value);
-
-          if (key == "display-name") {
-            sender.display_name = value;
-          } else if (key == "room-id") {
-            source.id = std::stoi(value);
-          } else if (key == "user-id") {
-            sender.id = std::stoi(value);
-          } else if (key == "badges") {
-            std::vector<std::string> badges =
-                utils::string::split_text(value, ',');
-
-            std::map<std::string, int> map;
-
-            for (const auto &badge : badges) {
-              std::istringstream iss2(badge);
-              std::string name;
-              std::string value;
-
-              std::getline(iss2, name, '/');
-              std::getline(iss2, value);
-
-              map.insert({name, std::stoi(value)});
-            }
-
-            sender.badges = map;
-          }
+        sender.login = msg.nick;
+        sender.display_name = msg.tags.at("display-name");
+        sender.id = std::stoi(msg.tags.at("user-id"));
+        for (const std::string &badge :
+             utils::string::split_text(msg.tags.at("badges"), ',')) {
+          auto b = utils::string::split_text_n(badge, "/", 1);
+          sender.badges.insert_or_assign(b[0], std::stoi(b[1]));
         }
 
+        source.login = msg.params.front();
+        if (source.login[0] == '#') {
+          source.login = source.login.substr(1);
+        }
+        source.id = std::stoi(msg.tags.at("room-id"));
+
+        Message<MessageType::Privmsg> message;
         message.sender = sender;
         message.source = source;
+        message.message = msg.params.at(1);
 
         return message;
       }
