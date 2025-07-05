@@ -8,6 +8,8 @@
 #include <chrono>
 #include <cmath>
 #include <ctime>
+#include <filesystem>
+#include <fstream>
 #include <iomanip>
 #include <memory>
 #include <nlohmann/json.hpp>
@@ -62,6 +64,29 @@ namespace bot::command::lua {
         struct rusage usage;
         getrusage(RUSAGE_SELF, &usage);
         return usage.ru_maxrss;
+      });
+
+      state->set_function("bot_get_temperature", []() {
+        float temp = 0.0;
+
+        std::string path = "/sys/class/thermal/thermal_zone0/temp";
+
+        if (!std::filesystem::exists(path)) {
+          return temp;
+        }
+
+        std::ifstream ifs;
+        ifs.open(path);
+
+        std::stringstream buffer;
+        buffer << ifs.rdbuf();
+        ifs.close();
+
+        temp = std::stof(buffer.str());
+        temp /= 1000;
+        temp = std::roundf(temp * 100) / 100;
+
+        return temp;
       });
 
       state->set_function("bot_get_compile_time",

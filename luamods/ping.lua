@@ -12,7 +12,7 @@ return {
             bot_get_compiler_version() ..
             " · Uptime: " .. time_humanize(bot_get_uptime()) ..
             " · Used memory: " .. math.ceil(bot_get_memory_usage() / 1024 / 1024) ..
-            "MB · Bot running on v" .. bot_get_version() ..
+            "MB · Temperature: " .. tostring(bot_get_temperature()) .. "°C · Bot running on v" .. bot_get_version() ..
             " (Last updated " .. time_humanize(time_current() - bot_get_compile_time()) .. " ago)"
     end
 }
