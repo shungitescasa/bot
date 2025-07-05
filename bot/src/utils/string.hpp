@@ -35,6 +35,10 @@ namespace bot {
           const std::string &base, const std::vector<std::string> &values,
           const std::string &prefix, const std::string &separator,
           const long long &max_length);
+
+      std::vector<std::string> split_text_n(std::string value,
+                                            const std::string &separator,
+                                            const int &n);
     }
   }
 }

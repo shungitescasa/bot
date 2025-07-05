@@ -113,6 +113,20 @@ namespace bot {
 
         return lines;
       }
+
+      std::vector<std::string> split_text_n(std::string value,
+                                            const std::string &separator,
+                                            const int &n) {
+        std::vector<std::string> v;
+        int fi, i = 0;
+        while ((fi = value.find(separator)) != std::string::npos && i < n) {
+          v.push_back(value.substr(0, fi));
+          value = value.substr(fi + separator.size());
+          i++;
+        }
+        v.push_back(value);
+        return v;
+      }
     }
   }
 }

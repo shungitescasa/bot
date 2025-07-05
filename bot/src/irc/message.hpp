@@ -14,6 +14,14 @@ namespace bot {
     enum MessageType { Privmsg, Ping, Notice };
     std::optional<MessageType> define_message_type(const std::string &msg);
 
+    struct IRCMessage {
+        std::map<std::string, std::string> tags;
+        std::string prefix, nick, command;
+        std::vector<std::string> params;
+
+        static std::optional<IRCMessage> from_string(std::string msg);
+    };
+
     struct MessageSender {
         std::string login;
         std::string display_name;
