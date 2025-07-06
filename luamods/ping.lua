@@ -8,7 +8,7 @@ return {
     subcommands = {},
     minimal_rights = "user",
     handle = function(request)
-        return request.sender.alias_name .. ": funnywhitecat Pong! " ..
+        return request.sender.alias_name .. ": PotFriend Pong! " ..
             bot_get_compiler_version() ..
             " · Uptime: " .. time_humanize(bot_get_uptime()) ..
             " · Used memory: " .. math.ceil(bot_get_memory_usage() / 1024 / 1024) ..
