@@ -71,12 +71,15 @@ namespace bot::command::lua {
       std::vector<std::string> get_subcommand_ids() const override {
         return this->subcommands;
       }
+      std::vector<std::string> get_aliases() const override {
+        return this->aliases;
+      }
 
     private:
       std::string name;
       int delay;
       schemas::PermissionLevel level;
-      std::vector<std::string> subcommands;
+      std::vector<std::string> subcommands, aliases;
 
       sol::function handle;
 

@@ -31,6 +31,7 @@ namespace bot {
         virtual schemas::PermissionLevel get_permission_level() const {
           return schemas::PermissionLevel::USER;
         }
+        virtual std::vector<std::string> get_aliases() const { return {}; }
         virtual int get_delay_seconds() const { return 5; }
         virtual std::vector<std::string> get_subcommand_ids() const {
           return {};

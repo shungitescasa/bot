@@ -172,16 +172,24 @@ namespace bot::command {
 
     std::string command_id = parts[0];
 
-    auto cmd = std::find_if(
-        command_loader.get_commands().begin(),
-        command_loader.get_commands().end(),
-        [&command_id](const auto &c) { return c->get_name() == command_id; });
+    auto &cmds = command_loader.get_commands();
+    auto cmd =
+        std::find_if(cmds.begin(), cmds.end(), [&command_id](const auto &c) {
+          auto aliases = c->get_aliases();
+          return c->get_name() == command_id ||
+                 std::any_of(aliases.begin(), aliases.end(),
+                             [&command_id](const std::string &alias) {
+                               return alias == command_id;
+                             });
+        });
 
-    if (cmd == command_loader.get_commands().end()) {
+    if (cmd == cmds.end()) {
       return std::nullopt;
     }
 
     parts.erase(parts.begin());
+
+    command_id = (*cmd)->get_name();
 
     Request req{command_id, std::nullopt, std::nullopt, irc_message, requester};
 

@@ -953,6 +953,14 @@ namespace bot::command::lua {
       }
     }
 
+    sol::table aliases = data["aliases"];
+    for (auto &k : aliases) {
+      sol::object value = k.second;
+      if (value.is<std::string>()) {
+        this->aliases.push_back(value.as<std::string>());
+      }
+    }
+
     std::string rights_text = data["minimal_rights"];
     if (rights_text == "suspended") {
       this->level = schemas::PermissionLevel::SUSPENDED;
