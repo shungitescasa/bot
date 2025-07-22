@@ -36,7 +36,13 @@ namespace bot::schemas {
       return EventType::BTTV_EMOTE_UPDATE;
     }
 #endif
-    else {
+    else if (type == "rss") {
+      return EventType::RSS;
+    } else if (type == "twitter") {
+      return EventType::TWITTER;
+    } else if (type == "telegram") {
+      return EventType::TELEGRAM;
+    } else {
       return EventType::CUSTOM;
     }
   }

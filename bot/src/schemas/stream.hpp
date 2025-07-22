@@ -22,6 +22,9 @@ namespace bot::schemas {
     BTTV_EMOTE_UPDATE,
 #endif
     GITHUB = 40,
+    RSS = 45,
+    TWITTER = 46,
+    TELEGRAM = 47,
     CUSTOM = 99
   };
 

@@ -120,6 +120,22 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(emotespp)
 
+# xml
+FetchContent_Declare(
+  pugixml
+  GIT_REPOSITORY https://github.com/zeux/pugixml.git
+  GIT_TAG v1.15
+)
+FetchContent_MakeAvailable(pugixml)
+
+# fmt
+FetchContent_Declare(
+  fmt
+  GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+  GIT_TAG 12.1.0
+)
+FetchContent_MakeAvailable(fmt)
+
 target_link_libraries(Bot PRIVATE
     ixwebsocket::ixwebsocket
     nlohmann_json::nlohmann_json
@@ -127,5 +143,7 @@ target_link_libraries(Bot PRIVATE
     lua
     sol2::sol2
     emotespp
+    pugixml
+    fmt
 )
 

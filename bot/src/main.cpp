@@ -22,6 +22,7 @@
 #include "irc/message.hpp"
 #include "localization/localization.hpp"
 #include "logger.hpp"
+#include "rss.hpp"
 #include "schemas/stream.hpp"
 #include "stream.hpp"
 #include "timer.hpp"
@@ -193,6 +194,8 @@ int main(int argc, char *argv[]) {
 
 #endif
 
+  bot::RSSListener rss_listener(client, helix_client, cfg);
+
   client.on<bot::irc::MessageType::Privmsg>(
       [&client, &command_loader, &localization, &cfg, &helix_client,
        &kick_api_client](
@@ -214,6 +217,7 @@ int main(int argc, char *argv[]) {
       std::thread(bot::emotes::create_emote_thread, &emote_bundle));
   threads.push_back(std::thread(&bot::api::KickAPIClient::refresh_token_thread,
                                 &kick_api_client));
+  threads.push_back(std::thread(&bot::RSSListener::run, &rss_listener));
 
   for (auto &thread : threads) {
     thread.join();

@@ -52,6 +52,7 @@ namespace bot {
       std::optional<std::string> help = std::nullopt;
       std::optional<std::string> paste_service = std::nullopt;
       std::optional<std::string> randompost = std::nullopt;
+      std::optional<std::string> rssbridge = std::nullopt;
   };
 
   struct TokenConfiguration {

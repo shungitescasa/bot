@@ -65,6 +65,11 @@ namespace bot {
     } else {
       url["randompost"] = sol::lua_nil;
     }
+    if (this->url.rssbridge.has_value()) {
+      url["rssbridge"] = this->url.rssbridge.value();
+    } else {
+      url["rssbridge"] = sol::lua_nil;
+    }
     o["url"] = url;
 
     return o;
@@ -149,6 +154,8 @@ namespace bot {
         url_cfg.paste_service = value;
       } else if (key == "url.randompost") {
         url_cfg.randompost = value;
+      } else if (key == "url.rssbridge") {
+        url_cfg.rssbridge = value;
       }
 
       else if (key == "token.github") {
