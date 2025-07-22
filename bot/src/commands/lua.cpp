@@ -13,6 +13,7 @@
 #include <iomanip>
 #include <memory>
 #include <nlohmann/json.hpp>
+#include <optional>
 #include <sol/sol.hpp>
 #include <sstream>
 #include <stdexcept>
@@ -31,6 +32,7 @@
 #include "cpr/multipart.h"
 #include "cpr/response.h"
 #include "database.hpp"
+#include "rss.hpp"
 #include "schemas/channel.hpp"
 #include "schemas/stream.hpp"
 #include "schemas/user.hpp"
@@ -626,6 +628,17 @@ namespace bot::command::lua {
       });
     }
 
+    void add_rss_library(std::shared_ptr<sol::state> state) {
+      state->set_function("rss_get", [state](const std::string &url) {
+        std::optional<RSSChannel> channel = bot::get_rss_channel(url);
+        if (!channel.has_value()) {
+          return sol::make_object(*state, sol::lua_nil);
+        }
+
+        return sol::make_object(*state, channel->as_lua_table(state));
+      });
+    }
+
     void add_base_libraries(std::shared_ptr<sol::state> state) {
       add_bot_library(state);
       add_time_library(state);
@@ -633,6 +646,7 @@ namespace bot::command::lua {
       add_net_library(state);
       add_string_library(state);
       add_array_library(state);
+      add_rss_library(state);
     }
 
     void add_chat_libraries(std::shared_ptr<sol::state> state,

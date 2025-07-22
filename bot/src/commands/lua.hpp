@@ -43,6 +43,8 @@ namespace bot::command::lua {
                              const Request &request, const Configuration &cfg,
                              const std::string &lua_id);
 
+    void add_rss_library(std::shared_ptr<sol::state> state);
+
     void add_base_libraries(std::shared_ptr<sol::state> state);
     void add_chat_libraries(std::shared_ptr<sol::state> state,
                             const Request &request,
