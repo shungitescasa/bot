@@ -1,5 +1,7 @@
 #include "commands/lua.hpp"
 
+#include <fmt/core.h>
+#include <fmt/std.h>
 #include <sys/resource.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -410,6 +412,23 @@ namespace bot::command::lua {
     }
 
     void add_string_library(std::shared_ptr<sol::state> state) {
+      state->set_function("str_format",
+                          [](const std::string &str, const sol::table &params) {
+                            std::vector<std::string> p;
+                            std::string s = str;
+                            long pos = std::string::npos;
+                            for (const auto &x : params) {
+                              if (x.second.is<std::string>()) {
+                                pos = s.find("{}");
+                                if (pos == std::string::npos) {
+                                  break;
+                                }
+                                s.replace(pos, 2, x.second.as<std::string>());
+                              }
+                            }
+                            return s;
+                          });
+
       state->set_function(
           "str_split", [state](const std::string &text, const char &delimiter) {
             sol::table o = state->create_table();
