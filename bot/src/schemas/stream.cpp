@@ -82,7 +82,13 @@ namespace bot::schemas {
       return "bttv_updated_emote";
     }
 #endif
-    else {
+    else if (type == RSS) {
+      return "rss";
+    } else if (type == TWITTER) {
+      return "twitter";
+    } else if (type == TELEGRAM) {
+      return "telegram";
+    } else {
       return "custom";
     }
   }

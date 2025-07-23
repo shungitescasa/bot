@@ -64,7 +64,7 @@ namespace bot {
     while (true) {
       this->add_channels();
       this->check_channels();
-      std::this_thread::sleep_for(std::chrono::seconds(30));
+      std::this_thread::sleep_for(std::chrono::seconds(60));
     }
   }
 
@@ -117,9 +117,6 @@ namespace bot {
           break;
         case schemas::TELEGRAM:
           bridge = "TelegramBridge";
-          if (name[0] != '@') {
-            name = "%40" + name;
-          }
           break;
         default:
           break;
@@ -229,14 +226,17 @@ namespace bot {
           this->irc_client.say(event.channel_alias_name, msg);
         }
       }
+
+      it->messages = channel->messages;
     }
   }
 
-  std::optional<RSSChannel> get_rss_channel(const std::string &url) {
-    cpr::Response response = cpr::Get(
-        cpr::Url{url},
-        cpr::Header{{"Accept", "application/xml"},
-                    {"User-Agent", "https://github.com/ilotterytea/bot"}});
+  std::optional<RSSChannel> get_rss_channel(const std::string& url) {
+    cpr::Response response =
+        cpr::Get(cpr::Url{url}, cpr::Header{{"Accept", "application/xml"},
+                                            {"User-Agent", "Mozilla/5.0"},
+                                            {"Cache-Control", "no-cache"},
+                                            {"Pragma", "no-cache"}});
 
     if (response.status_code != 200) {
       return std::nullopt;
@@ -250,7 +250,6 @@ namespace bot {
     pugi::xml_node channel = doc.child("rss").child("channel");
 
     std::string channel_name = channel.child("title").text().as_string();
-    std::string channel_url = channel.child("link").text().as_string();
 
     std::vector<RSSMessage> messages;
     for (pugi::xml_node item : channel.children("item")) {
@@ -271,6 +270,6 @@ namespace bot {
                           timestamp});
     }
 
-    return (RSSChannel){channel_name, channel_url, std::nullopt, messages};
+    return (RSSChannel){channel_name, url, std::nullopt, messages};
   }
 }
