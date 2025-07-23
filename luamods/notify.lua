@@ -1,15 +1,24 @@
 local function parse_target(value)
     local parts = str_split(value, ':')
-    if #parts ~= 2 then
+    if #parts < 2 then
         return nil
     end
 
+    local type = parts[#parts]
+    local target = ""
+    for i = 1, #parts - 1, 1 do
+        target = target .. parts[i]
+        if i + 1 < #parts then
+            target = target .. ":"
+        end
+    end
+
     local data = {
-        target = parts[1],
-        type = str_to_event_type(parts[2])
+        target = target,
+        type = str_to_event_type(type)
     }
 
-    if event_type_to_str(data.type) ~= parts[2] then
+    if event_type_to_str(data.type) ~= type then
         data.type = nil
     end
 
