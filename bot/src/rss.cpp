@@ -23,6 +23,7 @@
 #include "schemas/event.hpp"
 #include "schemas/stream.hpp"
 #include "utils/events.hpp"
+#include "utils/string.hpp"
 
 namespace bot {
   sol::table RSSChannel::as_lua_table(std::shared_ptr<sol::state> state) const {
@@ -41,7 +42,7 @@ namespace bot {
 
     sol::table ms = state->create_table();
 
-    for (const RSSMessage &v : this->messages) {
+    for (const RSSMessage& v : this->messages) {
       sol::table m = state->create_table();
       m["title"] = v.title;
       m["message"] = v.message;
@@ -68,12 +69,12 @@ namespace bot {
     }
   }
 
-  bool RSSListener::has_channel(const std::string &url) const {
+  bool RSSListener::has_channel(const std::string& url) const {
     return std::any_of(this->channels.begin(), this->channels.end(),
-                       [&url](const RSSChannel &c) { return c.url == url; });
+                       [&url](const RSSChannel& c) { return c.url == url; });
   }
 
-  void RSSListener::add_channel(const std::string &url) {
+  void RSSListener::add_channel(const std::string& url) {
     if (this->has_channel(url)) return;
 
     std::optional<RSSChannel> channel = get_rss_channel(url);
@@ -82,11 +83,11 @@ namespace bot {
     }
   }
 
-  void RSSListener::remove_channel(const std::string &url) {
+  void RSSListener::remove_channel(const std::string& url) {
     if (!this->has_channel(url)) return;
 
     std::remove_if(this->channels.begin(), this->channels.end(),
-                   [&url](const RSSChannel &c) { return c.url == url; });
+                   [&url](const RSSChannel& c) { return c.url == url; });
   }
 
   void RSSListener::add_channels() {
@@ -129,7 +130,7 @@ namespace bot {
       }
 
       if (std::any_of(this->channels.begin(), this->channels.end(),
-                      [&name, &type](const RSSChannel &c) {
+                      [&name, &type](const RSSChannel& c) {
                         auto e = c.event;
                         if (!e.has_value()) {
                           return false;
@@ -163,7 +164,7 @@ namespace bot {
       }
 
       if (!std::any_of(events.begin(), events.end(),
-                       [&c](const db::DatabaseRow &r) {
+                       [&c](const db::DatabaseRow& r) {
                          return r.at("name") == c.event->name &&
                                 std::stoi(r.at("event_type")) == c.event->type;
                        })) {
@@ -188,7 +189,7 @@ namespace bot {
            ++mit) {
         if (!std::any_of(
                 it->messages.begin(), it->messages.end(),
-                [&mit](const RSSMessage &m) { return m.id == mit->id; })) {
+                [&mit](const RSSMessage& m) { return m.id == mit->id; })) {
           messages.push_back(*mit);
         }
       }
@@ -202,28 +203,36 @@ namespace bot {
           db::create_connection(this->configuration), this->helix_client,
           this->irc_client.get_bot_id(), it->event->type, it->event->name);
 
-      for (const schemas::Event &event : events) {
+      for (const schemas::Event& event : events) {
         int count = 0;
 
         for (RSSMessage message : messages) {
           if (count > 5) break;
           count++;
 
-          std::string msg = event.message;
+          std::string base = "⚡ " + event.message;
+          if (!event.subs.empty()) {
+            base.append(" · ");
+          }
 
-          int pos = msg.find("{channel_name}");
-          if (pos != std::string::npos) msg.replace(pos, 14, it->name);
+          int pos = base.find("{channel_name}");
+          if (pos != std::string::npos) base.replace(pos, 14, it->name);
 
-          pos = msg.find("{title}");
-          if (pos != std::string::npos) msg.replace(pos, 7, message.title);
+          pos = base.find("{title}");
+          if (pos != std::string::npos) base.replace(pos, 7, message.title);
 
-          pos = msg.find("{message}");
-          if (pos != std::string::npos) msg.replace(pos, 9, message.message);
+          pos = base.find("{message}");
+          if (pos != std::string::npos) base.replace(pos, 9, message.message);
 
-          pos = msg.find("{link}");
-          if (pos != std::string::npos) msg.replace(pos, 6, message.id);
+          pos = base.find("{link}");
+          if (pos != std::string::npos) base.replace(pos, 6, message.id);
 
-          this->irc_client.say(event.channel_alias_name, msg);
+          std::vector<std::string> msgs = utils::string::separate_by_length(
+              base, event.subs, "@", " ", 500);
+
+          for (const std::string& msg : msgs) {
+            this->irc_client.say(event.channel_alias_name, base + msg);
+          }
         }
       }
 
