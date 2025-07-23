@@ -3,14 +3,14 @@ local lines = {
         ["not_configured"] = "{sender.alias_name}: This command is not set up properly. Try again later.",
         ["not_found"] = "{sender.alias_name}: Account %s not found.",
         ["no_value"] = "{sender.alias_name}: Valid Twitter account must be specified.",
-        ["message"] = "{sender.alias_name}: %s's last post: %s (posted %s ago)",
+        ["message"] = "{sender.alias_name}: %s's last post: %s (posted %s ago) (%s)",
         ["no_messages"] = "{sender.alias_name}: This Twitter account does not have any posts."
     },
     russian = {
         ["not_configured"] = "{sender.alias_name}: Команда не настроена. Попробуйте позже.",
         ["not_found"] = "{sender.alias_name}: Аккаунт %s не найден.",
         ["no_value"] = "{sender.alias_name}: Нужно указать Twitter аккаунт.",
-        ["message"] = "{sender.alias_name}: Последний пост %s: %s (опубликовано %s назад)",
+        ["message"] = "{sender.alias_name}: Последний пост %s: %s (опубликовано %s назад) (%s)",
         ["no_messages"] = "{sender.alias_name}: Этот Twitter аккаунт не содержит каких-либо постов."
     },
 }
@@ -64,6 +64,6 @@ Get the latest post from the specified Twitter account.
         end
 
         return l10n_custom_formatted_line_request(request, lines, "message",
-            { request.message, latest_post.title, post_time })
+            { request.message, latest_post.title, post_time, latest_post.id })
     end,
 }
