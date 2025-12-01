@@ -37,7 +37,7 @@ Get the latest post from the specified public Telegram channel.
     minimal_rights = "user",
     handle = function(request)
         local cfg = bot_config()
-        if cfg.url.rssbridge == nil then
+        if cfg.rss.bridge == nil then
             return l10n_custom_formatted_line_request(request, lines, "not_configured", {})
         end
 
@@ -45,7 +45,7 @@ Get the latest post from the specified public Telegram channel.
             return l10n_custom_formatted_line_request(request, lines, "no_value", {})
         end
 
-        local url = str_format(cfg.url.rssbridge, { "TelegramBridge", request.message })
+        local url = str_format(cfg.rss.bridge, { "TelegramBridge", request.message })
         local channel = rss_get(url)
         if channel == nil then
             return l10n_custom_formatted_line_request(request, lines, "not_found", { request.message })

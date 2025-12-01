@@ -52,11 +52,15 @@ namespace bot {
       std::optional<std::string> help = std::nullopt;
       std::optional<std::string> paste_service = std::nullopt;
       std::optional<std::string> randompost = std::nullopt;
-      std::optional<std::string> rssbridge = std::nullopt;
   };
 
   struct TokenConfiguration {
       std::optional<std::string> github_token = std::nullopt;
+  };
+
+  struct RssConfiguration {
+      std::optional<std::string> bridge = std::nullopt;
+      int timeout = 60;
   };
 
   struct Configuration {
@@ -67,10 +71,11 @@ namespace bot {
       OwnerConfiguration owner;
       UrlConfiguration url;
       TokenConfiguration tokens;
+      RssConfiguration rss;
 
       sol::table as_lua_table(std::shared_ptr<sol::state> luaState) const;
   };
 
   std::optional<Configuration> parse_configuration_from_file(
-      const std::string &file_path);
+      const std::string& file_path);
 }

@@ -65,18 +65,23 @@ namespace bot {
     } else {
       url["randompost"] = sol::lua_nil;
     }
-    if (this->url.rssbridge.has_value()) {
-      url["rssbridge"] = this->url.rssbridge.value();
-    } else {
-      url["rssbridge"] = sol::lua_nil;
-    }
     o["url"] = url;
+
+    sol::table rss = luaState->create_table();
+    if (this->rss.bridge.has_value()) {
+      rss["bridge"] = this->rss.bridge.value();
+    } else {
+      rss["bridge"] = sol::lua_nil;
+    }
+    rss["timeout"] = this->rss.timeout;
+
+    o["rss"] = rss;
 
     return o;
   }
 
   std::optional<Configuration> parse_configuration_from_file(
-      const std::string &file_path) {
+      const std::string& file_path) {
     std::ifstream ifs(file_path);
 
     if (!ifs.is_open()) {
@@ -92,6 +97,7 @@ namespace bot {
     OwnerConfiguration owner_cfg;
     UrlConfiguration url_cfg;
     TokenConfiguration token_cfg;
+    RssConfiguration rss_cfg;
 
     std::string line;
     while (std::getline(ifs, line, '\n')) {
@@ -102,7 +108,7 @@ namespace bot {
       std::getline(iss, key, '=');
       std::getline(iss, value);
 
-      for (char &c : key) {
+      for (char& c : key) {
         c = tolower(c);
       }
 
@@ -154,8 +160,12 @@ namespace bot {
         url_cfg.paste_service = value;
       } else if (key == "url.randompost") {
         url_cfg.randompost = value;
-      } else if (key == "url.rssbridge") {
-        url_cfg.rssbridge = value;
+      }
+
+      else if (key == "rss.timeout") {
+        rss_cfg.timeout = std::stoi(value);
+      } else if (key == "rss.bridge") {
+        rss_cfg.bridge = value;
       }
 
       else if (key == "token.github") {
@@ -170,6 +180,7 @@ namespace bot {
     cfg.kick_credentials = kick_crd_cfg;
     cfg.database = db_cfg;
     cfg.tokens = token_cfg;
+    cfg.rss = rss_cfg;
 
     log::info("Configuration",
               "Successfully loaded the file from '" + file_path + "'");

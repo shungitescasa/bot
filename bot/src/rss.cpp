@@ -57,7 +57,7 @@ namespace bot {
   }
 
   void RSSListener::run() {
-    if (!this->configuration.url.rssbridge.has_value()) {
+    if (!this->configuration.rss.bridge.has_value()) {
       log::error("RSSListener", "RSS Bridge is not set!");
       return;
     }
@@ -65,7 +65,8 @@ namespace bot {
     while (true) {
       this->add_channels();
       this->check_channels();
-      std::this_thread::sleep_for(std::chrono::seconds(60));
+      std::this_thread::sleep_for(
+          std::chrono::seconds(this->configuration.rss.timeout));
     }
   }
 
@@ -142,7 +143,7 @@ namespace bot {
 
       std::string url =
           useRSSBridge
-              ? fmt::format(*this->configuration.url.rssbridge, bridge, name)
+              ? fmt::format(*this->configuration.rss.bridge, bridge, name)
               : name;
 
       std::optional<RSSChannel> channel = get_rss_channel(url);
