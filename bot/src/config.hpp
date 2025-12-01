@@ -3,6 +3,7 @@
 #include <optional>
 #include <sol/sol.hpp>
 #include <string>
+#include <vector>
 
 #define GET_DATABASE_CONNECTION_URL(c)                                      \
   "dbname = " + c.database.name + " user = " + c.database.user +            \
@@ -63,6 +64,11 @@ namespace bot {
       int timeout = 60;
   };
 
+  struct LuaConfiguration {
+      bool allow_arbitrary_scripts = false;
+      std::vector<std::string> script_whitelist;
+  };
+
   struct Configuration {
       TwitchCredentialsConfiguration twitch_credentials;
       KickCredentialsConfiguration kick_credentials;
@@ -72,6 +78,7 @@ namespace bot {
       UrlConfiguration url;
       TokenConfiguration tokens;
       RssConfiguration rss;
+      LuaConfiguration lua;
 
       sol::table as_lua_table(std::shared_ptr<sol::state> luaState) const;
   };

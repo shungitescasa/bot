@@ -7,6 +7,7 @@
 #include <string>
 
 #include "logger.hpp"
+#include "utils/string.hpp"
 
 namespace bot {
   sol::table Configuration::as_lua_table(
@@ -98,6 +99,7 @@ namespace bot {
     UrlConfiguration url_cfg;
     TokenConfiguration token_cfg;
     RssConfiguration rss_cfg;
+    LuaConfiguration lua_cfg;
 
     std::string line;
     while (std::getline(ifs, line, '\n')) {
@@ -168,6 +170,12 @@ namespace bot {
         rss_cfg.bridge = value;
       }
 
+      else if (key == "lua.allow_arbitrary_scripts") {
+        lua_cfg.allow_arbitrary_scripts = std::stoi(value);
+      } else if (key == "lua.script_whitelist") {
+        lua_cfg.script_whitelist = utils::string::split_text(value, ',');
+      }
+
       else if (key == "token.github") {
         token_cfg.github_token = value;
       }
@@ -181,6 +189,7 @@ namespace bot {
     cfg.database = db_cfg;
     cfg.tokens = token_cfg;
     cfg.rss = rss_cfg;
+    cfg.lua = lua_cfg;
 
     log::info("Configuration",
               "Successfully loaded the file from '" + file_path + "'");
