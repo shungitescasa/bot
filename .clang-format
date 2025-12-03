@@ -4,6 +4,6 @@ FixNamespaceComments: 'false'
 NamespaceIndentation: All
 AccessModifierOffset: 0
 IndentAccessModifiers: true
-
+PointerAlignment: Right
 
 ...
