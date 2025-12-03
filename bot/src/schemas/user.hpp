@@ -50,7 +50,14 @@ namespace bot::schemas {
       std::optional<std::chrono::system_clock::time_point> opted_out_at;
   };
 
-  enum PermissionLevel { SUSPENDED, USER, VIP, MODERATOR, BROADCASTER };
+  enum PermissionLevel {
+    SUSPENDED,
+    USER,
+    VIP,
+    MODERATOR,
+    BROADCASTER,
+    TRUSTED = 50
+  };
 
   class UserRights {
     public:

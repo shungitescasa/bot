@@ -130,7 +130,7 @@ namespace bot::handlers {
         db::create_connection(bundle.configuration);
 
     std::optional<command::Requester> requester =
-        command::get_requester(message, conn);
+        command::get_requester(message, conn, bundle.configuration);
 
     if (!requester.has_value()) {
       return;

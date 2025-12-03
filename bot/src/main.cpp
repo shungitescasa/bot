@@ -39,10 +39,9 @@ int main(int argc, char *argv[]) {
 
   bot::Configuration cfg = o_cfg.value();
 
-  if (cfg.twitch_credentials.client_id.empty() ||
-      cfg.twitch_credentials.token.empty()) {
+  if (cfg.twitch.client_id.empty() || cfg.twitch.token.empty()) {
     bot::log::error("Main",
-                    "TWITCH_CREDENTIALS.CLIENT_ID and TWITCH_CREDENTIALS.TOKEN "
+                    "TWITCH.CLIENT_ID and TWITCH.TOKEN "
                     "must be set in environmental file!");
     return 1;
   }
@@ -56,14 +55,13 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  bot::irc::Client client(cfg.twitch_credentials.client_id,
-                          cfg.twitch_credentials.token);
+  bot::irc::Client client(cfg.twitch.client_id, cfg.twitch.token);
   bot::command::CommandLoader command_loader;
   command_loader.load_lua_directory("luamods");
 
   bot::loc::Localization localization("localization");
-  bot::api::twitch::HelixClient helix_client(cfg.twitch_credentials.token,
-                                             cfg.twitch_credentials.client_id);
+  bot::api::twitch::HelixClient helix_client(cfg.twitch.token,
+                                             cfg.twitch.client_id);
 
   bot::api::KickAPIClient kick_api_client(cfg.kick_credentials.client_id,
                                           cfg.kick_credentials.client_secret);

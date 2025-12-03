@@ -6,9 +6,11 @@
 #include <string>
 #include <vector>
 
+#include "config.hpp"
 #include "constants.hpp"
 #include "database.hpp"
 #include "schemas/channel.hpp"
+#include "schemas/user.hpp"
 #include "utils/string.hpp"
 
 namespace bot::command {
@@ -38,7 +40,7 @@ namespace bot::command {
 
   std::optional<Requester> get_requester(
       const irc::Message<irc::MessageType::Privmsg> &irc_message,
-      std::unique_ptr<db::BaseDatabase> &conn) {
+      std::unique_ptr<db::BaseDatabase> &conn, const Configuration &cfg) {
     // fetching channel
     std::vector<schemas::Channel> chans = conn->query_all<schemas::Channel>(
         "SELECT * FROM channels WHERE alias_id = $1",
@@ -109,7 +111,12 @@ namespace bot::command {
     schemas::PermissionLevel level = schemas::PermissionLevel::USER;
     const auto &badges = irc_message.sender.badges;
 
-    if (user.get_alias_id() == channel.get_alias_id()) {
+    if (std::any_of(cfg.twitch.trusted_user_ids.begin(),
+                    cfg.twitch.trusted_user_ids.end(), [&user](const int &x) {
+                      return x == user.get_alias_id();
+                    })) {
+      level = schemas::PermissionLevel::TRUSTED;
+    } else if (user.get_alias_id() == channel.get_alias_id()) {
       level = schemas::PermissionLevel::BROADCASTER;
     } else if (std::any_of(badges.begin(), badges.end(), [&](const auto &x) {
                  return x.first == "moderator";

@@ -97,7 +97,8 @@ namespace bot::command::lua {
 
         command::Response run(const InstanceBundle& bundle,
                               const command::Request& request) const override {
-          if (!bundle.configuration.lua.allow_arbitrary_scripts) {
+          if (!bundle.configuration.lua.allow_arbitrary_scripts &&
+              request.requester.user_rights.get_level() < schemas::TRUSTED) {
             throw ResponseException<ResponseError::ILLEGAL_COMMAND>(
                 request, bundle.localization);
           }
@@ -126,6 +127,7 @@ namespace bot::command::lua {
           }
 
           if (!bundle.configuration.lua.allow_arbitrary_scripts &&
+              request.requester.user_rights.get_level() < schemas::TRUSTED &&
               !std::any_of(bundle.configuration.lua.script_whitelist.begin(),
                            bundle.configuration.lua.script_whitelist.end(),
                            [&request](const std::string& i) {

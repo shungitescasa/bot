@@ -24,9 +24,10 @@ namespace bot {
       std::string port;
   };
 
-  struct TwitchCredentialsConfiguration {
+  struct TwitchConfiguration {
       std::string client_id;
       std::string token;
+      std::vector<int> trusted_user_ids;
   };
 
   struct KickCredentialsConfiguration {
@@ -70,7 +71,7 @@ namespace bot {
   };
 
   struct Configuration {
-      TwitchCredentialsConfiguration twitch_credentials;
+      TwitchConfiguration twitch;
       KickCredentialsConfiguration kick_credentials;
       DatabaseConfiguration database;
       CommandConfiguration commands;
@@ -84,5 +85,5 @@ namespace bot {
   };
 
   std::optional<Configuration> parse_configuration_from_file(
-      const std::string& file_path);
+      const std::string &file_path);
 }

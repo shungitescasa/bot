@@ -66,8 +66,8 @@ Here's example of `.env` file with required parameters. This file should be alon
 db_name=DB_NAME
 db_user=DB_USER
 db_pass=DB_PASS
-twitch_credentials.client_id=CLIENT_ID
-twitch_credentials.token=TOKEN
+twitch.client_id=CLIENT_ID
+twitch.token=TOKEN
 ```
 
 ### 5. Launch

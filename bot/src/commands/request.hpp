@@ -43,5 +43,5 @@ namespace bot::command {
 
   std::optional<Requester> get_requester(
       const irc::Message<irc::MessageType::Privmsg> &irc_message,
-      std::unique_ptr<db::BaseDatabase> &conn);
+      std::unique_ptr<db::BaseDatabase> &conn, const Configuration &cfg);
 }

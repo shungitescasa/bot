@@ -82,7 +82,7 @@ namespace bot {
   }
 
   std::optional<Configuration> parse_configuration_from_file(
-      const std::string& file_path) {
+      const std::string &file_path) {
     std::ifstream ifs(file_path);
 
     if (!ifs.is_open()) {
@@ -91,7 +91,7 @@ namespace bot {
     }
 
     Configuration cfg;
-    TwitchCredentialsConfiguration ttv_crd_cfg;
+    TwitchConfiguration ttv_cfg;
     KickCredentialsConfiguration kick_crd_cfg;
     DatabaseConfiguration db_cfg;
     CommandConfiguration cmd_cfg;
@@ -110,15 +110,21 @@ namespace bot {
       std::getline(iss, key, '=');
       std::getline(iss, value);
 
-      for (char& c : key) {
+      for (char &c : key) {
         c = tolower(c);
       }
 
-      if (key == "twitch_credentials.client_id") {
-        ttv_crd_cfg.client_id = value;
-      } else if (key == "twitch_credentials.token") {
-        ttv_crd_cfg.token = value;
-      } else if (key == "db_name") {
+      if (key == "twitch.client_id") {
+        ttv_cfg.client_id = value;
+      } else if (key == "twitch.token") {
+        ttv_cfg.token = value;
+      } else if (key == "twitch.trusted_user_ids") {
+        for (const std::string &x : utils::string::split_text(value, ',')) {
+          ttv_cfg.trusted_user_ids.push_back(std::stoi(x));
+        }
+      }
+
+      else if (key == "db_name") {
         db_cfg.name = value;
       } else if (key == "db_user") {
         db_cfg.user = value;
@@ -184,7 +190,7 @@ namespace bot {
     cfg.url = url_cfg;
     cfg.owner = owner_cfg;
     cfg.commands = cmd_cfg;
-    cfg.twitch_credentials = ttv_crd_cfg;
+    cfg.twitch = ttv_cfg;
     cfg.kick_credentials = kick_crd_cfg;
     cfg.database = db_cfg;
     cfg.tokens = token_cfg;
