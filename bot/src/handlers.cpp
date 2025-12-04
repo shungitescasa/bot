@@ -145,7 +145,8 @@ namespace bot::handlers {
     std::optional<command::Requester> requester =
         command::get_requester(message, conn, bundle.configuration);
 
-    if (!requester.has_value()) {
+    if (!requester.has_value() || requester->user.get_alias_name() ==
+                                      bundle.irc_client.get_bot_username()) {
       return;
     }
 
