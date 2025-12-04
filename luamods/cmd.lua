@@ -62,6 +62,7 @@ The `!cmd` command gives the ability to create their own chat commands.
 
 + `[name]` - The name for new custom command. It should be unique for your chat.
 **A prefix must be specified if you want a prefixed command, e.g. `!sub`, `!server`.**
+You can use `{prefix}` *(dynamic prefix)*, for example `{prefix}sub, {prefix}server`. It will be replaced with the current prefix in the chat.
 + `[message]` - Text that will be sent when the custom command is invoked.
 
 ### Delete the custom command

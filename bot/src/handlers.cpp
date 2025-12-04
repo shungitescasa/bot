@@ -62,13 +62,27 @@ namespace bot::handlers {
     }
 
     std::string cid = parts[0];
+    std::string cid_without_prefix =
+        "{prefix}" +
+        cid.substr(requester.channel_preferences.get_prefix().size(),
+                   cid.size());
 
     db::DatabaseRows cmds = conn->exec(
-        "SELECT message FROM custom_commands WHERE name = $1 AND (channel_id "
-        "= $2 OR is_global = TRUE)",
-        {cid, std::to_string(requester.channel.get_id())});
+        "SELECT name, message FROM custom_commands WHERE (name = $1 OR name "
+        "LIKE $2) "
+        "AND (channel_id "
+        "= $3 OR is_global = TRUE)",
+        {cid, cid_without_prefix, std::to_string(requester.channel.get_id())});
 
     if (cmds.empty()) {
+      return std::nullopt;
+    }
+
+    db::DatabaseRow cmd = cmds[0];
+    std::string cmd_name = cmd.at("name");
+    if (cmd_name.length() > 8 && cmd_name.substr(0, 8) == "{prefix}" &&
+        cid.substr(0, requester.channel_preferences.get_prefix().size()) !=
+            requester.channel_preferences.get_prefix()) {
       return std::nullopt;
     }
 
@@ -76,7 +90,6 @@ namespace bot::handlers {
 
     std::string initial_message = utils::string::join_vector(parts, ' ');
 
-    db::DatabaseRow cmd = cmds[0];
     std::string msg = cmd.at("message");
 
     // parsing values
