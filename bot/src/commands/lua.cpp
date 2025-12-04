@@ -320,6 +320,24 @@ namespace bot::command::lua {
           });
 
       state->set_function(
+          "net_post", [state](const std::string &url, const sol::table &body) {
+            sol::table t = state->create_table();
+
+            cpr::Multipart multipart = {};
+            for (auto &kv : body) {
+              multipart.parts.push_back(
+                  {kv.first.as<std::string>(), kv.second.as<std::string>()});
+            }
+
+            cpr::Response response = cpr::Post(cpr::Url{url}, multipart);
+
+            t["code"] = response.status_code;
+            t["text"] = response.text;
+
+            return t;
+          });
+
+      state->set_function(
           "net_post_multipart_with_headers",
           [state](const std::string &url, const sol::table &body,
                   const sol::table &headers) {
