@@ -1007,6 +1007,8 @@ namespace bot::command::lua {
       this->level = schemas::PermissionLevel::BROADCASTER;
     } else if (rights_text == "trusted") {
       this->level = schemas::PermissionLevel::TRUSTED;
+    } else if (rights_text == "superuser") {
+      this->level = schemas::PermissionLevel::SUPERUSER;
     } else {
       this->level = schemas::PermissionLevel::USER;
     }

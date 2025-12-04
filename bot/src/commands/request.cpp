@@ -111,10 +111,15 @@ namespace bot::command {
     schemas::PermissionLevel level = schemas::PermissionLevel::USER;
     const auto &badges = irc_message.sender.badges;
 
-    if (std::any_of(cfg.twitch.trusted_user_ids.begin(),
-                    cfg.twitch.trusted_user_ids.end(), [&user](const int &x) {
-                      return x == user.get_alias_id();
-                    })) {
+    if (std::any_of(
+            cfg.twitch.superuser_ids.begin(), cfg.twitch.superuser_ids.end(),
+            [&user](const int &x) { return x == user.get_alias_id(); })) {
+      level = schemas::PermissionLevel::SUPERUSER;
+    } else if (std::any_of(cfg.twitch.trusted_user_ids.begin(),
+                           cfg.twitch.trusted_user_ids.end(),
+                           [&user](const int &x) {
+                             return x == user.get_alias_id();
+                           })) {
       level = schemas::PermissionLevel::TRUSTED;
     } else if (user.get_alias_id() == channel.get_alias_id()) {
       level = schemas::PermissionLevel::BROADCASTER;

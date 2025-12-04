@@ -122,6 +122,10 @@ namespace bot {
         for (const std::string &x : utils::string::split_text(value, ',')) {
           ttv_cfg.trusted_user_ids.push_back(std::stoi(x));
         }
+      } else if (key == "twitch.superuser_ids") {
+        for (const std::string &x : utils::string::split_text(value, ',')) {
+          ttv_cfg.superuser_ids.push_back(std::stoi(x));
+        }
       }
 
       else if (key == "db_name") {

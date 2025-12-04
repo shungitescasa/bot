@@ -56,7 +56,8 @@ namespace bot::schemas {
     VIP,
     MODERATOR,
     BROADCASTER,
-    TRUSTED = 50
+    TRUSTED = 50,
+    SUPERUSER = 99
   };
 
   class UserRights {
