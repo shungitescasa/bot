@@ -942,6 +942,9 @@ namespace bot::command::lua {
         }
       }
       return {o};
+    } else if (res.get_type() == sol::type::nil ||
+               res.get_type() == sol::type::lua_nil) {
+      return {};
     } else {
       // should it be ResponseException?
       return {prefix + "Empty or unsupported response"};
