@@ -21,6 +21,39 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# getting Git information
+find_package(Git QUIET)
+if (GIT_FOUND)
+    # get git tag
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} describe --tags --abbrev=0
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_TAG
+        ERROR_QUIET
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+    if(NOT GIT_TAG)
+        execute_process(
+            COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            OUTPUT_VARIABLE GIT_COMMIT_HASH
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+        set(BOT_VERSION_STRING "commit ${GIT_COMMIT_HASH}")
+    else()
+        execute_process(
+            COMMAND ${GIT_EXECUTABLE} describe --tags --long --dirty --always
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            OUTPUT_VARIABLE GIT_DESCRIBE
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+        set(BOT_VERSION_STRING "commit ${GIT_DESCRIBE}")
+    endif()
+else()
+    set(BOT_VERSION_STRING "v${PROJECT_VERSION}")
+endif()
+
 option(BUILD_BOT "Build the bot" ON)
 option(BUILD_WEB "Build the web application" ON)
 
