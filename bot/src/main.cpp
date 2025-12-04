@@ -101,7 +101,7 @@ int main(int argc, char *argv[]) {
 
       if (name != helix_channel.login) {
         conn->exec("UPDATE channels SET alias_name = $1 WHERE id = $2",
-                   {helix_channel.login, channels[0][0]});
+                   {helix_channel.login, channels[0]["id"]});
       }
 
       client.join(helix_channel.login);
