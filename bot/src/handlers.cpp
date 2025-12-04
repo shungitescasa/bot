@@ -98,7 +98,7 @@ namespace bot::handlers {
       }
 
       irc::Message<irc::MessageType::Privmsg> msg2 = message;
-      msg2.message = inside;
+      msg2.message = requester.channel_preferences.get_prefix() + inside;
 
       std::optional<command::Response> response =
           run_command(bundle, command_loader, msg2, requester, conn);
