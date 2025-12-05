@@ -27,7 +27,7 @@ namespace bot {
         std::string display_name;
         int id;
 
-        std::map<std::string, int> badges;
+        std::map<std::string, std::string> badges;
 
         // More fields will be here
     };
@@ -59,7 +59,7 @@ namespace bot {
         for (const std::string &badge :
              utils::string::split_text(msg.tags.at("badges"), ',')) {
           auto b = utils::string::split_text_n(badge, "/", 1);
-          sender.badges.insert_or_assign(b[0], std::stoi(b[1]));
+          sender.badges.insert_or_assign(b[0], b[1]);
         }
 
         source.login = msg.params.front();
