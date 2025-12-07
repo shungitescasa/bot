@@ -68,11 +68,14 @@ namespace bot::handlers {
                    cid.size());
 
     db::DatabaseRows cmds = conn->exec(
-        "SELECT name, message FROM custom_commands WHERE (name = $1 OR name "
-        "LIKE $2) "
-        "AND (channel_id "
-        "= $3 OR is_global = TRUE)",
-        {cid, cid_without_prefix, std::to_string(requester.channel.get_id())});
+        "SELECT cc.name, cc.message FROM custom_commands cc "
+        "LEFT JOIN custom_command_aliases cca ON cca.command_id = cc.id "
+        "WHERE (cc.name = $1 OR cc.name "
+        "LIKE $2 OR cca.name = $3 OR cca.name LIKE $4) "
+        "AND (cc.channel_id "
+        "= $5 OR cc.is_global = TRUE)",
+        {cid, cid_without_prefix, cid, cid_without_prefix,
+         std::to_string(requester.channel.get_id())});
 
     if (cmds.empty()) {
       return std::nullopt;
