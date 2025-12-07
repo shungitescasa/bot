@@ -61,17 +61,20 @@ namespace bot::handlers {
       return std::nullopt;
     }
 
+    std::string prefix = requester.channel_preferences.get_prefix();
     std::string cid = parts[0];
-    std::string cid_without_prefix =
-        "{prefix}" +
-        cid.substr(requester.channel_preferences.get_prefix().size(),
-                   cid.size());
+    std::string cid_without_prefix = cid;
+
+    if (cid.size() > prefix.size() && cid.substr(0, prefix.size()) == prefix) {
+      cid_without_prefix = "{prefix}" + cid.substr(prefix.size(), cid.size());
+    }
 
     db::DatabaseRows cmds = conn->exec(
-        "SELECT cc.name, cc.message FROM custom_commands cc "
+        "SELECT cc.name, cc.message, cca.name AS alias_name FROM "
+        "custom_commands cc "
         "LEFT JOIN custom_command_aliases cca ON cca.command_id = cc.id "
-        "WHERE (cc.name = $1 OR cc.name "
-        "LIKE $2 OR cca.name = $3 OR cca.name LIKE $4) "
+        "WHERE (BINARY cc.name = $1 OR BINARY cc.name = $2 "
+        "OR BINARY cca.name = $3 OR BINARY cca.name = $4) "
         "AND (cc.channel_id "
         "= $5 OR cc.is_global = TRUE)",
         {cid, cid_without_prefix, cid, cid_without_prefix,
@@ -82,9 +85,10 @@ namespace bot::handlers {
     }
 
     db::DatabaseRow cmd = cmds[0];
-    std::string cmd_name = cmd.at("name");
+    std::string cmd_name =
+        cmd.at("alias_name").empty() ? cmd.at("name") : cmd.at("alias_name");
     if (cmd_name.length() > 8 && cmd_name.substr(0, 8) == "{prefix}" &&
-        cid.substr(0, requester.channel_preferences.get_prefix().size()) !=
+        cmd_name.substr(0, requester.channel_preferences.get_prefix().size()) !=
             requester.channel_preferences.get_prefix()) {
       return std::nullopt;
     }
