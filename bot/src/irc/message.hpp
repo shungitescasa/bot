@@ -11,7 +11,7 @@
 
 namespace bot {
   namespace irc {
-    enum MessageType { Privmsg, Ping, Notice };
+    enum MessageType { Privmsg, Ping, Notice, Connect };
     std::optional<MessageType> define_message_type(const std::string &msg);
 
     struct IRCMessage {
@@ -87,5 +87,9 @@ namespace bot {
         using fn = std::function<void(Message<Privmsg> message)>;
     };
 
+    template <>
+    struct MessageHandler<MessageType::Connect> {
+        using fn = std::function<void()>;
+    };
   }
 }
