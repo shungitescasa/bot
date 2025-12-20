@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "api/twitch/helix_client.hpp"
+#include "chat.hpp"
 #include "config.hpp"
 #include "irc/client.hpp"
 
@@ -18,7 +19,7 @@ namespace bot {
   class GithubListener {
     public:
       GithubListener(const Configuration &configuration,
-                     irc::Client &irc_client,
+                     chat::ChatClient &irc_client,
                      const api::twitch::HelixClient &helix_client)
           : configuration(configuration),
             irc_client(irc_client),
@@ -37,7 +38,7 @@ namespace bot {
       std::vector<std::string> ids;
       std::unordered_map<std::string, std::vector<std::string>> commits;
 
-      irc::Client &irc_client;
+      chat::ChatClient &irc_client;
       const Configuration &configuration;
       const api::twitch::HelixClient &helix_client;
   };

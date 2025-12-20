@@ -1,5 +1,6 @@
 #pragma once
 
+#include "chat.hpp"
 namespace bot {
   namespace command {
     class CommandLoader;
@@ -21,7 +22,7 @@ namespace bot {
 
 namespace bot {
   struct InstanceBundle {
-      irc::Client &irc_client;
+      chat::ChatClient &irc_client;
       const api::twitch::HelixClient &helix_client;
       const api::KickAPIClient &kick_api_client;
       const bot::loc::Localization &localization;

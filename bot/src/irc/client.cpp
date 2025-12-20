@@ -130,7 +130,7 @@ void Client::say(const std::string &channel_login, const std::string &message) {
   log::info("IRC", "Sent '" + message + "' in #" + channel_login);
 }
 
-bool Client::join(const std::string &channel_login) {
+void Client::join(const std::string &channel_login) {
   auto already_joined =
       std::any_of(this->joined_channels.begin(), this->joined_channels.end(),
                   [&](const auto &x) { return x == channel_login; });
@@ -140,8 +140,6 @@ bool Client::join(const std::string &channel_login) {
     this->joined_channels.push_back(channel_login);
     log::info("IRC", "Joined #" + channel_login);
   }
-
-  return !already_joined;
 }
 
 void Client::raw(const std::string &raw_message) {

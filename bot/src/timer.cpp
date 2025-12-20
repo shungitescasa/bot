@@ -4,13 +4,13 @@
 #include <string>
 #include <thread>
 
+#include "chat.hpp"
 #include "config.hpp"
 #include "database.hpp"
-#include "irc/client.hpp"
 #include "utils/chrono.hpp"
 
 namespace bot {
-  void create_timer_thread(irc::Client *irc_client,
+  void create_timer_thread(chat::ChatClient *irc_client,
                            Configuration *configuration) {
     while (true) {
       std::unique_ptr<db::BaseDatabase> conn =

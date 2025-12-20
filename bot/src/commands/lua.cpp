@@ -113,7 +113,7 @@ namespace bot::command::lua {
     void add_bot_library(std::shared_ptr<sol::state> state,
                          const InstanceBundle &bundle) {
       state->set_function("bot_username", [&bundle]() {
-        return bundle.irc_client.get_bot_username();
+        return bundle.irc_client.get_username();
       });
 
       state->set_function("bot_get_loaded_command_names", [state, &bundle]() {
@@ -718,7 +718,7 @@ namespace bot::command::lua {
       state->set_function("twitch_get_chatters", [state, &request, &bundle]() {
         auto chatters = bundle.helix_client.get_chatters(
             request.requester.channel.get_alias_id(),
-            bundle.irc_client.get_bot_id());
+            bundle.irc_client.get_user_id());
 
         sol::table o = state->create_table();
 
@@ -942,8 +942,7 @@ namespace bot::command::lua {
         }
       }
       return {o};
-    } else if (res.get_type() == sol::type::nil ||
-               res.get_type() == sol::type::lua_nil) {
+    } else if (res.get_type() == sol::type::lua_nil) {
       return {};
     } else {
       // should it be ResponseException?

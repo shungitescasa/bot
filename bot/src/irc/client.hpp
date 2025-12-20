@@ -5,19 +5,21 @@
 #include <string>
 #include <vector>
 
+#include "chat.hpp"
 #include "message.hpp"
 
 namespace bot {
   namespace irc {
-    class Client {
+    class Client : public chat::ChatClient {
       public:
         Client(std::string client_id, std::string token);
         ~Client() = default;
 
         void run();
 
-        void say(const std::string &channel_login, const std::string &message);
-        bool join(const std::string &channel_login);
+        void say(const std::string &channel_login,
+                 const std::string &message) override;
+        void join(const std::string &channel_login) override;
         void raw(const std::string &raw_message);
 
         template <MessageType T>
@@ -31,8 +33,10 @@ namespace bot {
           }
         }
 
-        const std::string &get_bot_username() const { return this->username; };
-        const int &get_bot_id() const { return this->id; }
+        const std::string &get_username() const override {
+          return this->username;
+        };
+        const unsigned int &get_user_id() const override { return this->id; }
 
       private:
         void authorize();

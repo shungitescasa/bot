@@ -6,13 +6,14 @@
 #include <string>
 
 #include "api/twitch/helix_client.hpp"
+#include "chat.hpp"
 #include "config.hpp"
 #include "irc/client.hpp"
 #include "schemas/stream.hpp"
 
 namespace bot::emotes {
   struct EmoteEventBundle {
-      irc::Client &irc_client;
+      chat::ChatClient &irc_client;
       const api::twitch::HelixClient &helix_client;
 #ifdef BUILD_BETTERTTV
       emotespp::BetterTTVWebsocketClient &bttv_ws_client;

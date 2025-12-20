@@ -202,7 +202,7 @@ namespace bot {
       // getting channels
       std::vector<schemas::Event> events = utils::get_events(
           db::create_connection(this->configuration), this->helix_client,
-          this->irc_client.get_bot_id(), it->event->type, it->event->name);
+          this->irc_client.get_user_id(), it->event->type, it->event->name);
 
       for (const schemas::Event& event : events) {
         int count = 0;

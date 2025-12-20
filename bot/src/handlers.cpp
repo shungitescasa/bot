@@ -152,8 +152,8 @@ namespace bot::handlers {
     std::optional<command::Requester> requester =
         command::get_requester(message, conn, bundle.configuration);
 
-    if (!requester.has_value() || requester->user.get_alias_name() ==
-                                      bundle.irc_client.get_bot_username()) {
+    if (!requester.has_value() ||
+        requester->user.get_alias_name() == bundle.irc_client.get_username()) {
       return;
     }
 
@@ -204,7 +204,7 @@ namespace bot::handlers {
                              schemas::ChannelFeature::RANDOM_MARKOV_RESPONSES;
                     });
 
-    std::string prefix = "@" + bundle.irc_client.get_bot_username() + ",";
+    std::string prefix = "@" + bundle.irc_client.get_username() + ",";
     bool intended_call = message.message.substr(0, prefix.length()) == prefix;
 
     int random = -1;

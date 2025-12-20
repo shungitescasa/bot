@@ -78,8 +78,9 @@ namespace bot::emotes {
       bool massping_enabled = std::stoi(event.at("is_massping"));
 
       if (massping_enabled) {
-        auto chatters = bundle.helix_client.get_chatters(
-            std::stoi(event.at("channel_aid")), bundle.irc_client.get_bot_id());
+        auto chatters =
+            bundle.helix_client.get_chatters(std::stoi(event.at("channel_aid")),
+                                             bundle.irc_client.get_user_id());
 
         std::for_each(chatters.begin(), chatters.end(),
                       [&names](const auto &x) { names.push_back(x.login); });

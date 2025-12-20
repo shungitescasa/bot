@@ -6,8 +6,8 @@
 #include <vector>
 
 #include "api/twitch/helix_client.hpp"
+#include "chat.hpp"
 #include "config.hpp"
-#include "irc/client.hpp"
 
 namespace bot {
   struct RSSMessage {
@@ -30,7 +30,7 @@ namespace bot {
 
   class RSSListener {
     public:
-      RSSListener(irc::Client &irc_client,
+      RSSListener(chat::ChatClient &irc_client,
                   api::twitch::HelixClient &helix_client,
                   Configuration &configuration)
           : irc_client(irc_client),
@@ -48,7 +48,7 @@ namespace bot {
       void check_channels();
 
       std::vector<RSSChannel> channels;
-      irc::Client &irc_client;
+      chat::ChatClient &irc_client;
       api::twitch::HelixClient &helix_client;
       Configuration &configuration;
   };
