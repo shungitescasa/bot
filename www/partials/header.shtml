@@ -4,4 +4,7 @@
     </a>
     <a href="/">home</a>
     <a href="/commands/">commands</a>
+    <!--# if expr="$wiki" -->
+    <a href="<!--# echo var='wiki' -->">wiki<img src="/static/img/icons/external_link.png"></a>
+    <!--# endif -->
 </header>
