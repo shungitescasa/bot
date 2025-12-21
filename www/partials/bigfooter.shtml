@@ -1,0 +1,14 @@
+<footer class="big">
+    <div class="w-50 column gap-8">
+        <section class="row gap-8 align-center">
+            <img src="/static/img/brand/project_icon.webp" alt="" height="82">
+            <h1>Project<br>Tinybot</h1>
+        </section>
+        <p>
+            This instance is maintained by
+            <a href="<!--# echo var='contact_url' default='#' -->">
+                <!--# echo var='contact_name' default='Anonymous' -->
+            </a>
+        </p>
+    </div>
+</footer>

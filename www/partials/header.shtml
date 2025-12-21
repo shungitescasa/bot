@@ -1,0 +1,10 @@
+<header class="gap-32">
+    <section class="row">
+        <a href="/">
+            <h1><img src="/static/img/brand/project_icon.webp" alt="Project Tinybot" width="64"></h1>
+        </a>
+    </section>
+    <section class="row gap-16">
+        <a href="/">home</a>
+    </section>
+</header>
