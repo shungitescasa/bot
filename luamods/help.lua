@@ -13,6 +13,7 @@ local lines = {
 
 return {
 	name = "help",
+	summary = "Get an information about commands.",
 	description = [[
 Get an information about commands.
 ]],

@@ -46,6 +46,7 @@ local lines = {
 
 return {
 	name = "cmd",
+	summary = "Make custom command.",
 	description = [[
 > This command is for broadcaster and moderators only
 

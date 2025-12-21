@@ -15,6 +15,7 @@ local lines = {
 
 return {
     name = "mcsrv",
+    summary = "Get Minecraft server status.",
     description = [[
 The `!mcsrv` command allows you to quickly find out the status of Minecraft server.
 This is a handy command that solves the problem of

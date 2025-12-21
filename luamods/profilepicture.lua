@@ -15,6 +15,7 @@ local lines = {
 
 return {
     name = "profilepicture",
+    summary = "Get user profile pictures.",
     description = [[
 Get user profile pictures.
 

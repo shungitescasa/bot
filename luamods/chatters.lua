@@ -15,6 +15,7 @@ local lines = {
 
 return {
 	name = "chatters",
+	summary = "Get a list of chatters.",
 	description = [[
 > To use the `!chatters` command, you must assign moderator to the bot.
 > Following the [Twitch API docs](https://dev.twitch.tv/docs/api/reference/#get-chatters), only moderators have access to full chatter list.

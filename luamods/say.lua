@@ -9,6 +9,7 @@ local lines = {
 
 return {
 	name = "say",
+	summary = "Make the bot say something.",
 	description = "Make the bot say something. Available only to superusers.",
 	delay_sec = 5,
 	options = {},

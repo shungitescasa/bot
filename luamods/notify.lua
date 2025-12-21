@@ -89,6 +89,7 @@ local lines = {
 
 return {
     name = "notify",
+    summary = "Manage event subscriptions.",
     description = [[
 The `!notify` command gives users the ability to manage event subscriptions.
 

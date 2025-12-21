@@ -1,5 +1,6 @@
 return {
     name = "massping",
+    summary = "Ping em! :MegaLUL:",
     description = "Ping em! :MegaLUL:",
     delay_sec = 5,
     options = {},

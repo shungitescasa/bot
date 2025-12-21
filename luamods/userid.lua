@@ -15,6 +15,7 @@ local lines = {
 
 return {
     name = "userid",
+    summary = "Get user ID and their availability.",
     description = [[
 The `!userid` command allows you to check if the specified users
 exist, or if they are banned, or if they are OK.

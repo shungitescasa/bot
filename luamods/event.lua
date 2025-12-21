@@ -94,6 +94,7 @@ local lines = {
 
 return {
     name = "event",
+    summary = "Manage events.",
     description = [[
 > This command is for broadcaster and moderators only.
 

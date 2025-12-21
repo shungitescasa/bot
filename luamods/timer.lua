@@ -39,6 +39,7 @@ local lines = {
 
 return {
 	name = "timer",
+	summary = "Send message every specified interval.",
 	description = [[
 > This command is for broadcaster and moderators only
 

@@ -17,6 +17,7 @@ local lines = {
 
 return {
     name = "twitter",
+    summary = "Get the latest post from Twitter account.",
     description = [[
 Get the latest post from the specified Twitter account.
 

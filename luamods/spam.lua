@@ -9,6 +9,7 @@ local lines = {
 
 return {
     name = "spam",
+    summary = "Repeat a given message a certain number of times.",
     description = [[
 > It is recommended to give the bot moderator rights in the chat room. This will speed up the sending of messages.
 

@@ -27,6 +27,7 @@ local lines = {
 
 return {
     name = "join",
+    summary = "Add the bot to your channel.",
     description = "Add the bot to your channel.",
     delay_sec = 1,
     options = {},

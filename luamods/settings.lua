@@ -25,6 +25,7 @@ local lines = {
 
 return {
     name = "set",
+    summary = "Bot settings in your chat.",
     description = [[
 > This command is for broadcaster and moderators only.
 

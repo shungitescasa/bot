@@ -13,6 +13,7 @@ local lines = {
 
 return {
 	name = "followlist",
+	summary = "Get user's followlist.",
 	description = [[
 Read the user's follows as plain text.
 After collecting the list of chatters, the bot returns a link to the paste from

@@ -17,6 +17,7 @@ local lines = {
 
 return {
     name = "telegram",
+    summary = "Get the latest post from Telegram channel.",
     description = [[
 Get the latest post from the specified public Telegram channel.
 
