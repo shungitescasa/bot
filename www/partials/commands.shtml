@@ -11,24 +11,26 @@
 <body>
     <main>
         <!--#include file="/partials/header.shtml" -->
-        <content class="gap-64">
-            <div class="row gap-8 background-colorful p-4" style="box-shadow: 0 2px 1px rgba(0, 0, 0, 0.25);z-index:1;">
-                <img src="/static/img/icons/script.png" alt="">
+        <box>
+            <header>
+                <img src="/static/img/icons/script.png" alt="" height="24">
                 <h2>Commands</h2>
-            </div>
-            <table>
-                <tr>
-                    <th>Name</th>
-                    <th>Description</th>
-                </tr>
-                {% for c in commands %}
-                <tr>
-                    <td><a href="/!{{ c.name }}">{{ c.name }}</a></td>
-                    <td>{{ c.summary }}</td>
-                </tr>
-                {% endfor %}
-            </table>
-        </content>
+            </header>
+            <content>
+                <table>
+                    <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                    </tr>
+                    {% for c in commands %}
+                    <tr>
+                        <td><a href="/!{{ c.name }}">{{ c.name }}</a></td>
+                        <td>{{ c.summary }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </content>
+        </box>
     </main>
 
     <!--#include file="/partials/footer.shtml" -->
