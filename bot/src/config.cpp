@@ -118,6 +118,8 @@ namespace bot {
         ttv_cfg.client_id = value;
       } else if (key == "twitch.token") {
         ttv_cfg.token = value;
+      } else if (key == "twitch.user_id") {
+        ttv_cfg.user_id = std::stoi(value);
       } else if (key == "twitch.trusted_user_ids") {
         for (const std::string &x : utils::string::split_text(value, ',')) {
           ttv_cfg.trusted_user_ids.push_back(std::stoi(x));

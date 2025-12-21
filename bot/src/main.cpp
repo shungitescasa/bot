@@ -1,3 +1,4 @@
+#include <chrono>
 #include <emotespp/seventv.hpp>
 #include <map>
 #include <memory>
@@ -26,6 +27,7 @@
 #include "schemas/stream.hpp"
 #include "stream.hpp"
 #include "timer.hpp"
+#include "twitch/chat.hpp"
 
 int main(int argc, char *argv[]) {
   bot::log::info("Main", "Starting up...");
@@ -55,7 +57,8 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  bot::irc::Client client(cfg.twitch.client_id, cfg.twitch.token);
+  bot::twitch::TwitchChatClient twitch_client(
+      cfg.twitch.user_id, cfg.twitch.token, cfg.twitch.client_id);
   bot::command::CommandLoader command_loader;
   command_loader.load_lua_directory("luamods");
 
@@ -72,57 +75,27 @@ int main(int argc, char *argv[]) {
   emotespp::SevenTVWebsocketClient seventv_emote_listener;
   emotespp::SevenTVAPIClient seventv_api_client;
 
-  client.join(client.get_bot_username());
-
   std::unique_ptr<bot::db::BaseDatabase> conn = bot::db::create_connection(cfg);
 
-  bot::db::DatabaseRows rows = conn->exec(
-      "SELECT alias_id FROM channels WHERE opted_out_At IS NULL AND alias_id "
+  bot::db::DatabaseRows id_rows = conn->exec(
+      "SELECT alias_id FROM channels WHERE opted_out_at IS NULL AND alias_id "
       "!= "
       "$1",
-      {std::to_string(client.get_bot_id())});
-
-  std::vector<int> ids;
-
-  for (const bot::db::DatabaseRow &row : rows) {
-    ids.push_back(std::stoi(row.at("alias_id")));
-  }
-
-  auto helix_channels = helix_client.get_users(ids);
-
-  // it could be optimized
-  for (const auto &helix_channel : helix_channels) {
-    std::vector<std::map<std::string, std::string>> channels =
-        conn->exec("SELECT id, alias_name FROM channels WHERE alias_id = $1",
-                   {std::to_string(helix_channel.id)});
-
-    if (!channels.empty()) {
-      std::string name = channels[0]["alias_name"];
-
-      if (name != helix_channel.login) {
-        conn->exec("UPDATE channels SET alias_name = $1 WHERE id = $2",
-                   {helix_channel.login, channels[0]["id"]});
-      }
-
-      client.join(helix_channel.login);
-    }
-  }
+      {std::to_string(twitch_client.get_user_id())});
 
   conn->close();
 
   bot::stream::StreamListenerClient stream_listener_client(
-      helix_client, kick_api_client, client, cfg);
+      helix_client, kick_api_client, twitch_client, cfg);
 
-  bot::GithubListener github_listener(cfg, client, helix_client);
+  bot::GithubListener github_listener(cfg, twitch_client, helix_client);
 
-  bot::emotes::EmoteEventBundle emote_bundle{client,
-                                             helix_client,
+  bot::emotes::EmoteEventBundle emote_bundle{
+      twitch_client,          helix_client,
 #ifdef BUILD_BETTERTTV
-                                             bttv_ws_client,
+      bttv_ws_client,
 #endif
-                                             seventv_emote_listener,
-                                             seventv_api_client,
-                                             cfg};
+      seventv_emote_listener, seventv_api_client, cfg};
 
   // ---------------
   // 7TV !!!
@@ -192,22 +165,32 @@ int main(int argc, char *argv[]) {
 
 #endif
 
-  bot::RSSListener rss_listener(client, helix_client, cfg);
+  bot::RSSListener rss_listener(twitch_client, helix_client, cfg);
 
-  client.on<bot::irc::MessageType::Privmsg>(
-      [&client, &command_loader, &localization, &cfg, &helix_client,
+  twitch_client.on_connect([&twitch_client, &id_rows]() {
+    bot::log::info("Main", "Joining channels...");
+    twitch_client.join(twitch_client.get_user_id());
+    for (const bot::db::DatabaseRow &row : id_rows) {
+      twitch_client.join(std::stoi(row.at("alias_id")));
+      std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    }
+  });
+
+  twitch_client.on_privmsg(
+      [&twitch_client, &command_loader, &localization, &cfg, &helix_client,
        &kick_api_client](
           const bot::irc::Message<bot::irc::MessageType::Privmsg> &message) {
-        bot::InstanceBundle bundle{client,       helix_client, kick_api_client,
-                                   localization, cfg,          command_loader};
-
+        bot::InstanceBundle bundle{twitch_client, helix_client, kick_api_client,
+                                   localization,  cfg,          command_loader};
         bot::handlers::handle_private_message(bundle, command_loader, message);
       });
 
-  client.run();
+  // client.run();
+  twitch_client.start();
 
   std::vector<std::thread> threads;
-  threads.push_back(std::thread(bot::create_timer_thread, &client, &cfg));
+  threads.push_back(
+      std::thread(bot::create_timer_thread, &twitch_client, &cfg));
   threads.push_back(std::thread(&bot::stream::StreamListenerClient::run,
                                 &stream_listener_client));
   threads.push_back(std::thread(&bot::GithubListener::run, &github_listener));
