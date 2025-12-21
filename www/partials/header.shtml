@@ -6,5 +6,6 @@
     </section>
     <section class="row gap-16">
         <a href="/">home</a>
+        <a href="/commands/">commands</a>
     </section>
 </header>

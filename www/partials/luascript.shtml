@@ -1,0 +1,50 @@
+<html>
+
+<head>
+    <title>&excl;{{name}} - <!--# echo var='bot_name_formatted' default='Project Tinybot' --></title>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
+</head>
+
+<body>
+    <main>
+        <!--#include file="/partials/header.shtml" -->
+        <content>
+            <div class="row gap-8 background-colorful p-4" style="box-shadow: 0 2px 1px rgba(0, 0, 0, 0.25);z-index:1;">
+                <img src="/static/img/icons/script.png" alt="">
+                <h2>!{{ name }}</h2>
+            </div>
+            <div class="row">
+                <!-- WIKI CONTENT -->
+                <div class="wiki-content">
+                    <table class="vertical">
+                        <tr>
+                            <th>Delay</th>
+                            <td>{{ delay }} seconds</td>
+                        </tr>
+                        <tr>
+                            <th>Subcommands</th>
+                            <td>{{ subcommands | join(", ") }}</td>
+                        </tr>
+                        <tr>
+                            <th>Aliases</th>
+                            <td>{{ aliases | join(", ")}}</td>
+                        </tr>
+                        <tr>
+                            <th>Minimal rights</th>
+                            <td>{{ minimal_rights }}</td>
+                        </tr>
+                    </table>
+                    <content>{{ description }}</content>
+                </div>
+
+            </div>
+            <a href="/!/{{ name }}.lua"><img src="/static/img/icons/code.png"> Check the
+                source code</a>
+        </content>
+    </main>
+    <!--#include file="/partials/footer.shtml" -->
+</body>
+
+</html>
