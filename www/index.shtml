@@ -4,122 +4,131 @@
 <head>
     <title><!--# echo var='bot_name_formatted' default='Project Tinybot' --></title>
     <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A multi-chat utility and entertainment Twitch bot.">
+    <meta name="robots" content="nofollow">
     <link rel="stylesheet" href="/static/style.css">
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
 </head>
 
 <body>
-    <main>
+    <main class="main-page">
         <!--#include file="partials/header.shtml" -->
-        <content class="gap-64">
-            <!-- PROMO -->
-            <section class="row justify-between align-center background-colorful border" style="border-radius:4px">
-                <div class="row justify-center align-center img-gradient">
-                    <img src="/static/img/brand/bot_picture.webp" alt=""
-                        style="border-top-left-radius:4px;border-bottom-left-radius:4px;">
-                </div>
-                <div class="column justify-end gap-8 p-16">
-                    <h1 class="self-end text-right">Enhance your chat with
-                        <!--# echo var='bot_name_formatted' default='Project Tinybot' -->
-                    </h1>
+        <!-- PROMO -->
+        <section class="promo-banner">
+            <div class="bot-image">
+                <img src="/static/img/brand/bot_picture.webp" alt="">
+            </div>
+            <div class="description">
+                <h1>
+                    Enhance your chat with
+                    <!--# echo var='bot_name_formatted' default='Project Tinybot' -->
+                </h1>
+                <p>
+                    A multi-utility Twitch chat bot that brings<br>
+                    a lot of functionality into your chat.
+                </p>
+                <a href="/!join">
+                    <button>Get the bot today!</button>
+                </a>
+            </div>
+        </section>
 
+        <!-- BIG FEATURES -->
+        <box class="features">
+            <header>Features</header>
+            <content>
+                <!-- STREAM NOTIFICATIONS -->
+                <section>
+                    <div class="description">
+                        <h1>Stream notifications</h1>
+                        <p>A convenient way to keep track of streams on Twitch. Simply use the <a href="/!event"
+                                class="command">!event</a> command to
+                            create a notification in chat about an upcoming stream. To always be in the know, sign
+                            up for notifications using the <a href="/!notify" class="command">!notify</a> command. Never
+                            miss a moment and enjoy your
+                            streams on time! </p>
+                    </div>
+                    <div class="icon">
+                        <img src="/static/img/features/stream.webp" alt="">
+                    </div>
+                </section>
+                <!-- EMOTE UPDATES -->
+                <section>
+                    <div class="description">
+                        <h1>Emote Updates</h1>
+                        <p>
+                            Instant updates on new changes to the emote set. The bot automatically notifies the chat
+                            about new emotes, deletion of existing emotes, and changes in their names.<br>
+                            For now only for 7TV.
+                        </p>
+                    </div>
+                    <div class="icon">
+                        <img src="/static/img/features/emotes.webp" alt="">
+                    </div>
+                </section>
+                <!-- LUA CODING -->
+                <section>
+                    <div class="description">
+                        <h1>Lua coding</h1>
+                        <p>
+                            With <a href="/!lua" class="command">!lua</a> and <a href="/!luaimport"
+                                class="command">!luaimport</a> you can create your own logic for custom commands! It can
+                            be
+                            another utility, a mini-game, or even a bot within a bot - only your imagination<span
+                                title="and bot limitations">*</span> limits
+                            you. The coding awaits you today!
+                        </p>
+                    </div>
+                    <div class="icon">
+                        <img src="/static/img/features/scripting.webp" alt="">
+                    </div>
+                </section>
+            </content>
+        </box>
 
-                    <p class="self-end text-right">
-                        A multi-utility Twitch chat bot that brings<br>
-                        a lot of functionality into your chat.
-                    </p>
-                    <a href="/!join" class="self-end">
-                        <button>Get the bot today!</button>
-                    </a>
+        <!-- SMALL FEATURES -->
+        <box class="small-features">
+            <section>
+                <div class="icon">
+                    <img src="/static/img/icons/bell.png" alt="">
                 </div>
+                <h2>&commat;everyone in your chat</h2>
+                <p>With the <a href="/!massping" class="command">!massping</a> command, moderators can quickly notify
+                    all participants by mentioning
+                    them
+                    with an important message. </p>
             </section>
-
-            <!-- BIG FEATURES -->
-            <section class="features-box column gap-8">
-                <div class="tab row justify-center align-center">
-                    <h1>Features</h1>
+            <section>
+                <div class="icon">
+                    <img src="/static/img/icons/keyboard.png" alt="">
                 </div>
-                <div class="content column gap-8">
-                    <!-- STREAM NOTIFICATIONS -->
-                    <section>
-                        <div class="description">
-                            <h1>Stream notifications</h1>
-                            <p>A convenient way to keep track of streams on Twitch. Simply use the !event command to
-                                create a notification in chat about an upcoming stream. To always be in the know, sign
-                                up for notifications using the !notify command. Never miss a moment and enjoy your
-                                streams on time! </p>
-                        </div>
-                        <div class="icon">
-                            <img src="/static/img/features/stream.webp" alt="">
-                        </div>
-                    </section>
-                    <!-- EMOTE UPDATES -->
-                    <section>
-                        <div class="description">
-                            <h1>Emote Updates</h1>
-                            <p>
-                                Instant updates on new changes to the emote set. The bot automatically notifies the chat
-                                about new emotes, deletion of existing emotes, and changes in their names.<br>
-                                For now only for 7TV.
-                            </p>
-                        </div>
-                        <div class="icon">
-                            <img src="/static/img/features/emotes.webp" alt="">
-                        </div>
-                    </section>
-                    <!-- LUA CODING -->
-                    <section>
-                        <div class="description">
-                            <h1>Lua coding</h1>
-                            <p>
-                                With !lua and !luaimport you can create your own logic for custom commands! It can be
-                                another utility, a mini-game, or even a bot within a bot - only your imagination* limits
-                                you. The coding awaits you today!
-                            </p>
-                        </div>
-                        <div class="icon">
-                            <img src="/static/img/features/scripting.webp" alt="">
-                        </div>
-                    </section>
+                <h2>No Ctrl&plus;Enter anymore</h2>
+                <p>In addition, the <a href="/!spam" class="command">!spam</a> command provides the ability to repeat a
+                    message the desired number
+                    of
+                    times, which is useful for repetitive reminders or clarifications.</p>
+            </section>
+            <section>
+                <div class="icon">
+                    <img src="/static/img/icons/clock.png" alt="">
                 </div>
+                <h2>Timers</h2>
+                <p>With the <a href="/!timer" class="command">!timer</a> command, you can set messages to be sent each
+                    interval. moderators can
+                    quickly
+                    notify all participants by mentioning them with an important message. </p>
             </section>
-
-            <!-- SMALL FEATURES -->
-            <section class="small-features grid-2 gap-32">
-                <section>
-                    <div class="icon">
-                        <img src="/static/img/icons/bell.png" alt="">
-                    </div>
-                    <h2>&commat;everyone in your chat</h2>
-                    <p>With the "!massping" command, moderators can quickly notify all participants by mentioning them
-                        with an important message. </p>
-                </section>
-                <section>
-                    <div class="icon">
-                        <img src="/static/img/icons/keyboard.png" alt="">
-                    </div>
-                    <h2>No Ctrl&plus;Enter anymore</h2>
-                    <p>In addition, the "!spam" command provides the ability to repeat a message the desired number of
-                        times, which is useful for repetitive reminders or clarifications.</p>
-                </section>
-                <section>
-                    <div class="icon">
-                        <img src="/static/img/icons/clock.png" alt="">
-                    </div>
-                    <h2>Timers</h2>
-                    <p>With the !timer command, you can set messages to be sent each interval. moderators can quickly
-                        notify all participants by mentioning them with an important message. </p>
-                </section>
-                <section>
-                    <div class="icon">
-                        <img src="/static/img/icons/terminal.png" alt="">
-                    </div>
-                    <h2>Create your own commands</h2>
-                    <p>The !cmd command allow the creation of personalized commands, which adds interactivity and
-                        flexibility to communication by allowing channel owners to create their own commands. </p>
-                </section>
+            <section>
+                <div class="icon">
+                    <img src="/static/img/icons/terminal.png" alt="">
+                </div>
+                <h2>Create your own commands</h2>
+                <p>The <a href="/!cmd" class="command">!cmd</a> command allow the creation of personalized commands,
+                    which adds interactivity and
+                    flexibility to communication by allowing channel owners to create their own commands. </p>
             </section>
-        </content>
+        </box>
     </main>
 
     <!--#include file="partials/bigfooter.shtml" -->

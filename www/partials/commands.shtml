@@ -3,6 +3,9 @@
 
 <head>
     <title>Commands - <!--# echo var='bot_name_formatted' default='Project Tinybot' --></title>
+    <meta name="description" content="A list of available commands which you can use with this bot.">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
     <link rel="stylesheet" href="/static/style.css">
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">

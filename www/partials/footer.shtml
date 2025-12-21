@@ -1,13 +1,11 @@
 <footer>
-    <div class="w-50 row gap-8">
-        <div class="row grow gap-8">
-            <p>Powered by Project Tinybot.</p>
-            <p>
-                This instance is maintained by
-                <a href="<!--# echo var='contact_url' default='#' -->">
-                    <!--# echo var='contact_name' default='Anonymous' -->
-                </a>
-            </p>
-        </div>
-    </div>
+    <main>
+        <p>Powered by Project Tinybot.</p>
+        <p>
+            This instance is maintained by
+            <a href="<!--# echo var='contact_url' default='#' -->">
+                <!--# echo var='contact_name' default='Anonymous' -->
+            </a>
+        </p>
+    </main>
 </footer>

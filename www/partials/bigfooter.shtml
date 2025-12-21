@@ -1,6 +1,6 @@
-<footer class="big">
-    <div class="w-50 column gap-8">
-        <section class="row gap-8 align-center">
+<hugefooter>
+    <main>
+        <section class="brand">
             <img src="/static/img/brand/project_icon.webp" alt="" height="82">
             <h1>Project<br>Tinybot</h1>
         </section>
@@ -10,5 +10,5 @@
                 <!--# echo var='contact_name' default='Anonymous' -->
             </a>
         </p>
-    </div>
-</footer>
+    </main>
+</hugefooter>
