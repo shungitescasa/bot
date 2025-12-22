@@ -113,7 +113,7 @@ namespace bot::command::lua {
     void add_bot_library(std::shared_ptr<sol::state> state,
                          const InstanceBundle &bundle) {
       state->set_function("bot_username", [&bundle]() {
-        return bundle.irc_client.get_username();
+        return bundle.irc_client.get_me().login;
       });
 
       state->set_function("bot_get_loaded_command_names", [state, &bundle]() {
@@ -680,24 +680,14 @@ namespace bot::command::lua {
     void add_irc_library(std::shared_ptr<sol::state> state,
                          const InstanceBundle &bundle) {
       state->set_function("irc_join_channel",
-                          [&bundle](const std::string &channel_name) {
-                            return bundle.irc_client.join(channel_name);
-                          });
-
-      state->set_function("irc_join_channel", [&bundle](const int &channel_id) {
-        return bundle.irc_client.join(channel_id);
-      });
-
-      state->set_function("irc_send_message",
-                          [&bundle](const std::string &channel_name,
-                                    const std::string &message) {
-                            bundle.irc_client.say(channel_name, message);
+                          [&bundle](const sol::table &room) {
+                            return bundle.irc_client.join({room});
                           });
 
       state->set_function(
           "irc_send_message",
-          [&bundle](const int &channel_id, const std::string &message) {
-            bundle.irc_client.say(channel_id, message);
+          [&bundle](const sol::table &room, const std::string &message) {
+            bundle.irc_client.say({room}, message);
           });
     }
 
@@ -708,7 +698,7 @@ namespace bot::command::lua {
       state->set_function("twitch_get_chatters", [state, &request, &bundle]() {
         auto chatters = bundle.helix_client.get_chatters(
             request.requester.channel.get_alias_id(),
-            bundle.irc_client.get_user_id());
+            bundle.irc_client.get_me().id);
 
         sol::table o = state->create_table();
 

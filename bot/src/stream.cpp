@@ -228,7 +228,7 @@ namespace bot::stream {
 
       if (massping_enabled) {
         auto chatters = this->helix_client.get_chatters(
-            std::stoi(event.at("channel_aid")), this->irc_client.get_user_id());
+            std::stoi(event.at("channel_aid")), this->irc_client.get_me().id);
 
         std::for_each(chatters.begin(), chatters.end(),
                       [&names](const auto &x) { names.push_back(x.login); });
@@ -275,7 +275,9 @@ namespace bot::stream {
           utils::string::separate_by_length(base, names, "@", " ", 500);
 
       for (const auto &msg : msgs) {
-        this->irc_client.say(std::stoi(event.at("channel_aid")), base + msg);
+        this->irc_client.say(
+            {event.at("channel_aname"), std::stoi(event.at("channel_aid"))},
+            base + msg);
       }
     }
 

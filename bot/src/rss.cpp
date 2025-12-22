@@ -42,7 +42,7 @@ namespace bot {
 
     sol::table ms = state->create_table();
 
-    for (const RSSMessage& v : this->messages) {
+    for (const RSSMessage &v : this->messages) {
       sol::table m = state->create_table();
       m["message"] = v.message;
       m["id"] = v.id;
@@ -69,12 +69,12 @@ namespace bot {
     }
   }
 
-  bool RSSListener::has_channel(const std::string& url) const {
+  bool RSSListener::has_channel(const std::string &url) const {
     return std::any_of(this->channels.begin(), this->channels.end(),
-                       [&url](const RSSChannel& c) { return c.url == url; });
+                       [&url](const RSSChannel &c) { return c.url == url; });
   }
 
-  void RSSListener::add_channel(const std::string& url) {
+  void RSSListener::add_channel(const std::string &url) {
     if (this->has_channel(url)) return;
 
     std::optional<RSSChannel> channel = get_rss_channel(url);
@@ -83,11 +83,11 @@ namespace bot {
     }
   }
 
-  void RSSListener::remove_channel(const std::string& url) {
+  void RSSListener::remove_channel(const std::string &url) {
     if (!this->has_channel(url)) return;
 
     std::remove_if(this->channels.begin(), this->channels.end(),
-                   [&url](const RSSChannel& c) { return c.url == url; });
+                   [&url](const RSSChannel &c) { return c.url == url; });
   }
 
   void RSSListener::add_channels() {
@@ -130,7 +130,7 @@ namespace bot {
       }
 
       if (std::any_of(this->channels.begin(), this->channels.end(),
-                      [&name, &type](const RSSChannel& c) {
+                      [&name, &type](const RSSChannel &c) {
                         auto e = c.event;
                         if (!e.has_value()) {
                           return false;
@@ -164,7 +164,7 @@ namespace bot {
       }
 
       if (!std::any_of(events.begin(), events.end(),
-                       [&c](const db::DatabaseRow& r) {
+                       [&c](const db::DatabaseRow &r) {
                          return r.at("name") == c.event->name &&
                                 std::stoi(r.at("event_type")) == c.event->type;
                        })) {
@@ -189,7 +189,7 @@ namespace bot {
            ++mit) {
         if (!std::any_of(
                 it->messages.begin(), it->messages.end(),
-                [&mit](const RSSMessage& m) { return m.id == mit->id; })) {
+                [&mit](const RSSMessage &m) { return m.id == mit->id; })) {
           messages.push_back(*mit);
         }
       }
@@ -201,9 +201,9 @@ namespace bot {
       // getting channels
       std::vector<schemas::Event> events = utils::get_events(
           db::create_connection(this->configuration), this->helix_client,
-          this->irc_client.get_user_id(), it->event->type, it->event->name);
+          this->irc_client.get_me().id, it->event->type, it->event->name);
 
-      for (const schemas::Event& event : events) {
+      for (const schemas::Event &event : events) {
         int count = 0;
 
         for (RSSMessage message : messages) {
@@ -227,8 +227,9 @@ namespace bot {
           std::vector<std::string> msgs = utils::string::separate_by_length(
               base, event.subs, "@", " ", 500);
 
-          for (const std::string& msg : msgs) {
-            this->irc_client.say(event.channel_alias_id, base + msg);
+          for (const std::string &msg : msgs) {
+            this->irc_client.say(
+                {event.channel_alias_name, event.channel_alias_id}, base + msg);
           }
         }
       }
@@ -237,7 +238,7 @@ namespace bot {
     }
   }
 
-  std::optional<RSSChannel> get_rss_channel(const std::string& url) {
+  std::optional<RSSChannel> get_rss_channel(const std::string &url) {
     cpr::Response response =
         cpr::Get(cpr::Url{url}, cpr::Header{{"Accept", "application/xml"},
                                             {"User-Agent", "Mozilla/5.0"},

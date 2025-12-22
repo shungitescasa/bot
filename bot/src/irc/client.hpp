@@ -10,43 +10,25 @@
 
 namespace bot {
   namespace irc {
-    class Client : public chat::ChatClient {
+    class Client : public chat::ChatClient, public chat::EventChatClient {
       public:
         Client(std::string client_id, std::string token);
         ~Client() = default;
 
         void run();
 
-        void say(const std::string &channel_login,
+        void say(const irc::MessageSource &room,
                  const std::string &message) override;
-        void join(const std::string &channel_login) override;
+        void join(const irc::MessageSource &room) override;
         void raw(const std::string &raw_message);
-
-        template <MessageType T>
-        void on(typename MessageHandler<T>::fn function) {
-          switch (T) {
-            case Privmsg:
-              this->onPrivmsg = function;
-              break;
-            default:
-              break;
-          }
-        }
-
-        const std::string &get_username() const override {
-          return this->username;
-        };
-        const unsigned int &get_user_id() const override { return this->id; }
 
       private:
         void authorize();
 
-        std::string client_id, token, username;
+        std::string client_id, token;
 
         std::string host;
         std::string port;
-
-        int id;
 
         ix::WebSocket websocket;
 
@@ -54,9 +36,6 @@ namespace bot {
         std::vector<std::string> pool;
 
         std::vector<std::string> joined_channels;
-
-        // Message handlers
-        typename MessageHandler<MessageType::Privmsg>::fn onPrivmsg;
     };
   }
 }

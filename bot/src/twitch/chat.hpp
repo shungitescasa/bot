@@ -1,4 +1,5 @@
 #pragma once
+#ifdef USE_EVENTSUB_CONNECTION
 
 #include <string>
 #include <vector>
@@ -19,16 +20,11 @@ namespace bot::twitch {
 
       ~TwitchChatClient() = default;
 
-      void start();
+      void run();
 
-      void say(const std::string &channel_login,
+      void say(const irc::MessageSource &room,
                const std::string &message) override;
-      void say(unsigned int channel_id, const std::string &message) override;
-      void join(const std::string &channel_login) override;
-      void join(unsigned int channel_id) override;
-
-      const unsigned int &get_user_id() const override;
-      const std::string &get_username() const override;
+      void join(const irc::MessageSource &room) override;
 
     private:
       void prepare();
@@ -39,8 +35,9 @@ namespace bot::twitch {
 
       const unsigned int user_id;
       const std::string &client_token, &client_id;
-      std::string websocket_session_id, username;
+      std::string websocket_session_id;
 
       std::vector<unsigned int> joined_channels;
   };
 }
+#endif

@@ -80,6 +80,15 @@ if (USE_MARIADB)
   target_link_libraries(Bot PRIVATE ${MYSQL_LIBS})
 endif()
 
+# Twitch EventSub support
+option(USE_EVENTSUB_CONNECTION "Use Twitch EventSub connection instead of IRC" OFF)
+if (USE_EVENTSUB_CONNECTION)
+  message("-- Using Twitch EventSub connection for chats")
+  target_compile_definitions(Bot PRIVATE USE_EVENTSUB_CONNECTION)
+else()
+  message("-- Using IRC connection for chats")
+endif()
+
 # Getting libraries
 
 # json

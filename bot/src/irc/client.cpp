@@ -4,7 +4,6 @@
 #include <ixwebsocket/IXWebSocketMessageType.h>
 
 #include <algorithm>
-#include <iostream>
 #include <optional>
 #include <string>
 #include <vector>
@@ -40,8 +39,8 @@ Client::Client(std::string client_id, std::string token) {
     nlohmann::json j = nlohmann::json::parse(response.text);
 
     auto d = j["data"][0];
-    this->id = std::stoi(d["id"].get<std::string>());
-    this->username = d["login"];
+    this->me.id = std::stoi(d["id"].get<std::string>());
+    this->me.login = d["login"];
   }
 }
 
@@ -125,20 +124,20 @@ void Client::run() {
   this->websocket.start();
 }
 
-void Client::say(const std::string &channel_login, const std::string &message) {
-  this->raw("PRIVMSG #" + channel_login + " :" + message);
-  log::info("IRC", "Sent '" + message + "' in #" + channel_login);
+void Client::say(const irc::MessageSource &room, const std::string &message) {
+  this->raw("PRIVMSG #" + room.login + " :" + message);
+  log::info("IRC", "Sent '" + message + "' in #" + room.login);
 }
 
-void Client::join(const std::string &channel_login) {
+void Client::join(const irc::MessageSource &room) {
   auto already_joined =
       std::any_of(this->joined_channels.begin(), this->joined_channels.end(),
-                  [&](const auto &x) { return x == channel_login; });
+                  [&](const auto &x) { return x == room.login; });
 
   if (!already_joined) {
-    this->raw("JOIN #" + channel_login);
-    this->joined_channels.push_back(channel_login);
-    log::info("IRC", "Joined #" + channel_login);
+    this->raw("JOIN #" + room.login);
+    this->joined_channels.push_back(room.login);
+    log::info("IRC", "Joined #" + room.login);
   }
 }
 
@@ -152,7 +151,7 @@ void Client::raw(const std::string &raw_message) {
 }
 
 void Client::authorize() {
-  if (this->username.empty() || this->token.empty()) {
+  if (this->me.login.empty() || this->token.empty()) {
     log::error("IRC", "Bot username and token must be set for authorization!");
     return;
   }
@@ -160,7 +159,7 @@ void Client::authorize() {
   log::info("IRC", "Authorizing on Twitch IRC servers...");
 
   this->raw("PASS oauth:" + this->token);
-  this->raw("NICK " + this->username);
+  this->raw("NICK " + this->me.login);
   this->raw("CAP REQ :twitch.tv/membership");
   this->raw("CAP REQ :twitch.tv/commands");
   this->raw("CAP REQ :twitch.tv/tags");

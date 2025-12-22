@@ -1,3 +1,4 @@
+#ifdef USE_EVENTSUB_CONNECTION
 #include "twitch/chat.hpp"
 
 #include <stdexcept>
@@ -47,27 +48,28 @@ namespace bot::twitch {
     if (response.status_code != 200) return false;
 
     nlohmann::json j = nlohmann::json::parse(response.text);
-    this->username = j["login"];
+    this->me.login = j["login"];
+    this->me.id = this->user_id;
 
     return true;
   }
 
-  void TwitchChatClient::start() {
+  void TwitchChatClient::run() {
     log::info("TwitchChatClient",
               "Starting ReadWebsocket for Twitch chat client...");
     this->read_websocket.start();
   }
 
-  void TwitchChatClient::say(unsigned int channel_id,
+  void TwitchChatClient::say(const irc::MessageSource &room,
                              const std::string &message) {
     if (this->websocket_session_id.empty()) {
       throw std::runtime_error("websocket_session_id is not set yet!");
     }
 
     log::debug("TwitchChatClient",
-               fmt::format("Sending \"{}\" to {}...", message, channel_id));
+               fmt::format("Sending \"{}\" to {}...", message, room.id));
 
-    nlohmann::json j = {{"broadcaster_id", channel_id},
+    nlohmann::json j = {{"broadcaster_id", room.id},
                         {"sender_id", this->user_id},
                         {"message", message}};
 
@@ -85,33 +87,19 @@ namespace bot::twitch {
     }
   }
 
-  void TwitchChatClient::say(const std::string &channel_login,
-                             const std::string &message) {
-    cpr::Response response = cpr::Get(cpr::Url{fmt::format(
-        "https://api.ivr.fi/v2/twitch/user?login={}", channel_login)});
-
-    if (response.status_code != 200) {
-      return;
-    }
-
-    nlohmann::json j = nlohmann::json::parse(response.text);
-
-    this->say(std::stoi((std::string)j[0]["id"]), message);
-  }
-
-  void TwitchChatClient::join(unsigned int channel_id) {
+  void TwitchChatClient::join(const irc::MessageSource &room) {
     if (this->websocket_session_id.empty()) {
       throw std::runtime_error("websocket_session_id is not set yet!");
     }
 
-    log::info("TwitchChatClient", fmt::format("Joining {}...", channel_id));
+    log::info("TwitchChatClient", fmt::format("Joining {}...", room.id));
 
     using namespace nlohmann::literals;
 
     nlohmann::json j = {{"type", "channel.chat.message"},
                         {"version", "1"},
                         {"condition",
-                         {{"broadcaster_user_id", std::to_string(channel_id)},
+                         {{"broadcaster_user_id", std::to_string(room.id)},
                           {"user_id", std::to_string(this->user_id)}}},
                         {"transport",
                          {{"method", "websocket"},
@@ -131,27 +119,6 @@ namespace bot::twitch {
                       "returned {} code.",
                       response.status_code));
     }
-  }
-
-  void TwitchChatClient::join(const std::string &channel_login) {
-    cpr::Response response = cpr::Get(cpr::Url{fmt::format(
-        "https://api.ivr.fi/v2/twitch/user?login={}", channel_login)});
-
-    if (response.status_code != 200) {
-      return;
-    }
-
-    nlohmann::json j = nlohmann::json::parse(response.text);
-
-    this->join(std::stoi((std::string)j[0]["id"]));
-  }
-
-  const unsigned int &TwitchChatClient::get_user_id() const {
-    return this->user_id;
-  }
-
-  const std::string &TwitchChatClient::get_username() const {
-    return this->username;
   }
 
   void TwitchChatClient::handleWebsocketMessage(const std::string &raw) {
@@ -194,3 +161,4 @@ namespace bot::twitch {
     }
   }
 }
+#endif

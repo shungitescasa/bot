@@ -39,13 +39,15 @@ namespace bot {
 
         if (difference.count() > interval_sec) {
           db::DatabaseRows channels = conn->exec(
-              "SELECT alias_id, opted_out_at FROM channels WHERE id = $1",
+              "SELECT alias_id, alias_name, opted_out_at FROM channels WHERE "
+              "id = $1",
               {std::to_string(channel_id)});
 
           if (!channels.empty() && channels[0].at("opted_out_at").empty()) {
             std::string alias_id = channels[0].at("alias_id");
+            std::string alias_name = channels[0].at("alias_name");
 
-            irc_client->say(std::stoi(alias_id), message);
+            irc_client->say({alias_name, std::stoi(alias_id)}, message);
           }
 
           conn->exec(

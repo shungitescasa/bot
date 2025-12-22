@@ -5,6 +5,16 @@
 #include <vector>
 
 namespace bot::irc {
+  MessageSource::MessageSource(const sol::table &table) {
+    this->id = table["id"];
+    this->login = table["login"];
+  }
+
+  MessageSource::MessageSource(const std::string &login, const int &id) {
+    this->id = id;
+    this->login = login;
+  }
+
   std::optional<MessageType> define_message_type(const std::string &msg) {
     if (msg == "NOTICE") {
       return MessageType::Notice;

@@ -78,9 +78,8 @@ namespace bot::emotes {
       bool massping_enabled = std::stoi(event.at("is_massping"));
 
       if (massping_enabled) {
-        auto chatters =
-            bundle.helix_client.get_chatters(std::stoi(event.at("channel_aid")),
-                                             bundle.irc_client.get_user_id());
+        auto chatters = bundle.helix_client.get_chatters(
+            std::stoi(event.at("channel_aid")), bundle.irc_client.get_me().id);
 
         std::for_each(chatters.begin(), chatters.end(),
                       [&names](const auto &x) { names.push_back(x.login); });
@@ -122,7 +121,9 @@ namespace bot::emotes {
           utils::string::separate_by_length(base, names, "@", " ", 500);
 
       for (const auto &msg : msgs) {
-        bundle.irc_client.say(event.at("channel_aname"), base + msg);
+        bundle.irc_client.say(
+            {event.at("channel_aname"), std::stoi(event.at("channel_aid"))},
+            base + msg);
       }
     }
   }

@@ -12,14 +12,11 @@
 #include "api/twitch/helix_client.hpp"
 #include "bundle.hpp"
 #include "commands/command.hpp"
-#include "commands/lua.hpp"
-#include "commands/response.hpp"
 #include "config.hpp"
 #include "database.hpp"
 #include "emotes.hpp"
 #include "github.hpp"
 #include "handlers.hpp"
-#include "irc/client.hpp"
 #include "irc/message.hpp"
 #include "localization/localization.hpp"
 #include "logger.hpp"
@@ -27,7 +24,11 @@
 #include "schemas/stream.hpp"
 #include "stream.hpp"
 #include "timer.hpp"
+#ifdef USE_EVENTSUB_CONNECTION
 #include "twitch/chat.hpp"
+#else
+#include "irc/client.hpp"
+#endif
 
 int main(int argc, char *argv[]) {
   bot::log::info("Main", "Starting up...");
@@ -57,8 +58,12 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
+#ifdef USE_EVENTSUB_CONNECTION
   bot::twitch::TwitchChatClient twitch_client(
       cfg.twitch.user_id, cfg.twitch.token, cfg.twitch.client_id);
+#else
+  bot::irc::Client twitch_client(cfg.twitch.client_id, cfg.twitch.token);
+#endif
   bot::command::CommandLoader command_loader;
   command_loader.load_lua_directory("luascripts");
 
@@ -78,10 +83,11 @@ int main(int argc, char *argv[]) {
   std::unique_ptr<bot::db::BaseDatabase> conn = bot::db::create_connection(cfg);
 
   bot::db::DatabaseRows id_rows = conn->exec(
-      "SELECT alias_id FROM channels WHERE opted_out_at IS NULL AND alias_id "
+      "SELECT alias_id, alias_name FROM channels WHERE opted_out_at IS NULL "
+      "AND alias_id "
       "!= "
       "$1",
-      {std::to_string(twitch_client.get_user_id())});
+      {std::to_string(twitch_client.get_me().id)});
 
   conn->close();
 
@@ -169,9 +175,9 @@ int main(int argc, char *argv[]) {
 
   twitch_client.on_connect([&twitch_client, &id_rows]() {
     bot::log::info("Main", "Joining channels...");
-    twitch_client.join(twitch_client.get_user_id());
+    twitch_client.join(twitch_client.get_me());
     for (const bot::db::DatabaseRow &row : id_rows) {
-      twitch_client.join(std::stoi(row.at("alias_id")));
+      twitch_client.join({row.at("alias_name"), std::stoi(row.at("alias_id"))});
       std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
   });
@@ -185,8 +191,7 @@ int main(int argc, char *argv[]) {
         bot::handlers::handle_private_message(bundle, command_loader, message);
       });
 
-  // client.run();
-  twitch_client.start();
+  twitch_client.run();
 
   std::vector<std::thread> threads;
   threads.push_back(

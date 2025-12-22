@@ -153,7 +153,7 @@ namespace bot {
       db::DatabaseRows events = conn->exec(
           "SELECT e.id, e.message, is_massping, "
           "c.alias_name AS "
-          "channel_name, c.alias_id AS channel_aid "
+          "channel_aname, c.alias_id AS channel_aid "
           "FROM events e "
           "INNER JOIN channels c ON c.id = e.channel_id "
           "WHERE e.name = $1 AND e.event_type = 40",
@@ -166,8 +166,7 @@ namespace bot {
 
         if (massping_enabled) {
           auto chatters = this->helix_client.get_chatters(
-              std::stoi(event.at("channel_aid")),
-              this->irc_client.get_user_id());
+              std::stoi(event.at("channel_aid")), this->irc_client.get_me().id);
 
           std::for_each(chatters.begin(), chatters.end(),
                         [&names](const auto &u) { names.push_back(u.login); });
@@ -211,7 +210,8 @@ namespace bot {
           std::for_each(parts.begin(), parts.end(),
                         [&message, &event, this](const std::string &part) {
                           this->irc_client.say(
-                              std::stoi(event.at("channel_aid")),
+                              {event.at("channel_aname"),
+                               std::stoi(event.at("channel_aid"))},
                               message + part);
                         });
         }

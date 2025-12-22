@@ -3,6 +3,7 @@
 #include <functional>
 #include <map>
 #include <optional>
+#include <sol/table.hpp>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -35,6 +36,10 @@ namespace bot {
     struct MessageSource {
         std::string login;
         int id;
+
+        MessageSource() = default;
+        MessageSource(const std::string &login, const int &id);
+        MessageSource(const sol::table &table);
     };
 
     template <MessageType T>

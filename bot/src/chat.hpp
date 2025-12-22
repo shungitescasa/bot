@@ -9,15 +9,14 @@
 namespace bot::chat {
   class ChatClient {
     public:
-      virtual void say(const std::string &channel_login,
+      virtual void say(const irc::MessageSource &room,
                        const std::string &message) = 0;
-      virtual void say(unsigned int channel_id, const std::string &message) = 0;
+      virtual void join(const irc::MessageSource &room) = 0;
 
-      virtual void join(const std::string &channel_login) = 0;
-      virtual void join(unsigned int channel_id) = 0;
+      irc::MessageSource &get_me() { return this->me; };
 
-      virtual const std::string &get_username() const = 0;
-      virtual const unsigned int &get_user_id() const = 0;
+    protected:
+      irc::MessageSource me;
   };
 
   class EventChatClient {
