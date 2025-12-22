@@ -52,9 +52,13 @@ namespace bot::schemas {
       ChannelPreferences(const db::DatabaseRow &row) {
         this->channel_id = std::stoi(row.at("id"));
         this->prefix =
-            row.at("prefix").empty() ? DEFAULT_PREFIX : row.at("prefix");
+            row.find("prefix") == row.end() || row.at("prefix").empty()
+                ? DEFAULT_PREFIX
+                : row.at("prefix");
         this->locale =
-            row.at("locale").empty() ? DEFAULT_LOCALE_ID : row.at("locale");
+            row.find("locale") == row.end() || row.at("locale").empty()
+                ? DEFAULT_LOCALE_ID
+                : row.at("locale");
         this->silent_mode = std::stoi(row.at("silent_mode"));
       }
 
