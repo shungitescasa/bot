@@ -66,6 +66,11 @@ namespace bot {
     } else {
       url["randompost"] = sol::lua_nil;
     }
+    if (this->url.stats.has_value()) {
+      url["stats"] = this->url.stats.value();
+    } else {
+      url["stats"] = sol::lua_nil;
+    }
     o["url"] = url;
 
     sol::table rss = luaState->create_table();
@@ -174,6 +179,8 @@ namespace bot {
         url_cfg.paste_service = value;
       } else if (key == "url.randompost") {
         url_cfg.randompost = value;
+      } else if (key == "url.stats") {
+        url_cfg.stats = value;
       }
 
       else if (key == "rss.timeout") {
