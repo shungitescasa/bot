@@ -14,7 +14,6 @@
 #include "commands/request.hpp"
 #include "commands/response.hpp"
 #include "commands/response_error.hpp"
-#include "constants.hpp"
 #include "cpr/api.h"
 #include "cpr/multipart.h"
 #include "cpr/response.h"

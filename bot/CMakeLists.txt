@@ -12,7 +12,9 @@ endif()
 add_executable(Bot)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_compile_definitions(Bot PRIVATE DEBUG_MODE)
+    target_compile_definitions(Bot PRIVATE DEBUG_MODE DEFAULT_PREFIX="~")
+else()
+    target_compile_definitions(Bot PRIVATE DEFAULT_PREFIX="!")
 endif()
 
 string(TIMESTAMP PROJECT_COMPILE_TIME "%s")
@@ -20,6 +22,7 @@ string(TIMESTAMP PROJECT_COMPILE_TIME "%s")
 target_compile_definitions(Bot PRIVATE
   BOT_VERSION="${BOT_VERSION_STRING}"
   BOT_COMPILED_TIMESTAMP=${PROJECT_COMPILE_TIME}
+  DEFAULT_LOCALE_ID="english"
 )
 
 set_target_properties(

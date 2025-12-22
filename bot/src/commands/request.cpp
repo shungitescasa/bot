@@ -7,7 +7,6 @@
 #include <vector>
 
 #include "config.hpp"
-#include "constants.hpp"
 #include "database.hpp"
 #include "schemas/channel.hpp"
 #include "schemas/user.hpp"

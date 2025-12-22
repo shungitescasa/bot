@@ -19,6 +19,8 @@
 #include "schemas/user.hpp"
 #include "utils/string.hpp"
 
+const auto START_TIME = std::chrono::steady_clock::now();
+
 void print_lua_object_type(const sol::object &obj);
 
 namespace bot::command::lua {
