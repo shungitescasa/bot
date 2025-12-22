@@ -170,11 +170,7 @@ namespace bot::command {
     const std::string &prefix = requester.channel_preferences.get_prefix();
 
     if (fullmsg.empty() || fullmsg.substr(0, prefix.length()) != prefix ||
-        std::any_of(requester.channel_preferences.get_features().begin(),
-                    requester.channel_preferences.get_features().end(),
-                    [](const schemas::ChannelFeature &f) {
-                      return f == schemas::ChannelFeature::SILENT_MODE;
-                    })) {
+        requester.channel_preferences.is_silent()) {
       return std::nullopt;
     }
 

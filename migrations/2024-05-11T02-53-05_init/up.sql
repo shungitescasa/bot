@@ -19,9 +19,7 @@ CREATE TABLE IF NOT EXISTS channel_preferences (
   id INTEGER NOT NULL PRIMARY KEY REFERENCES channels(id) ON DELETE CASCADE,
   prefix TEXT,
   locale TEXT,
-  silent_mode BOOLEAN NOT NULL DEFAULT FALSE,
-  markov_responses BOOLEAN NOT NULL DEFAULT FALSE,
-  random_markov_responses BOOLEAN NOT NULL DEFAULT FALSE
+  silent_mode BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE IF NOT EXISTS user_rights (

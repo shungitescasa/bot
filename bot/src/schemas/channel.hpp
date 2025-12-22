@@ -1,11 +1,9 @@
 #pragma once
 
-#include <algorithm>
 #include <chrono>
 #include <optional>
 #include <sol/sol.hpp>
 #include <string>
-#include <vector>
 
 #include "../constants.hpp"
 #include "../utils/chrono.hpp"
@@ -50,18 +48,6 @@ namespace bot::schemas {
       std::optional<std::chrono::system_clock::time_point> opted_out_at;
   };
 
-  enum ChannelFeature {
-    MARKOV_RESPONSES,
-    RANDOM_MARKOV_RESPONSES,
-    SILENT_MODE
-  };
-  const std::vector<ChannelFeature> FEATURES = {
-      MARKOV_RESPONSES, RANDOM_MARKOV_RESPONSES, SILENT_MODE};
-  std::optional<ChannelFeature> string_to_channel_feature(
-      const std::string &value);
-  std::optional<std::string> channelfeature_to_string(
-      const ChannelFeature &value);
-
   class ChannelPreferences {
     public:
       ChannelPreferences(const db::DatabaseRow &row) {
@@ -70,16 +56,7 @@ namespace bot::schemas {
             row.at("prefix").empty() ? DEFAULT_PREFIX : row.at("prefix");
         this->locale =
             row.at("locale").empty() ? DEFAULT_LOCALE_ID : row.at("locale");
-
-        std::for_each(
-            FEATURES.begin(), FEATURES.end(),
-            [this, &row](const ChannelFeature &f) {
-              std::optional<std::string> feature = channelfeature_to_string(f);
-              if (feature.has_value() && row.find(*feature) != row.end() &&
-                  row.at(*feature) == "1") {
-                this->features.push_back(f);
-              }
-            });
+        this->silent_mode = std::stoi(row.at("silent_mode"));
       }
 
       ~ChannelPreferences() = default;
@@ -87,15 +64,13 @@ namespace bot::schemas {
       const int &get_channel_id() const { return this->channel_id; }
       const std::string &get_prefix() const { return this->prefix; }
       const std::string &get_locale() const { return this->locale; }
-      const std::vector<ChannelFeature> &get_features() const {
-        return this->features;
-      }
+      const bool &is_silent() const { return this->silent_mode; }
 
       sol::table as_lua_table(std::shared_ptr<sol::state> luaState) const;
 
     private:
       int channel_id;
       std::string prefix, locale;
-      std::vector<ChannelFeature> features;
+      bool silent_mode;
   };
 }

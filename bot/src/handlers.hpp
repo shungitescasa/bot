@@ -8,10 +8,4 @@ namespace bot::handlers {
   void handle_private_message(
       const InstanceBundle &bundle, command::CommandLoader &command_loader,
       const irc::Message<irc::MessageType::Privmsg> &message);
-
-  void make_markov_response(
-      const InstanceBundle &bundle,
-      const irc::Message<irc::MessageType::Privmsg> &message,
-      const schemas::Channel &channel,
-      const schemas::ChannelPreferences &preference);
 }

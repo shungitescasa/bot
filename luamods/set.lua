@@ -6,9 +6,6 @@ local lines = {
         ["locale_not_exists"] = "{sender.alias_name}: Language %s not found",
         ["set_locale"] = "{sender.alias_name}: This bot will speak English in this chat!",
         ["set_prefix"] = "{sender.alias_name}: Prefix \"%s\" has been set for this chat!",
-        ["no_feature"] = "{sender.alias_name}: Feature %s not found",
-        ["feature_disabled"] = "{sender.alias_name}: Feature %s has been disabled",
-        ["feature_enabled"] = "{sender.alias_name}: Feature %s has been enabled"
     },
     russian = {
         ["no_value"] = "{sender.alias_name}: Значение требуется для этой команды.",
@@ -16,10 +13,7 @@ local lines = {
         "{sender.alias_name}: Подкоманда требуется для этой команды. Используйте {channel.prefix}help для большей информации.",
         ["locale_not_exists"] = "{sender.alias_name}: Язык %s не найден",
         ["set_locale"] = "{sender.alias_name}: Этот бот будет говорить по-русски!",
-        ["set_prefix"] = "{sender.alias_name}: Префикс \"%s\" установлен для этого чата!",
-        ["no_feature"] = "{sender.alias_name}: Функция %s не найдена",
-        ["feature_disabled"] = "{sender.alias_name}: Функция %s теперь выключена",
-        ["feature_enabled"] = "{sender.alias_name}: Функция %s теперь включена"
+        ["set_prefix"] = "{sender.alias_name}: Префикс \"%s\" установлен для этого чата!"
     },
 }
 
@@ -32,11 +26,6 @@ return {
 
 The `!set` command gives broadcasters ability to customize the bot as they need it to be more fitted for chat.
 
-
-## Available features
-
-+ `markov_responses` - Enable Markov-generated responses *(triggered by "@teabot, " prefix)*
-+ `random_markov_responses` - Enable Markov-generated responses on random messages. It is required that the feature `markov_responses` is enabled.
 
 ## Syntax
 
@@ -51,11 +40,6 @@ Available languages at the moment: **english**, **russian**.
 
 + `[characters]` - Characters to be set as a prefix.
 
-### Enable/disable the bot feature for the chat
-`!set feature [feature]`
-
-+ `[feature]` - [Available features](#available-features)
-
 ## Usage
 
 ### Setting the bot localization
@@ -68,10 +52,6 @@ Available languages at the moment: **english**, **russian**.
 + `!set prefix ~`
 + `!set prefix ?!`
 
-### Enabling/disabling the bot feature
-
-+ `!set feature notify_7tv_updates`
-
 ## Responses
 
 ### Setting the bot localization
@@ -83,15 +63,10 @@ Available languages at the moment: **english**, **russian**.
 
 + `Successfully set the chat prefix to "~"`
 + `Successfully set the chat prefix to "?!"`
-
-### Enabling/disabling the bot feature
-
-+ `Successfully enabled the "markov_responses" feature for this chat!`
-+ `Successfully disabled the "random_markov_responses" feature for this chat!`
 ]],
     delay_sec = 1,
     options = {},
-    subcommands = { "locale", "prefix", "feature" },
+    subcommands = { "locale", "prefix" },
     aliases = {},
     minimal_rights = "moderator",
     handle = function(request)
@@ -121,28 +96,6 @@ Available languages at the moment: **english**, **russian**.
             value = value:gsub("&nbsp;", " ")
             db_execute('UPDATE channel_preferences SET prefix = $1 WHERE id = $2', { value, request.channel.id })
             return l10n_custom_formatted_line_request(request, lines, "set_prefix", { value })
-        elseif request.subcommand_id == "feature" then
-            local feature = str_to_feature(value)
-            if feature == nil then
-                return l10n_custom_formatted_line_request(request, lines, "no_feature", { value })
-            end
-
-            local channel_features = request.channel_preference.features
-
-            local line_id = ""
-            local query = ""
-
-            if array_contains(channel_features, value) then
-                line_id = "feature_disabled"
-                query = 'UPDATE channel_preferences SET ' .. feature_to_str(feature) .. ' = 0 WHERE id = $1'
-            else
-                line_id = "feature_enabled"
-                query = 'UPDATE channel_preferences SET ' .. feature_to_str(feature) .. ' = 1 WHERE id = $1'
-            end
-
-            db_execute(query, { request.channel.id })
-
-            return l10n_custom_formatted_line_request(request, lines, line_id, { value })
         end
     end,
 }

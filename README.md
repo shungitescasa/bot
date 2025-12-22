@@ -10,7 +10,6 @@ A feature-rich chatbot for Twitch. It is written in C++17 and uses the Twitch AP
 + Timer
 + Custom commands
 + Listening for commit updates in GitHub repositories
-+ Markov-generated responses?!?!?!?
 
 ## Prerequisites
 

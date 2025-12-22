@@ -459,26 +459,6 @@ namespace bot::command::lua {
             return o;
           });
 
-      state->set_function(
-          "str_to_feature", [state](const std::string &feature) {
-            auto f = schemas::string_to_channel_feature(feature);
-            if (f.has_value()) {
-              return sol::make_object(*state, (int)f.value());
-            } else {
-              return sol::make_object(*state, sol::lua_nil);
-            }
-          });
-
-      state->set_function("feature_to_str", [state](const int &feature) {
-        auto f = schemas::channelfeature_to_string(
-            static_cast<schemas::ChannelFeature>(feature));
-        if (f.has_value()) {
-          return sol::make_object(*state, *f);
-        } else {
-          return sol::make_object(*state, sol::lua_nil);
-        }
-      });
-
       state->set_function("event_type_to_str", [](const int &v) {
         return schemas::event_type_to_string(v);
       });
