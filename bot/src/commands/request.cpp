@@ -123,7 +123,7 @@ namespace bot::command {
     } else if (user.get_alias_id() == channel.get_alias_id()) {
       level = schemas::PermissionLevel::BROADCASTER;
     } else if (std::any_of(badges.begin(), badges.end(), [&](const auto &x) {
-                 return x.first == "moderator";
+                 return x.first == "moderator" || x.first == "lead_moderator";
                })) {
       level = schemas::PermissionLevel::MODERATOR;
     } else if (std::any_of(badges.begin(), badges.end(),
