@@ -22,6 +22,8 @@ namespace bot::irc {
       return MessageType::Privmsg;
     } else if (msg == "PING") {
       return MessageType::Ping;
+    } else if (msg == "001") {
+      return MessageType::Connect;
     }
 
     return std::nullopt;

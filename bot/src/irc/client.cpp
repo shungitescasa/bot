@@ -75,21 +75,31 @@ void Client::run() {
 
               MessageType m_type = type.value();
 
-              if (m_type == MessageType::Privmsg) {
-                std::optional<Message<MessageType::Privmsg>> message =
-                    parse_message<MessageType::Privmsg>(*m);
+              switch (m_type) {
+                case MessageType::Privmsg: {
+                  std::optional<Message<MessageType::Privmsg>> message =
+                      parse_message<MessageType::Privmsg>(*m);
 
-                if (message.has_value()) {
-                  this->onPrivmsg(message.value());
+                  if (message.has_value()) {
+                    this->onPrivmsg(message.value());
+                  }
+                  break;
                 }
-              } else if (m_type == MessageType::Ping) {
-                // as the docs say, the message should be the same as the one
-                // from the ping
-                std::string text;
-                if (!m->params.empty()) {
-                  text = " :" + m->params.at(0);
+                case MessageType::Ping: {
+                  // as the docs say, the message should be the same as the one
+                  // from the ping
+                  std::string text;
+                  if (!m->params.empty()) {
+                    text = " :" + m->params.at(0);
+                  }
+                  this->raw("PONG" + text);
+                  break;
                 }
-                this->raw("PONG" + text);
+                case MessageType::Connect:
+                  this->onConnect();
+                  break;
+                default:
+                  break;
               }
             }
 
