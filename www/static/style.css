@@ -220,6 +220,7 @@ box:has(header):has(content) {
 
 box>header {
     background-color: var(--box-header-background);
+    color: black;
     border-bottom: solid 1px var(--box-border);
     box-shadow: 0 2px 6px var(--box-border);
     padding: 4px;
@@ -237,6 +238,7 @@ box>content {
 
 .promo-banner {
     background-color: var(--promo-banner-background);
+    color: black;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -448,4 +450,25 @@ box>content {
 .script-links img {
     height: 12px;
     vertical-align: middle;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background: #1e2622;
+        --color: #e4f5ed;
+
+        --box-background: #262c2a;
+        --box-color: #70e7b7;
+        --box-border: #3c584c;
+
+        --table-header-background: #356250;
+        --table-row-background: #303b37;
+        --table-row-alt-background: #2e3733;
+        --table-border: #293630;
+
+        --anchor-color: #41eaa4;
+        --anchor-color-hover: #1f4938;
+
+        --script-anchor-color: #41eaa4;
+    }
 }
