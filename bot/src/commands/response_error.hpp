@@ -15,14 +15,7 @@ namespace bot {
     NOT_ENOUGH_ARGUMENTS,
     INCORRECT_ARGUMENT,
 
-    INCOMPATIBLE_NAME,
-    NAMESAKE_CREATION,
-    NOT_FOUND,
-
-    SOMETHING_WENT_WRONG,
-
     EXTERNAL_API_ERROR,
-    INSUFFICIENT_RIGHTS,
 
     ILLEGAL_COMMAND,
 
@@ -35,8 +28,6 @@ namespace bot {
   template <ResponseError T>
   class ResponseException<
       T, typename std::enable_if<T == INCORRECT_ARGUMENT ||
-                                 T == INCOMPATIBLE_NAME ||
-                                 T == NAMESAKE_CREATION || T == NOT_FOUND ||
                                  T == LUA_EXECUTION_ERROR>::type>
       : public std::exception {
     public:
@@ -49,26 +40,11 @@ namespace bot {
             error(T) {
         loc::LineId line_id;
 
-        switch (this->error) {
-          case INCORRECT_ARGUMENT:
-            line_id = loc::LineId::ErrorIncorrectArgument;
-            break;
-          case INCOMPATIBLE_NAME:
-            line_id = loc::LineId::ErrorIncompatibleName;
-            break;
-          case NAMESAKE_CREATION:
-            line_id = loc::LineId::ErrorNamesakeCreation;
-            break;
-          case NOT_FOUND:
-            line_id = loc::LineId::ErrorNotFound;
-            break;
-          case LUA_EXECUTION_ERROR:
-            line_id = loc::LineId::ErrorLuaExecutionError;
-            break;
-          default:
-            line_id = loc::LineId::ErrorSomethingWentWrong;
-            break;
-        };
+        if (this->error == INCORRECT_ARGUMENT) {
+          line_id = loc::LineId::ErrorIncorrectArgument;
+        } else {
+          line_id = loc::LineId::ErrorLuaExecutionError;
+        }
 
         this->line =
             this->localizator
@@ -88,27 +64,13 @@ namespace bot {
 
   template <ResponseError T>
   class ResponseException<T,
-                          typename std::enable_if<T == SOMETHING_WENT_WRONG ||
-                                                  T == INSUFFICIENT_RIGHTS ||
-                                                  T == ILLEGAL_COMMAND>::type>
+                          typename std::enable_if<T == ILLEGAL_COMMAND>::type>
       : public std::exception {
     public:
       ResponseException(const command::Request &request,
                         const loc::Localization &localizator)
           : request(request), localizator(localizator), error(T) {
-        loc::LineId line_id;
-
-        switch (this->error) {
-          case INSUFFICIENT_RIGHTS:
-            line_id = loc::LineId::ErrorInsufficientRights;
-            break;
-          case ILLEGAL_COMMAND:
-            line_id = loc::LineId::ErrorIllegalCommand;
-            break;
-          default:
-            line_id = loc::LineId::ErrorSomethingWentWrong;
-            break;
-        }
+        loc::LineId line_id = loc::LineId::ErrorIllegalCommand;
 
         this->line =
             this->localizator.get_formatted_line(this->request, line_id, {})
@@ -187,9 +149,6 @@ namespace bot {
           case command::MESSAGE:
             arg_id = loc::LineId::ArgumentMessage;
             break;
-          case command::INTERVAL:
-            arg_id = loc::LineId::ArgumentInterval;
-            break;
           case command::NAME:
             arg_id = loc::LineId::ArgumentName;
             break;
@@ -198,9 +157,6 @@ namespace bot {
             break;
           case command::VALUE:
             arg_id = loc::LineId::ArgumentValue;
-            break;
-          case command::AMOUNT:
-            arg_id = loc::LineId::ArgumentAmount;
             break;
           default:
             break;
@@ -228,5 +184,4 @@ namespace bot {
       ResponseError error;
       std::string line;
   };
-
 }

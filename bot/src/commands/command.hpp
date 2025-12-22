@@ -16,11 +16,9 @@ namespace bot {
     enum CommandArgument {
       SUBCOMMAND,
       MESSAGE,
-      INTERVAL,
       NAME,
       TARGET,
       VALUE,
-      AMOUNT,
     };
 
     class Command {
