@@ -3,7 +3,7 @@ include(FetchContent)
 
 # Creating symbolic links
 create_symlink_if_exists("${CMAKE_SOURCE_DIR}/localization" "${CMAKE_CURRENT_BINARY_DIR}/localization")
-create_symlink_if_exists("${CMAKE_SOURCE_DIR}/luamods" "${CMAKE_CURRENT_BINARY_DIR}/luamods")
+create_symlink_if_exists("${CMAKE_SOURCE_DIR}/luascripts" "${CMAKE_CURRENT_BINARY_DIR}/luascripts")
 
 if (EXISTS "${CMAKE_SOURCE_DIR}/.env")
   create_symlink_if_exists("${CMAKE_SOURCE_DIR}/.env" "${CMAKE_CURRENT_BINARY_DIR}/.env")

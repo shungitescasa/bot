@@ -14,7 +14,7 @@ out_dir.mkdir(parents=True, exist_ok=True)
 commands = []
 
 # generating lua pages
-for lua_file in Path("luamods").glob("*.lua"):
+for lua_file in Path("luascripts").glob("*.lua"):
     data = lua.execute(lua_file.read_text())
     item = {
         "name": data["name"],

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 
 project(www NONE)
 
-file(GLOB LUA_SCRIPTS "${CMAKE_SOURCE_DIR}/luamods/*.lua")
+file(GLOB LUA_SCRIPTS "${CMAKE_SOURCE_DIR}/luascripts/*.lua")
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 

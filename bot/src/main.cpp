@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
   bot::twitch::TwitchChatClient twitch_client(
       cfg.twitch.user_id, cfg.twitch.token, cfg.twitch.client_id);
   bot::command::CommandLoader command_loader;
-  command_loader.load_lua_directory("luamods");
+  command_loader.load_lua_directory("luascripts");
 
   bot::loc::Localization localization("localization");
   bot::api::twitch::HelixClient helix_client(cfg.twitch.token,
