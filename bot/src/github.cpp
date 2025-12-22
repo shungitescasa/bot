@@ -210,8 +210,9 @@ namespace bot {
 
           std::for_each(parts.begin(), parts.end(),
                         [&message, &event, this](const std::string &part) {
-                          this->irc_client.say(event.at("channel_name"),
-                                               message + part);
+                          this->irc_client.say(
+                              std::stoi(event.at("channel_aid")),
+                              message + part);
                         });
         }
       }

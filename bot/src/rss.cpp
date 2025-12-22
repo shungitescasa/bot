@@ -232,7 +232,7 @@ namespace bot {
               base, event.subs, "@", " ", 500);
 
           for (const std::string& msg : msgs) {
-            this->irc_client.say(event.channel_alias_name, base + msg);
+            this->irc_client.say(event.channel_alias_id, base + msg);
           }
         }
       }

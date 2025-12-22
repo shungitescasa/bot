@@ -70,21 +70,18 @@ return {
             return l10n_custom_formatted_line_request(request, lines, "join_from_bot_channel", { bot_username() })
         end
 
-        local db_channels = db_query('SELECT id, alias_name, opted_out_at FROM channels WHERE alias_id = $1',
+        local db_channels = db_query('SELECT id, alias_id opted_out_at FROM channels WHERE alias_id = $1',
             { channel_id })
 
         if #db_channels > 0 then
             local db_channel = db_channels[1]
 
             if db_channel.opted_out_at ~= nil then
-                print(db_channel)
-                print(db_channel.id)
-                print(type(db_channel.opted_out_at))
                 db_execute('UPDATE channels SET opted_out_at = NULL WHERE id = $1', { db_channel.id })
 
-                irc_join_channel(db_channel.alias_name)
+                irc_join_channel(tonumber(db_channel.alias_id))
                 irc_send_message(
-                    channel_name,
+                    channel_id,
                     l10n_custom_formatted_line_request(request, lines, "chat_response", { bot_username() })
                 )
                 return l10n_custom_formatted_line_request(request, lines, "rejoined", {})
@@ -96,11 +93,11 @@ return {
         db_execute('INSERT INTO channels(alias_id, alias_name) VALUES ($1, $2)',
             { channel_id, channel_name })
 
-        irc_join_channel(channel_name)
+        irc_join_channel(channel_id)
 
         if not silent_mode then
             irc_send_message(
-                channel_name,
+                channel_id,
                 l10n_custom_formatted_line_request(request, lines, "chat_response", { bot_username() })
             )
         else

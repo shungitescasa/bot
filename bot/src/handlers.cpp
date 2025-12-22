@@ -40,7 +40,7 @@ namespace bot::handlers {
 
         return response;
       } catch (const std::exception &e) {
-        bundle.irc_client.say(message.source.login, e.what());
+        bundle.irc_client.say(message.source.id, e.what());
         log::error("PrivMsg/" + request->command_id, e.what());
       }
     }
@@ -161,10 +161,10 @@ namespace bot::handlers {
 
     if (response.has_value()) {
       if (response->is_single()) {
-        bundle.irc_client.say(message.source.login, response->get_single());
+        bundle.irc_client.say(message.source.id, response->get_single());
       } else if (response->is_multiple()) {
         for (const std::string &msg : response->get_multiple()) {
-          bundle.irc_client.say(message.source.login, msg);
+          bundle.irc_client.say(message.source.id, msg);
         }
       }
 
@@ -175,7 +175,7 @@ namespace bot::handlers {
         bundle, command_loader, conn, *requester, message);
 
     if (custom_command_response.has_value()) {
-      bundle.irc_client.say(message.source.login, *custom_command_response);
+      bundle.irc_client.say(message.source.id, *custom_command_response);
       return;
     }
 

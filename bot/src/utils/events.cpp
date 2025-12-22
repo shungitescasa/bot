@@ -23,13 +23,14 @@ namespace bot::utils {
       schemas::Event event;
 
       event.id = std::stoi(row.at("id"));
-      event.alias_id = std::stoi(row.at("channel_aid"));
       event.is_massping = std::stoi(row.at("is_massping"));
       event.message = row.at("message");
       event.channel_alias_name = row.at("channel_aname");
+      event.channel_alias_id = std::stoi(row.at("channel_aid"));
 
       if (event.is_massping) {
-        auto chatters = api_client.get_chatters(event.alias_id, moderator_id);
+        auto chatters =
+            api_client.get_chatters(event.channel_alias_id, moderator_id);
 
         std::for_each(
             chatters.begin(), chatters.end(),

@@ -275,7 +275,7 @@ namespace bot::stream {
           utils::string::separate_by_length(base, names, "@", " ", 500);
 
       for (const auto &msg : msgs) {
-        this->irc_client.say(event.at("channel_aname"), base + msg);
+        this->irc_client.say(std::stoi(event.at("channel_aid")), base + msg);
       }
     }
 
