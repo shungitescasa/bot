@@ -44,7 +44,6 @@ namespace bot {
 
     for (const RSSMessage& v : this->messages) {
       sol::table m = state->create_table();
-      m["title"] = v.title;
       m["message"] = v.message;
       m["id"] = v.id;
       m["timestamp"] = v.timestamp;
@@ -219,9 +218,6 @@ namespace bot {
           int pos = base.find("{channel_name}");
           if (pos != std::string::npos) base.replace(pos, 14, it->name);
 
-          pos = base.find("{title}");
-          if (pos != std::string::npos) base.replace(pos, 7, message.title);
-
           pos = base.find("{message}");
           if (pos != std::string::npos) base.replace(pos, 9, message.message);
 
@@ -274,10 +270,8 @@ namespace bot {
         timestamp = timegm(&tm);
       }
 
-      messages.push_back({item.child("title").text().as_string(),
-                          item.child("guid").text().as_string(),
-                          item.child("description").text().as_string(),
-                          timestamp});
+      messages.push_back({item.child("guid").text().as_string(),
+                          item.child("title").text().as_string(), timestamp});
     }
 
     return (RSSChannel){channel_name, url, std::nullopt, messages};

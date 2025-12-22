@@ -116,9 +116,9 @@ The `!event` command gives the ability to manage events.
 + 7tv_new_emote *(`{emote}` - emote name, `{old_emote}` - original emote name, `{author}` - name of the person who added it)*
 + 7tv_deleted_emote *(`{emote}` - emote name, `{old_emote}` - original emote name, `{author}` - name of the person who added it)*
 + 7tv_updated_emote *(`{emote}` - new emote name, `{old_emote}` - previous emote name, `{author}` - name of the person who added it)*
-+ rss *(`{channel_name}` - channel name, `{title}` - message title, `{message}` - message content, `{link}` - message link)*
-+ twitter *(`{channel_name}` - account name, `{title}` - post title, `{message}` - post content, `{link}` - post link)*
-+ telegram *(`{channel_name}` - channel name, `{title}` - post title, `{message}` - post content, `{link}` - post link)*
++ rss *(`{channel_name}` - channel name, `{message}` - message content, `{link}` - message link)*
++ twitter *(`{channel_name}` - account name, `{message}` - post content, `{link}` - post link)*
++ telegram *(`{channel_name}` - channel name, `{message}` - post content, `{link}` - post link)*
 + custom
 
 ## How to use placeholders?
@@ -130,9 +130,9 @@ Here are some basic examples to inspire you:
 + `!event on torvalds/linux:github {author} made a new commit in linux kernel: {msg} (ID {sha})` - Please also note that the event name has the following format: **username/repository** *(https://github.com/ **username/repository**)*
 + `!event on forsen:7tv_new_emote {author} added a new 7TV emote: {emote}`
 + `!event on forsen:7tv_updated_emote {author} renamed a 7TV emote from {old_emote} to {emote}`
-+ `!event on https://ilt.su/rss.php:rss new post on ilt.su: {title} ({link})`
-+ `!event on durov:telegram Durov posted a new Telegram post: {title} ({link})`
-+ `!event on forsen:twitter New post ({channel_name}): {title} ({link})`
++ `!event on https://ilt.su/rss.php:rss new post on ilt.su: {message} ({link})`
++ `!event on durov:telegram Durov posted a new Telegram post: {message} ({link})`
++ `!event on forsen:twitter New post ({channel_name}): {message} ({link})`
 
 ## Syntax
 

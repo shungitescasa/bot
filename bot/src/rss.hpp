@@ -11,7 +11,7 @@
 
 namespace bot {
   struct RSSMessage {
-      std::string title, id, message;
+      std::string id, message;
       long timestamp;
   };
 

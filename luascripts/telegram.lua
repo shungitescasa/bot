@@ -64,6 +64,6 @@ Get the latest post from the specified public Telegram channel.
         end
 
         return l10n_custom_formatted_line_request(request, lines, "message",
-            { request.message, latest_post.title, post_time, latest_post.id })
+            { request.message, latest_post.message, post_time, latest_post.id })
     end,
 }
