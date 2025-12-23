@@ -57,7 +57,8 @@ namespace bot::command::lua {
   command::Response run_safe_lua_script(const Request &request,
                                         const InstanceBundle &bundle,
                                         const std::string &script,
-                                        std::string lua_id = "");
+                                        std::string lua_id = "",
+                                        bool moon_prefix = true);
 
   class LuaCommand : public Command {
     public:
@@ -128,13 +129,16 @@ namespace bot::command::lua {
                 request, bundle.localization, command::CommandArgument::VALUE);
           }
 
+          bool trusted_script =
+              std::any_of(bundle.configuration.lua.script_whitelist.begin(),
+                          bundle.configuration.lua.script_whitelist.end(),
+                          [&request](const std::string &i) {
+                            return i == request.message.value();
+                          });
+
           if (!bundle.configuration.lua.allow_arbitrary_scripts &&
               request.requester.user_rights.get_level() < schemas::TRUSTED &&
-              !std::any_of(bundle.configuration.lua.script_whitelist.begin(),
-                           bundle.configuration.lua.script_whitelist.end(),
-                           [&request](const std::string &i) {
-                             return i == request.message.value();
-                           })) {
+              !trusted_script) {
             throw ResponseException<ResponseError::ILLEGAL_COMMAND>(
                 request, bundle.localization);
           }
@@ -181,7 +185,8 @@ namespace bot::command::lua {
 
           std::string script = response.text;
 
-          return command::lua::run_safe_lua_script(r, bundle, script, url);
+          return command::lua::run_safe_lua_script(r, bundle, script, url,
+                                                   !trusted_script);
         }
     };
   }

@@ -900,13 +900,13 @@ namespace bot::command::lua {
   }
 
   Response parse_lua_response(const sol::table &r, sol::object &res,
-                              bool moon_prefix = true) {
+                              bool moon_prefix) {
     const std::string prefix = moon_prefix ? "🌑 " : "";
 
     if (res.get_type() == sol::type::function) {
       sol::function f = res.as<sol::function>();
       sol::object o = f(r);
-      return parse_lua_response(r, o);
+      return parse_lua_response(r, o, moon_prefix);
     } else if (res.get_type() == sol::type::string) {
       return {prefix + res.as<std::string>()};
     } else if (res.get_type() == sol::type::number) {
@@ -933,7 +933,7 @@ namespace bot::command::lua {
   command::Response run_safe_lua_script(const Request &request,
                                         const InstanceBundle &bundle,
                                         const std::string &script,
-                                        std::string lua_id) {
+                                        std::string lua_id, bool moon_prefix) {
     // shared_ptr is unnecessary here, but my library needs it.
     std::shared_ptr<sol::state> state = std::make_shared<sol::state>();
 
@@ -967,7 +967,7 @@ namespace bot::command::lua {
 
     sol::object o = res;
 
-    return parse_lua_response(request.as_lua_table(state), o);
+    return parse_lua_response(request.as_lua_table(state), o, moon_prefix);
   }
 
   LuaCommand::LuaCommand(std::shared_ptr<sol::state> luaState,
