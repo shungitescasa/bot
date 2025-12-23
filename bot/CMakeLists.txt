@@ -2,11 +2,11 @@ cmake_minimum_required(VERSION 3.10)
 include(FetchContent)
 
 # Creating symbolic links
-create_symlink_if_exists("${CMAKE_SOURCE_DIR}/localization" "${CMAKE_CURRENT_BINARY_DIR}/localization")
-create_symlink_if_exists("${CMAKE_SOURCE_DIR}/luascripts" "${CMAKE_CURRENT_BINARY_DIR}/luascripts")
+create_symlink_if_exists("${CMAKE_SOURCE_DIR}/localization" "${CMAKE_CURRENT_BINARY_DIR}/bin/localization")
+create_symlink_if_exists("${CMAKE_SOURCE_DIR}/luascripts" "${CMAKE_CURRENT_BINARY_DIR}/bin/luascripts")
 
 if (EXISTS "${CMAKE_SOURCE_DIR}/.env")
-  create_symlink_if_exists("${CMAKE_SOURCE_DIR}/.env" "${CMAKE_CURRENT_BINARY_DIR}/.env")
+  create_symlink_if_exists("${CMAKE_SOURCE_DIR}/.env" "${CMAKE_CURRENT_BINARY_DIR}/bin/.env")
 endif()
 
 add_executable(Bot)
@@ -29,6 +29,7 @@ set_target_properties(
   Bot PROPERTIES
   DESCRIPTION ${PROJECT_DESCRIPTION}
   OUTPUT_NAME "${PROJECT_NAME}-bot"
+  RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin
 )
 
 # BetterTTV Emote support
