@@ -3,6 +3,11 @@ include(FetchContent)
 
 add_executable(Bot)
 
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+  set(BUILD_SHARED_LIBS OFF)
+  target_link_options(Bot PRIVATE -static-libgcc -static-libstdc++)
+endif()
+
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_definitions(Bot PRIVATE DEBUG_MODE DEFAULT_PREFIX="~")
 else()

@@ -1,5 +1,5 @@
 ### lua
-add_library(lua
+add_library(lua STATIC
   src/lapi.c
   src/lauxlib.c
   src/lbaselib.c
