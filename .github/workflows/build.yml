@@ -1,0 +1,109 @@
+name: Build
+
+on:
+  push:
+
+jobs:
+  build-linux-amd64:
+    runs-on: ubuntu-latest
+
+    outputs:
+      bot-artifact: ${{ steps.upload.outputs.bot }}
+      web-artifact: ${{ steps.upload.outputs.web }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential cmake tar pkg-config \
+          libmysqlclient-dev zlib1g-dev
+
+    - name: Configure project
+      run: |
+        mkdir -p build
+        cd build
+        cmake -DUSE_TLS=1 -DCMAKE_BUILD_TYPE=Release ..
+
+    - name: Build project
+      run: |
+        cd build
+        make
+
+    - name: Generate Lua pages
+      run: |
+        cd build
+        cmake --build . --target generate_lua_pages
+
+    - name: Archive bot
+      run: |
+        mkdir -p artifacts
+        tar -czf artifacts/bot-amd64.tar.gz -C build/bot/bin .
+
+    - name: Archive web
+      run: |
+        tar -czf artifacts/web-amd64.tar.gz -C www .
+
+    - name: Upload artifacts
+      id: upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-artifacts-amd64
+        path: artifacts/
+
+  build-linux-arm64:
+    runs-on: ubuntu-24.04-arm
+
+    outputs:
+      bot-artifact: ${{ steps.upload.outputs.bot }}
+      web-artifact: ${{ steps.upload.outputs.web }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+  
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential cmake tar pkg-config \
+          libmysqlclient-dev zlib1g-dev
+
+    - name: Configure project
+      run: |
+        mkdir -p build
+        cd build
+        cmake -DUSE_TLS=1 -DCMAKE_BUILD_TYPE=Release ..
+
+    - name: Build project
+      run: |
+        cd build
+        make
+
+    - name: Generate Lua pages
+      run: |
+        cd build
+        cmake --build . --target generate_lua_pages
+
+    - name: Archive bot
+      run: |
+        mkdir -p artifacts
+        tar -czf artifacts/bot-arm64.tar.gz -C build/bot/bin .
+
+    - name: Archive web
+      run: |
+        tar -czf artifacts/web-arm64.tar.gz -C www .
+
+    - name: Upload artifacts
+      id: upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-artifacts-arm64
+        path: artifacts/

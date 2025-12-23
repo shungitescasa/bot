@@ -1,0 +1,50 @@
+name: Release
+
+on:
+  workflow_run:
+    workflows: ["Build"]
+    types:
+      - completed
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    permissions:
+      contents: write
+      actions: read
+
+    steps:
+    - name: Download amd64 artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: build-artifacts-amd64
+        path: artifacts/amd64
+        run-id: ${{ github.event.workflow_run.id }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Download arm64 artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: build-artifacts-arm64
+        path: artifacts/arm64
+        run-id: ${{ github.event.workflow_run.id }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Set release tag
+      run: echo "TAG=$(date +'%d%H%M')" >> $GITHUB_ENV
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ env.TAG }}
+        name: Build ${{ env.TAG }}
+        files: |
+          artifacts/amd64/bot-amd64.tar.gz
+          artifacts/amd64/web-amd64.tar.gz
+          artifacts/arm64/bot-arm64.tar.gz
+          artifacts/arm64/web-arm64.tar.gz
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
