@@ -95,24 +95,24 @@ The `!notify` command gives users the ability to manage event subscriptions.
 
 > Event must be created before using `!notify` command. See about `!event` command [here](/!event).
 
-## Syntax
+# Syntax
 
-### Subscribe to the event
+## Subscribe to the event
 `!notify sub [name]:[type]`
 
 + `[name]` - Twitch username or event name *(custom type only)*.
 + `[type]` - [Event type](/!event#event-types).
 
-### Unsubscribe from the event
+## Unsubscribe from the event
 `!notify unsub [name]:[type]`
 
 + `[name]` - Twitch username or event name *(custom type only)*.
 + `[type]` - [Event type](/!event#event-types).
 
-### Get your event subscriptions
+## Get your event subscriptions
 `!notify subs`
 
-### Get available events to subscribe
+## Get available events to subscribe
 `!notify list`
 ]],
     delay_sec = 1,

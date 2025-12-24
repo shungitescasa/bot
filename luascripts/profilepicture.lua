@@ -19,23 +19,23 @@ return {
     description = [[
 Get user profile pictures.
 
-## Syntax
+# Syntax
 
 `!pfp [users...]`
 
 + `[users...]` - User ID or user names. Separated by space.
 
-## Usage
+# Usage
 
 + `!pfp drdisrespect`
 + `!pfp 22484632`
 + `!pfp drdisrespect 22484632 okayeg`
 
-## Responses
+# Responses
 
 + `drdisrespect's profile picture: https://static-cdn.jtvnw.net/jtv_user_pictures/72a69c72-14b9-4be8-b8cb-802bc3e5f8ed-profile_image-600x600.png`
 
-## Important notes
+# Important notes
 
 + User information is taken from the third-party API service ["ivr.fi"](https://api.ivr.fi/v2/docs)
 ]],

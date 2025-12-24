@@ -21,13 +21,13 @@ return {
     description = [[
 Get the latest post from the specified public Telegram channel.
 
-## Syntax
+# Syntax
 
 `!telegram [username]`
 
 + `[username]` - Valid public Telegram channel.
 
-## Usage
+# Usage
 
 + `!telegram durov`
 ]],

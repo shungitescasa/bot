@@ -17,16 +17,16 @@ return {
 	description = [[
 Read the user's follows as plain text.
 After collecting the list of chatters, the bot returns a link to the paste from
-[the Pastebin-like service](https://paste.alright.party).
+[the Pastebin-like service](https://tnd.quest).
 
-## Syntax
+# Syntax
 
 `!followlist <username>`
 
 + `<username>` - Twitch username *(optional)*.
 
-## Responses
-+ `https://paste.alright.party/XXXXX.txt`
+# Responses
++ `https://tnd.quest/XXXXX.txt`
 ]],
 	delay_sec = 5,
 	options = {},

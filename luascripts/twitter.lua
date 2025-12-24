@@ -21,13 +21,13 @@ return {
     description = [[
 Get the latest post from the specified Twitter account.
 
-## Syntax
+# Syntax
 
 `!twitter [username]`
 
 + `[username]` - Valid Twitter username.
 
-## Usage
+# Usage
 
 + `!twitter forsen`
 + `!x twitch`

@@ -23,17 +23,17 @@ return {
     description = [[
 The `!emotecount` command is designed to track the number of times an emote has been used in a chat.
 
-## Syntax
+# Syntax
 
 `!emotecount [name]`
 
 + `[name]` - The name of the emote.
 
-## Usage
+# Usage
 
 + `!emotecount forsenHoppedIn`
 
-## Important notes
+# Important notes
 
 + Emotes data may be temporarily unavailable if the bot has just joined a chat.
 + Emote information is stored and retrieved from [the external API](https://stats.ilt.su).

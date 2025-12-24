@@ -47,43 +47,43 @@ return {
 The `!timer` command gives the ability to create timers that sends messages to the chat room every specified interval.
 
 
-## Syntax
+# Syntax
 
-### Create a new timer
+## Create a new timer
 `!timer new [name] [interval] [message...]`
 
 + `[name]` - The name for new timer. It should be unique for your chat.
 + `[interval]` - Message sending interval *(in seconds)*.
 + `[message]` - Text that will be sent after the interval has passed.
 
-### Delete the timer
+## Delete the timer
 `!timer delete [name]` OR `!timer remove [name]`
 
 + `[name]` - The name of the timer.
 
-### Edit the message for the timer
+## Edit the message for the timer
 `!timer edit [name] [message...]`
 
 + `[name]` - The name of the timer.
 + `[message]` - Text with which to replace.
 
-### Edit the interval for the timer
+## Edit the interval for the timer
 `!timer interval [name] [interval]`
 
 + `[name]` - The name of the timer.
 + `[interval]` - An interval *(in seconds)* with which to replace.
 
-### Check the information about the timer
+## Check the information about the timer
 `!timer view [name]`
 
 + `[name]` - The name of the timer.
 
-### Call the timer
+## Call the timer
 `!timer call [name]`
 
 + `[name]` - The name of the timer.
 
-### Get the list of created timers
+## Get the list of created timers
 `!timer list`
 ]],
 	delay_sec = 1,

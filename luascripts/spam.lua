@@ -16,31 +16,38 @@ return {
 The `!spam` command gives users the ability to repeat a given message a certain number of times in a chat room.
 This feature can be useful for highlighting important information.
 
-## Syntax
+# Syntax
 `!spam [amount] [message...]`
 
 + `[amount]` (optional) - A number that specified how many times the message should be repeated.
 + `[message...]` - The text of the message to be repeated.
 
-## Usage
+# Usage
 
 + `!spam forsen`
-+ `!spam 100 forsen forsen forsen`
++ `!spam 10 forsen forsen forsen`
 
-## Responses
+# Responses
 
-```
-forsen forsen forsen
-forsen forsen forsen
-forsen forsen forsen
-forsen forsen forsen
-forsen forsen forsen
-forsen forsen forsen
-forsen forsen forsen
-forsen forsen forsen
-forsen forsen forsen
-forsen forsen forsen
-...
+`forsen forsen forsen`
+
+`forsen forsen forsen`
+
+`forsen forsen forsen`
+
+`forsen forsen forsen`
+
+`forsen forsen forsen`
+
+`forsen forsen forsen`
+
+`forsen forsen forsen`
+
+`forsen forsen forsen`
+
+`forsen forsen forsen`
+
+`forsen forsen forsen`
 ]],
     delay_sec = 10,
     options = {},

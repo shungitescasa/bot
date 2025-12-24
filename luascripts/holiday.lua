@@ -23,14 +23,14 @@ The `!holiday` command allows you to get information about today's and upcoming 
 > **So far, only Russian holidays and in Russian.**
 
 
-## Syntax
+# Syntax
 
 `!holiday [date]`
 
 + `[date]` (Optional) - The date on which you want to get a random holiday.
 If it's not specified, today's date will be used.
 
-## Usage
+# Usage
 
 + `!holiday` - Get today's random holiday.
 + `!holiday 25.02` - Get a random holiday on February 25th.
@@ -38,7 +38,7 @@ If it's not specified, today's date will be used.
 + `!holiday all` - Get all today's holidays.
 + `!holiday all 02.03` - Get all holidays on March 2nd.
 
-## Important notes
+# Important notes
 
 + The information is obtained from the third-party service ["ilotterytea/holidays"](https://ilt.su/holidays/)
 ]],
