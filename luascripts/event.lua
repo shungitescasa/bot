@@ -102,97 +102,134 @@ return {
 The `!event` command gives the ability to manage events.
 
 
-## Event types (and their placeholders)
+<h1 id="event-types">Event types</h1>
+
+## Twitch livestreams
 
 + live
 + offline
-+ title *(`{new}` - new title, `{old}` - old title)*
-+ game *(`{new}` - new game, `{old}` - old game)*
++ title
++ + Placeholders: `{new}` - new title, `{old}` - old title
++ + Message example: This streamer has changed the title - {new} (previously, it was {old})
++ game
++ + Placeholders: `{new}` - new game, `{old}` - old game
++ + Message example: This streamer is now playing {new} (previously, he played {old})
+
+## Kick livestreams
 + kick_live
 + kick_offline
-+ kick_title *(`{new}` - new title, `{old}` - old title)*
-+ kick_game *(`{new}` - new game, `{old}` - old game)*
-+ github *(`{sha}` - commit ID, `{author}` - committer, `{msg}` - message)*
-+ 7tv_new_emote *(`{emote}` - emote name, `{old_emote}` - original emote name, `{author}` - name of the person who added it)*
-+ 7tv_deleted_emote *(`{emote}` - emote name, `{old_emote}` - original emote name, `{author}` - name of the person who added it)*
-+ 7tv_updated_emote *(`{emote}` - new emote name, `{old_emote}` - previous emote name, `{author}` - name of the person who added it)*
-+ rss *(`{channel_name}` - channel name, `{message}` - message content, `{link}` - message link)*
-+ twitter *(`{channel_name}` - account name, `{message}` - post content, `{link}` - post link)*
-+ telegram *(`{channel_name}` - channel name, `{message}` - post content, `{link}` - post link)*
-+ custom
++ kick_title
++ + Placeholders: `{new}` - new title, `{old}` - old title
++ + Message example: This streamer has changed the title - {new} (previously, it was {old})
++ kick_game
++ + Placeholders: `{new}` - new game, `{old}` - old game
++ + Message example: This streamer is now playing {new} (previously, he played {old})
 
-## How to use placeholders?
+## Version Control System
 
-Some event types have placeholders that can enrich your event message. You can easily use them by simply inserting them into your message.
-Here are some basic examples to inspire you:
++ github
++ + Placeholders: `{sha}` - commit ID, `{author}` - committer, `{msg}` - message
++ + Message example: {author} made a new commit in linux kernel: {msg} (ID {sha})
++ + Target example: `torvalds/linux:github` - Note that the event name has the following format: **username/repository**
 
-+ `!event on forsen:game Forsen is now playing {new} (previously, he played {old})`
-+ `!event on torvalds/linux:github {author} made a new commit in linux kernel: {msg} (ID {sha})` - Please also note that the event name has the following format: **username/repository** *(https://github.com/ **username/repository**)*
-+ `!event on forsen:7tv_new_emote {author} added a new 7TV emote: {emote}`
-+ `!event on forsen:7tv_updated_emote {author} renamed a 7TV emote from {old_emote} to {emote}`
-+ `!event on https://ilt.su/rss.php:rss new post on ilt.su: {message} ({link})`
-+ `!event on durov:telegram Durov posted a new Telegram post: {message} ({link})`
-+ `!event on forsen:twitter New post ({channel_name}): {message} ({link})`
+## 7TV
 
-## Syntax
++ 7tv_new_emote
++ + Placeholders: `{emote}` - emote name, `{old_emote}` - original emote name, `{author}` - name of the person who added it
++ + Message example: {author} added a new 7TV emote: {emote} (originally {old_emote})
 
-### Create a new event
++ 7tv_deleted_emote
++ + Placeholders: `{emote}` - emote name, `{old_emote}` - original emote name, `{author}` - name of the person who deleted it
++ + Message example: {author} added a new 7TV emote: {emote} (originally {old_emote})
 
-`!event on [name]:[type] [message...]`
++ 7tv_updated_emote
++ + Placeholders: `{emote}` - new emote name, `{old_emote}` - previous emote name, `{author}` - name of the person who updated it
++ + Message example: {author} renamed a 7TV emote from {old_emote} to {emote}
 
-+ `[name]` - Twitch username or event name *(custom type only)*.
-+ `[type]` - [Event type](#event-types).
+## BetterTTV
+
++ bttv_new_emote
++ + Placeholders: `{emote}` - emote name, `{old_emote}` - original emote name
++ + Message example: New BTTV emote: {emote} (originally {old_emote})
+
++ bttv_deleted_emote
++ + Placeholders: `{emote}` - emote name, `{old_emote}` - original emote name
++ + Message example: BTTV emote {emote} has been removed
+
++ bttv_updated_emote
++ + Placeholders: `{emote}` - new emote name, `{old_emote}` - previous emote name
++ + Message example: BTTV emote {old_emote} has been renamed to {emote}
+
+## Feed
+
++ rss
++ + Placeholders: `{channel_name}` - channel name, `{message}` - message content, `{link}` - message link
++ + Message example: new post on ilt.su: {message} ({link})
++ + Target example: `https://ilt.su/rss.xml:rss`
+
++ telegram
++ + Placeholders: `{channel_name}` - channel name, `{message}` - message content, `{link}` - message link
++ + Message example: Durov posted a new Telegram post: {message} ({link})
++ + Target example: `forsen:twitter`
+
++ twitter
++ + Placeholders: `{channel_name}` - channel name, `{message}` - message content, `{link}` - message link
++ + Message example: New post ({channel_name}): {message} ({link})
++ + Target example: `durov:telegram`
+
+# Syntax
+
+> `[target]` is short for `[name]:[type]`. For `[name]`, look for *Target example* in your [event type](#event-types). If there is no such field, use Twitch username.
+
+## Create a new event
+
+`!event on [target] [message...]`
+
++ `[target]` - Event target.
 + `[message]` - The message that will be sent with the event.
 
-### Delete the event
+## Delete the event
 
-`!event off [name]:[type]`
+`!event off [target]`
 
-+ `[name]` - Twitch username or event name *(custom type only)*.
-+ `[type]` - [Event type](#event-types).
++ `[target]` - Event target.
 
-### Make the event massping everytime
+## Make the event massping everytime
 
-`!event setmassping [name]:[type]`
+`!event setmassping [target]`
 
-+ `[name]` - Twitch username or event name *(custom type only)*.
-+ `[type]` - [Event type](#event-types).
++ `[target]` - Event target.
 
-### Edit the event message
+## Edit the event message
 
-`!event edit [name]:[type] [message...]`
+`!event edit [target] [message...]`
 
-+ `[name]` - Twitch username or event name *(custom type only)*.
-+ `[type]` - [Event type](#event-types).
++ `[target]` - Event target.
 + `[message]` - New message.
 
-### Set a new target for the event
+## Set a new target for the event
 
-`!event settarget [name]:[type] [new_name]:[new_type]`
+`!event settarget [target] [new_target]`
 
-+ `[name]` - Twitch username or event name *(custom type only)*.
-+ `[type]` - [Event type](#event-types).
-+ `[new_name]` - New Twitch username or event name *(custom type only)*.
-+ `[new_type]` - [New event type](#event-types).
++ `[target]` - Current event target.
++ `[new_target]` - New event target.
 
 
-### Call the event
+## Call the event
 
 
 > The bot requires moderator privileges on events with the **"massping"** flag.
 
 
-`!event call [name]:[type]`
+`!event call [target]`
 
-+ `[name]` - Twitch username or event name *(custom type only)*.
-+ `[type]` - [Event type](#event-types).
++ `[target]` - Event target.
 
-### View the event
+## View the event
 
-`!event view [name]:[type]`
+`!event view [target]`
 
-+ `[name]` - Twitch username or event name *(custom type only)*.
-+ `[type]` - [Event type](#event-types).
++ `[target]` - Event target.
 ]],
     delay_sec = 1,
     options = {},
