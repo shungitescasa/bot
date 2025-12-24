@@ -266,7 +266,7 @@ You can use `{prefix}` *(dynamic prefix)*, for example `{prefix}sub, {prefix}ser
 			return l10n_custom_formatted_line_request(request, lines, "delalias_command", { old_alias, name })
 		elseif scid == "setglobal" then
 			local cfg = bot_config()
-			if cfg == nil or cfg.owner == nil or request.sender.alias_id ~= cfg.owner.id then
+			if cfg == nil or not array_contains_int(cfg.twitch.superuser_ids, request.sender.alias_id) then
 				return l10n_custom_formatted_line_request(request, lines, "not_enough_rights", {})
 			end
 

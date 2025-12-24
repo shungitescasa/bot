@@ -46,11 +46,6 @@ namespace bot {
       std::string paste_title_name = "title";
   };
 
-  struct OwnerConfiguration {
-      std::optional<std::string> name = std::nullopt;
-      std::optional<int> id = std::nullopt;
-  };
-
   struct UrlConfiguration {
       std::optional<std::string> help = std::nullopt;
       std::optional<std::string> paste_service = std::nullopt;
@@ -77,7 +72,6 @@ namespace bot {
       KickCredentialsConfiguration kick_credentials;
       DatabaseConfiguration database;
       CommandConfiguration commands;
-      OwnerConfiguration owner;
       UrlConfiguration url;
       TokenConfiguration tokens;
       RssConfiguration rss;

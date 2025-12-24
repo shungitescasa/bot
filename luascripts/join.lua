@@ -49,8 +49,7 @@ return {
         local silent_mode = false
 
         if request.message ~= nil and
-            cfg.owner.id ~= nil and
-            request.sender.alias_id == cfg.owner.id
+            array_contains_int(cfg.twitch.superuser_ids, request.sender.alias_id)
         then
             local users = twitch_get_users({ logins = { request.message } })
 

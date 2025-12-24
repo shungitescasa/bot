@@ -35,19 +35,19 @@ namespace bot {
     cmds["paste_title_name"] = this->commands.paste_title_name;
     o["commands"] = cmds;
 
-    // --- OWNER
-    sol::table owner = luaState->create_table();
-    if (this->owner.name.has_value()) {
-      owner["name"] = this->owner.name.value();
-    } else {
-      owner["name"] = sol::lua_nil;
+    // --- TWITCH
+    sol::table twitch = luaState->create_table();
+    sol::table trusted_user_ids = luaState->create_table();
+    for (const int &id : this->twitch.trusted_user_ids) {
+      trusted_user_ids.add(id);
     }
-    if (this->owner.id.has_value()) {
-      owner["id"] = this->owner.id.value();
-    } else {
-      owner["id"] = sol::lua_nil;
+    twitch["trusted_user_ids"] = trusted_user_ids;
+    sol::table superuser_ids = luaState->create_table();
+    for (const int &id : this->twitch.superuser_ids) {
+      superuser_ids.add(id);
     }
-    o["owner"] = owner;
+    twitch["superuser_ids"] = superuser_ids;
+    o["twitch"] = twitch;
 
     // --- URL
     sol::table url = luaState->create_table();
@@ -100,7 +100,6 @@ namespace bot {
     KickCredentialsConfiguration kick_crd_cfg;
     DatabaseConfiguration db_cfg;
     CommandConfiguration cmd_cfg;
-    OwnerConfiguration owner_cfg;
     UrlConfiguration url_cfg;
     TokenConfiguration token_cfg;
     RssConfiguration rss_cfg;
@@ -167,12 +166,6 @@ namespace bot {
         cmd_cfg.paste_title_name = value;
       }
 
-      else if (key == "owner.name") {
-        owner_cfg.name = value;
-      } else if (key == "owner.id") {
-        owner_cfg.id = std::stoi(value);
-      }
-
       else if (key == "url.help") {
         url_cfg.help = value;
       } else if (key == "url.chatters.paste_service") {
@@ -201,7 +194,6 @@ namespace bot {
     }
 
     cfg.url = url_cfg;
-    cfg.owner = owner_cfg;
     cfg.commands = cmd_cfg;
     cfg.twitch = ttv_cfg;
     cfg.kick_credentials = kick_crd_cfg;
