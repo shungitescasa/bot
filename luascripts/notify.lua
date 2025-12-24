@@ -101,13 +101,13 @@ The `!notify` command gives users the ability to manage event subscriptions.
 `!notify sub [name]:[type]`
 
 + `[name]` - Twitch username or event name *(custom type only)*.
-+ `[type]` - [Event type](/scripts.php?id=event#event-types).
++ `[type]` - [Event type](/!event#event-types).
 
 ### Unsubscribe from the event
 `!notify unsub [name]:[type]`
 
 + `[name]` - Twitch username or event name *(custom type only)*.
-+ `[type]` - [Event type](/scripts.php?id=event#event-types).
++ `[type]` - [Event type](/!event#event-types).
 
 ### Get your event subscriptions
 `!notify subs`
