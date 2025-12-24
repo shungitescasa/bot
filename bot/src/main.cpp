@@ -23,7 +23,6 @@
 #include "rss.hpp"
 #include "schemas/stream.hpp"
 #include "stream.hpp"
-#include "timer.hpp"
 #ifdef USE_EVENTSUB_CONNECTION
 #include "twitch/chat.hpp"
 #else
@@ -195,7 +194,7 @@ int main(int argc, char *argv[]) {
 
   std::vector<std::thread> threads;
   threads.push_back(
-      std::thread(bot::create_timer_thread, &twitch_client, &cfg));
+      std::thread(bot::handlers::handle_timers, &twitch_client, &cfg));
   threads.push_back(std::thread(&bot::stream::StreamListenerClient::run,
                                 &stream_listener_client));
   threads.push_back(std::thread(&bot::GithubListener::run, &github_listener));
