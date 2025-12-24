@@ -373,6 +373,7 @@ box>content {
 .script-description h1 {
     font-size: 32px;
     font-weight: 600;
+    border-bottom: solid 1px var(--box-border);
 }
 
 .script-description h2 {
@@ -390,7 +391,6 @@ box>content {
 .script-description h4 {
     margin: 16px 0;
     color: var(--box-color);
-    border-bottom: solid 1px var(--box-border);
 }
 
 .script-description p {
@@ -405,6 +405,14 @@ box>content {
     list-style-type: disc;
 }
 
+.script-description li:has(ul) {
+    list-style-type: none;
+}
+
+.script-description li li {
+    list-style-type: circle;
+}
+
 .script-description a {
     color: var(--script-anchor-color);
 }
@@ -416,7 +424,8 @@ box>content {
 .script-description code {
     background-color: var(--box-border);
     color: var(--box-color);
-    padding: 2px 4px;
+    padding: 0 4px;
+    white-space: nowrap;
 }
 
 .script-description pre code {
