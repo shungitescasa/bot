@@ -60,16 +60,16 @@ return {
             local user = users[1]
 
             channel_name = user.login
-            channel_id = user.id
+            channel_id = tonumber(user.id)
 
             silent_mode = request.subcommand_id ~= nil and request.subcommand_id == "silent"
         end
 
-        if not cfg.commands.join_allow_from_ther_chats and request.channel.alias_name ~= bot_username() then
+        if not cfg.commands.join_allow_from_other_chats and request.channel.alias_name ~= bot_username() then
             return l10n_custom_formatted_line_request(request, lines, "join_from_bot_channel", { bot_username() })
         end
 
-        local db_channels = db_query('SELECT id, alias_id opted_out_at FROM channels WHERE alias_id = $1',
+        local db_channels = db_query('SELECT id, alias_id, alias_name, opted_out_at FROM channels WHERE alias_id = $1',
             { channel_id })
 
         if #db_channels > 0 then
@@ -78,9 +78,9 @@ return {
             if db_channel.opted_out_at ~= nil then
                 db_execute('UPDATE channels SET opted_out_at = NULL WHERE id = $1', { db_channel.id })
 
-                irc_join_channel(tonumber(db_channel.alias_id))
+                irc_join_channel({login = channel_name, id = channel_id})
                 irc_send_message(
-                    channel_id,
+                    {login = channel_name, id = channel_id},
                     l10n_custom_formatted_line_request(request, lines, "chat_response", { bot_username() })
                 )
                 return l10n_custom_formatted_line_request(request, lines, "rejoined", {})
@@ -92,11 +92,11 @@ return {
         db_execute('INSERT INTO channels(alias_id, alias_name) VALUES ($1, $2)',
             { channel_id, channel_name })
 
-        irc_join_channel(channel_id)
+        irc_join_channel({login = channel_name, id = channel_id})
 
         if not silent_mode then
             irc_send_message(
-                channel_id,
+                {login = channel_name, id = channel_id},
                 l10n_custom_formatted_line_request(request, lines, "chat_response", { bot_username() })
             )
         else
