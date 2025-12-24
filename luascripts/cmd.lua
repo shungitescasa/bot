@@ -53,11 +53,21 @@ return {
 
 The `!cmd` command gives the ability to create their own chat commands.
 
+# Embedded commands
 
-## Syntax
+Custom commands can run internal commands using `{...}`.
+`{X}` where `X` is the command, e.g., `{ping}` or `{luaimport https://pastebin.com/...}`.
+Also, you can pass a message to the command using `$1`, e.g. `{spam 5 $1}`, `{luaimport https://pastebin.com/... $1}`.
+
+## Examples
+
++ Creation: `!cmd new !cvpaste {spam 3 $1}`
++ + Usage: `!cvpaste this is a custom command` - executes as `!spam 3 this is a custom command`.
+
+# Syntax
 
 
-### Create a new custom command
+## Create a new custom command
 
 `!cmd new [name] [message...]`
 
@@ -66,68 +76,70 @@ The `!cmd` command gives the ability to create their own chat commands.
 You can use `{prefix}` *(dynamic prefix)*, for example `{prefix}sub, {prefix}server`. It will be replaced with the current prefix in the chat.
 + `[message]` - Text that will be sent when the custom command is invoked.
 
-### Delete the custom command
+## Delete the custom command
 
 `!cmd delete [name]`
 
 + `[name]` - Name of custom command.
 
-### Edit the message for custom command
+## Edit the message for custom command
 `!cmd edit [name] [message...]`
 
 + `[name]` - Name of custom command.
 + `[message]` - Text with which to replace
 
-### Edit the custom command name
+## Edit the custom command name
 
 `!cmd rename [name] [new_name]`
 
 + `[name]` - Name of custom command.
 + `[new_name]` - New name for custom command.
 
-### Create a new alias for custom command
+## Create a new alias for custom command
 
 `!cmd alias [name] [alias]`
 
 + `[name]` - Name of custom command.
 + `[alias]` - New alias for custom command.
 
-### Delete alias from custom command
+## Delete alias from custom command
 
 `!cmd delalias [name] [alias]`
 
 + `[name]` - Name of custom command.
 + `[alias]` - Alias of custom command.
 
-### Check the information about custom command
+## Check the information about custom command
+
 `!cmd view [name]`
 
 + `[name]` - Name of custom command
 
-### Get the list of created custom commands
+## Get the list of created custom commands
+
 `!cmd list`
 
-## Usage
+# Usage
 
-### Creating a new custom command
+## Creating a new custom command
 + `!cmd new !sub Buy a Twitch sub at this link and become like the rest of us 😎`
 
-### Deleting the custom command
+## Deleting the custom command
 + `!cmd delete !sub`
 
-### Editing the message for custom command
+## Editing the message for custom command
 + `!cmd edit !sub Buy a Prime sub at this link and become like the rest of us 😎`
 
-### Renaming the custom command
+## Renaming the custom command
 + `!cmd rename !sub buysub`
 
-### Creating a new alias for custom command
+## Creating a new alias for custom command
 + `!cmd alias !sub buy_subscription`
 
-### Deleting the alias for custom command
+## Deleting the alias for custom command
 + `!cmd delalias !sub subscription`
 
-### Checking the information about the custom command
+## Checking the information about the custom command
 + `!cmd view !sub`
 ]],
 	delay_sec = 1,
