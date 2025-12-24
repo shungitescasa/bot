@@ -689,6 +689,11 @@ namespace bot::command::lua {
           [&bundle](const sol::table &room, const std::string &message) {
             bundle.irc_client.say({room}, message);
           });
+
+      state->set_function("irc_part_channel",
+                          [&bundle](const sol::table &room) {
+                            bundle.irc_client.part({room});
+                          });
     }
 
     void add_twitch_library(std::shared_ptr<sol::state> state,

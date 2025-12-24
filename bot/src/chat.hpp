@@ -12,6 +12,7 @@ namespace bot::chat {
       virtual void say(const irc::MessageSource &room,
                        const std::string &message) = 0;
       virtual void join(const irc::MessageSource &room) = 0;
+      virtual void part(const irc::MessageSource &room) = 0;
 
       irc::MessageSource &get_me() { return this->me; };
 

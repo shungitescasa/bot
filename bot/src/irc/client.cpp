@@ -151,6 +151,18 @@ void Client::join(const irc::MessageSource &room) {
   }
 }
 
+void Client::part(const irc::MessageSource &room) {
+  auto joined =
+      std::remove_if(this->joined_channels.begin(), this->joined_channels.end(),
+                     [&](const auto &x) { return x == room.login; });
+
+  if (joined != this->joined_channels.end()) {
+    this->raw("PART #" + room.login);
+    this->joined_channels.erase(joined);
+    log::info("IRC", "Left #" + room.login);
+  }
+}
+
 void Client::raw(const std::string &raw_message) {
   std::string msg = raw_message + "\r\n";
   if (this->is_connected) {

@@ -20,6 +20,7 @@ namespace bot {
         void say(const irc::MessageSource &room,
                  const std::string &message) override;
         void join(const irc::MessageSource &room) override;
+        void part(const irc::MessageSource &room) override;
         void raw(const std::string &raw_message);
 
       private:
