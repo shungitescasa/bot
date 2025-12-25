@@ -18,6 +18,7 @@
 #include "database.hpp"
 #include "request.hpp"
 #include "response.hpp"
+#include "schemas/user.hpp"
 #include "utils/string.hpp"
 
 namespace bot {
@@ -89,27 +90,30 @@ namespace bot {
       std::unique_ptr<db::BaseDatabase> conn =
           db::create_connection(bundle.configuration);
 
-      db::DatabaseRows actions = conn->exec(
-          "SELECT sent_at FROM actions WHERE user_id = $1 AND channel_id = $2 "
-          "AND command = $3 ORDER BY sent_at DESC",
-          {std::to_string(request.requester.user.get_id()),
-           std::to_string(request.requester.channel.get_id()),
-           request.command_id});
+      if (request.requester.user_rights.get_level() < schemas::SUPERUSER) {
+        db::DatabaseRows actions = conn->exec(
+            "SELECT sent_at FROM actions WHERE user_id = $1 AND channel_id = "
+            "$2 "
+            "AND command = $3 ORDER BY sent_at DESC",
+            {std::to_string(request.requester.user.get_id()),
+             std::to_string(request.requester.channel.get_id()),
+             request.command_id});
 
-      if (!actions.empty()) {
-        auto last_sent_at =
-            utils::chrono::string_to_time_point(actions[0]["sent_at"]);
+        if (!actions.empty()) {
+          auto last_sent_at =
+              utils::chrono::string_to_time_point(actions[0]["sent_at"]);
 
-        auto now = std::chrono::system_clock::now();
-        auto now_time_it = std::chrono::system_clock::to_time_t(now);
-        auto now_tm = std::gmtime(&now_time_it);
-        now = std::chrono::system_clock::from_time_t(std::mktime(now_tm));
+          auto now = std::chrono::system_clock::now();
+          auto now_time_it = std::chrono::system_clock::to_time_t(now);
+          auto now_tm = std::gmtime(&now_time_it);
+          now = std::chrono::system_clock::from_time_t(std::mktime(now_tm));
 
-        auto difference = std::chrono::duration_cast<std::chrono::seconds>(
-            now - last_sent_at);
+          auto difference = std::chrono::duration_cast<std::chrono::seconds>(
+              now - last_sent_at);
 
-        if (difference.count() < command->get()->get_delay_seconds()) {
-          return std::nullopt;
+          if (difference.count() < command->get()->get_delay_seconds()) {
+            return std::nullopt;
+          }
         }
       }
 
