@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <optional>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include "../logger.hpp"
@@ -81,7 +82,7 @@ void Client::run() {
                       parse_message<MessageType::Privmsg>(*m);
 
                   if (message.has_value()) {
-                    this->onPrivmsg(message.value());
+                    std::thread(onPrivmsg, message.value()).detach();
                   }
                   break;
                 }
@@ -96,7 +97,7 @@ void Client::run() {
                   break;
                 }
                 case MessageType::Connect:
-                  this->onConnect();
+                  std::thread(onConnect).detach();
                   break;
                 default:
                   break;
