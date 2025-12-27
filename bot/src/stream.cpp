@@ -55,8 +55,26 @@ namespace bot::stream {
                     }
                   });
 
-    auto kick_streams = this->kick_api_client.get_channels(kick_ids);
-    auto twitch_streams = this->helix_client.get_streams(twitch_ids);
+    // abusing limits :tf:
+    std::vector<api::KickChannel> kick_streams;
+    while (!kick_ids.empty()) {
+      int count = std::min<size_t>(50, kick_ids.size());
+      std::vector<int> ids(kick_ids.begin(), kick_ids.begin() + count);
+      kick_ids.erase(kick_ids.begin(), kick_ids.begin() + count);
+      kick_streams = this->kick_api_client.get_channels(ids);
+      std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+
+    std::vector<api::twitch::schemas::Stream> twitch_streams;
+
+    while (!twitch_ids.empty()) {
+      int count = std::min<size_t>(100, twitch_ids.size());
+      std::vector<int> ids(twitch_ids.begin(), twitch_ids.begin() + count);
+      twitch_ids.erase(twitch_ids.begin(), twitch_ids.begin() + count);
+      twitch_streams = this->helix_client.get_streams(ids);
+      std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+
     auto now = std::chrono::system_clock::now();
     auto now_time_it = std::chrono::system_clock::to_time_t(now);
     auto now_tm = std::gmtime(&now_time_it);

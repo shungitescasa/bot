@@ -103,19 +103,13 @@ namespace bot::api::twitch {
     std::string s;
 
     for (auto i = ids.begin(); i != ids.end(); i++) {
-      std::string start;
-      if (i == ids.begin()) {
-        start = "?";
-      } else {
-        start = "&";
-      }
-
-      s += start + "user_id=" + std::to_string(*i);
+      s += "&user_id=" + std::to_string(*i);
     }
 
-    cpr::Response response = cpr::Get(
-        cpr::Url{this->base_url + "/streams" + s}, cpr::Bearer{this->token},
-        cpr::Header{{"Client-Id", this->client_id.c_str()}});
+    cpr::Response response =
+        cpr::Get(cpr::Url{this->base_url + "/streams?first=100" + s},
+                 cpr::Bearer{this->token},
+                 cpr::Header{{"Client-Id", this->client_id.c_str()}});
 
     if (response.status_code != 200) {
       return {};
