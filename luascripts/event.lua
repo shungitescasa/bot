@@ -315,8 +315,8 @@ The `!event` command gives the ability to manage events.
         end
 
         local events = db_query(
-            'SELECT id, message, is_massping FROM events WHERE name = $1 AND event_type = $2',
-            { data_name, data.type })
+            'SELECT id, message, is_massping FROM events WHERE name = $1 AND event_type = $2 AND channel_id = $3',
+            { data_name, data.type, request.channel.id })
 
         if scid == "on" then
             if #events > 0 then
