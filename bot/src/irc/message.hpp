@@ -4,7 +4,6 @@
 #include <map>
 #include <optional>
 #include <sol/table.hpp>
-#include <sstream>
 #include <string>
 #include <vector>
 
@@ -42,6 +41,11 @@ namespace bot {
         MessageSource(const sol::table &table);
     };
 
+    struct MessageReply {
+        std::string id, login, display_name, message;
+        unsigned int user_id;
+    };
+
     template <MessageType T>
     struct Message;
 
@@ -49,6 +53,7 @@ namespace bot {
     struct Message<MessageType::Privmsg> {
         MessageSender sender;
         MessageSource source;
+        std::optional<MessageReply> reply;
         std::string message;
     };
 
@@ -73,10 +78,34 @@ namespace bot {
         }
         source.id = std::stoi(msg.tags.at("room-id"));
 
+        std::string message_text = msg.params.at(1);
+
+        // searching for reply
+        std::optional<MessageReply> reply = std::nullopt;
+        if (msg.tags.count("reply-parent-msg-id") &&
+            msg.tags.count("reply-parent-user-login") &&
+            msg.tags.count("reply-parent-user-id") &&
+            msg.tags.count("reply-parent-display-name")) {
+          reply = (MessageReply){};
+          reply->id = msg.tags.at("reply-parent-msg-id");
+          reply->login = msg.tags.at("reply-parent-user-login");
+          reply->display_name = msg.tags.at("reply-parent-display-name");
+          reply->user_id = std::stoi(msg.tags.at("reply-parent-user-id"));
+          reply->message = msg.tags.at("reply-parent-msg-body");
+          utils::string::replace(reply->message, "\\s", " ");
+          utils::string::replace(reply->message, "\\:", ";");
+
+          if (message_text.substr(0, reply->login.length() + 1) ==
+              "@" + reply->login) {
+            message_text = message_text.substr(reply->login.length() + 2);
+          }
+        }
+
         Message<MessageType::Privmsg> message;
         message.sender = sender;
         message.source = source;
-        message.message = msg.params.at(1);
+        message.reply = reply;
+        message.message = message_text;
 
         return message;
       }

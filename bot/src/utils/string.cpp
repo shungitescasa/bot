@@ -8,6 +8,16 @@
 namespace bot {
   namespace utils {
     namespace string {
+      void replace(std::string &str, const std::string &from,
+                   const std::string &to) {
+        if (from.empty()) return;
+        int pos = 0;
+        while ((pos = str.find(from, pos)) != std::string::npos) {
+          str.replace(pos, from.length(), to);
+          pos += to.length();
+        }
+      }
+
       std::vector<std::string> split_text(const std::string &text,
                                           char delimiter) {
         std::vector<std::string> parts;

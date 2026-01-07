@@ -28,6 +28,18 @@ namespace bot::command {
       o["message"] = sol::lua_nil;
     }
 
+    if (this->irc_message.reply.has_value()) {
+      sol::table r = luaState->create_table();
+      r["id"] = this->irc_message.reply->id;
+      r["login"] = this->irc_message.reply->login;
+      r["display_name"] = this->irc_message.reply->display_name;
+      r["user_id"] = this->irc_message.reply->user_id;
+      r["message"] = this->irc_message.reply->message;
+      o["reply"] = r;
+    } else {
+      o["reply"] = sol::lua_nil;
+    }
+
     o["sender"] = requester.user.as_lua_table(luaState);
     o["channel"] = requester.channel.as_lua_table(luaState);
     o["channel_preference"] =

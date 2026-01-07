@@ -7,6 +7,9 @@
 namespace bot {
   namespace utils {
     namespace string {
+      void replace(std::string &str, const std::string &from,
+                   const std::string &to);
+
       std::vector<std::string> split_text(const std::string &text,
                                           char delimiter);
       std::string join_vector(const std::vector<std::string> &vec,
