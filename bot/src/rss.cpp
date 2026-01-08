@@ -271,8 +271,16 @@ namespace bot {
         timestamp = timegm(&tm);
       }
 
-      messages.push_back({item.child("guid").text().as_string(),
-                          item.child("title").text().as_string(), timestamp});
+      RSSMessage message = {item.child("guid").text().as_string(),
+                            item.child("title").text().as_string(), timestamp};
+
+      if (message.message.find("Bridge returned error") != std::string::npos) {
+        log::warn("RSSListener/" + url, "Bridge returned error");
+        messages.clear();
+        break;
+      }
+
+      messages.push_back(message);
     }
 
     return (RSSChannel){channel_name, url, std::nullopt, messages};
