@@ -11,7 +11,6 @@
 #include "api/twitch/schemas/stream.hpp"
 #include "database.hpp"
 #include "logger.hpp"
-#include "nlohmann/json.hpp"
 #include "schemas/stream.hpp"
 #include "utils/string.hpp"
 
@@ -61,17 +60,28 @@ namespace bot::stream {
       int count = std::min<size_t>(50, kick_ids.size());
       std::vector<int> ids(kick_ids.begin(), kick_ids.begin() + count);
       kick_ids.erase(kick_ids.begin(), kick_ids.begin() + count);
-      kick_streams = this->kick_api_client.get_channels(ids);
+
+      auto temp = this->kick_api_client.get_channels(ids);
+      kick_streams.insert(kick_streams.end(), temp.begin(), temp.end());
+
       std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 
-    std::vector<api::twitch::schemas::Stream> twitch_streams;
+    std::vector<api::twitch::schemas::Stream> twitch_streams,
+        twitch_stream_info;
 
     while (!twitch_ids.empty()) {
       int count = std::min<size_t>(100, twitch_ids.size());
       std::vector<int> ids(twitch_ids.begin(), twitch_ids.begin() + count);
       twitch_ids.erase(twitch_ids.begin(), twitch_ids.begin() + count);
-      twitch_streams = this->helix_client.get_streams(ids);
+
+      auto temp = this->helix_client.get_streams(ids);
+      twitch_streams.insert(twitch_streams.end(), temp.begin(), temp.end());
+
+      auto temp2 = this->helix_client.get_channel_information(ids);
+      twitch_stream_info.insert(twitch_stream_info.end(), temp2.begin(),
+                                temp2.end());
+
       std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 
@@ -158,9 +168,6 @@ namespace bot::stream {
     }
 
     // notifying about stream info
-    auto twitch_stream_info =
-        this->helix_client.get_channel_information(twitch_ids);
-
     for (const auto &stream : twitch_stream_info) {
       auto data = std::find_if(this->streamers.begin(), this->streamers.end(),
                                [&stream](const StreamerData &data) {
