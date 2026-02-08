@@ -71,6 +71,11 @@ namespace bot {
     } else {
       url["stats"] = sol::lua_nil;
     }
+    if (this->url.tinyemotes.has_value()) {
+      url["tinyemotes"] = this->url.tinyemotes.value();
+    } else {
+      url["tinyemotes"] = sol::lua_nil;
+    }
     o["url"] = url;
 
     sol::table rss = luaState->create_table();
@@ -174,6 +179,8 @@ namespace bot {
         url_cfg.randompost = value;
       } else if (key == "url.stats") {
         url_cfg.stats = value;
+      } else if (key == "url.tinyemotes") {
+        url_cfg.tinyemotes = value;
       }
 
       else if (key == "rss.timeout") {
