@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <nlohmann/json.hpp>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -160,5 +161,49 @@ namespace bot::api::twitch {
     }
 
     return streams;
+  }
+
+  std::vector<Emote> HelixClient::get_global_emotes() const {
+    cpr::Response response =
+        cpr::Get(cpr::Url{this->base_url + "/chat/emotes/global"},
+                 cpr::Bearer{this->token},
+                 cpr::Header{{"Client-Id", this->client_id.c_str()}});
+
+    if (response.status_code != 200) {
+      throw std::runtime_error("Failed to get global emotes: " +
+                               std::to_string(response.status_code));
+    }
+
+    nlohmann::json j = nlohmann::json::parse(response.text);
+    std::vector<Emote> emotes;
+
+    for (const auto &d : j["data"]) {
+      emotes.push_back({d["id"], d["name"]});
+    }
+
+    return emotes;
+  }
+
+  std::vector<Emote> HelixClient::get_channel_emotes(
+      const int &channel_id) const {
+    cpr::Response response = cpr::Get(
+        cpr::Url{this->base_url +
+                 "/chat/emotes?broadcaster_id=" + std::to_string(channel_id)},
+        cpr::Bearer{this->token},
+        cpr::Header{{"Client-Id", this->client_id.c_str()}});
+
+    if (response.status_code != 200) {
+      throw std::runtime_error("Failed to get channel emotes: " +
+                               std::to_string(response.status_code));
+    }
+
+    nlohmann::json j = nlohmann::json::parse(response.text);
+    std::vector<Emote> emotes;
+
+    for (const auto &d : j["data"]) {
+      emotes.push_back({d["id"], d["name"]});
+    }
+
+    return emotes;
   }
 }

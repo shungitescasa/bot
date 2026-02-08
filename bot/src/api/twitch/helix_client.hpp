@@ -7,6 +7,10 @@
 #include "schemas/user.hpp"
 
 namespace bot::api::twitch {
+  struct Emote {
+      std::string id, name;
+  };
+
   class HelixClient {
     public:
       HelixClient(const std::string &token, const std::string &client_id);
@@ -27,6 +31,9 @@ namespace bot::api::twitch {
 
       std::vector<schemas::Stream> get_channel_information(
           const std::vector<int> &ids) const;
+
+      std::vector<Emote> get_global_emotes() const;
+      std::vector<Emote> get_channel_emotes(const int &channel_id) const;
 
     private:
       std::vector<schemas::User> get_users_by_query(

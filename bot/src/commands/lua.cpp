@@ -23,6 +23,7 @@
 #include <vector>
 
 #include "api/kick.hpp"
+#include "api/twitch/helix_client.hpp"
 #include "api/twitch/schemas/user.hpp"
 #include "bundle.hpp"
 #include "commands/request.hpp"
@@ -766,6 +767,39 @@ namespace bot::command::lua {
                             u["login"] = x.login;
 
                             o.add(u);
+                          });
+
+            return o;
+          });
+
+      state->set_function(
+          "twitch_get_global_emotes", [state, &request, &bundle]() {
+            auto emotes = bundle.helix_client.get_global_emotes();
+            sol::table o = state->create_table();
+
+            std::for_each(emotes.begin(), emotes.end(),
+                          [state, &o](const api::twitch::Emote &x) {
+                            sol::table e = state->create_table();
+                            e["id"] = x.id;
+                            e["name"] = x.name;
+                            o.add(e);
+                          });
+
+            return o;
+          });
+
+      state->set_function(
+          "twitch_get_channel_emotes",
+          [state, &request, &bundle](const unsigned int &id) {
+            auto emotes = bundle.helix_client.get_channel_emotes(id);
+            sol::table o = state->create_table();
+
+            std::for_each(emotes.begin(), emotes.end(),
+                          [state, &o](const api::twitch::Emote &x) {
+                            sol::table e = state->create_table();
+                            e["id"] = x.id;
+                            e["name"] = x.name;
+                            o.add(e);
                           });
 
             return o;
