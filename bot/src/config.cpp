@@ -128,6 +128,8 @@ namespace bot {
         irc_cfg.host = value;
       } else if (key == "irc.port") {
         irc_cfg.port = value;
+      } else if (key == "irc.password") {
+        irc_cfg.password = value;
       }
 
       else if (key == "twitch.client_id") {

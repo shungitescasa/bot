@@ -18,13 +18,15 @@
 
 using namespace bot::irc;
 
-Client::Client(std::string host, std::string port, std::string client_id,
+Client::Client(std::string host, std::string port,
+               std::optional<std::string> password, std::string client_id,
                std::string token) {
   this->client_id = client_id;
   this->token = token;
 
   this->host = host;
   this->port = port;
+  this->password = password.has_value() ? "oauth:" + *password : token;
 
   this->websocket.setUrl(this->host + ":" + this->port);
 
@@ -175,14 +177,14 @@ void Client::raw(const std::string &raw_message) {
 }
 
 void Client::authorize() {
-  if (this->me.login.empty() || this->token.empty()) {
+  if (this->me.login.empty() || this->password.empty()) {
     log::error("IRC", "Bot username and token must be set for authorization!");
     return;
   }
 
   log::info("IRC", "Authorizing on Twitch IRC servers...");
 
-  this->raw("PASS oauth:" + this->token);
+  this->raw("PASS " + this->password);
   this->raw("NICK " + this->me.login);
   this->raw("CAP REQ :twitch.tv/membership");
   this->raw("CAP REQ :twitch.tv/commands");

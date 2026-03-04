@@ -2,6 +2,7 @@
 
 #include <ixwebsocket/IXWebSocket.h>
 
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -12,7 +13,8 @@ namespace bot {
   namespace irc {
     class Client : public chat::ChatClient, public chat::EventChatClient {
       public:
-        Client(std::string host, std::string port, std::string client_id,
+        Client(std::string host, std::string port,
+               std::optional<std::string> password, std::string client_id,
                std::string token);
         ~Client() = default;
 
@@ -29,8 +31,7 @@ namespace bot {
 
         std::string client_id, token;
 
-        std::string host;
-        std::string port;
+        std::string host, port, password;
 
         ix::WebSocket websocket;
 
