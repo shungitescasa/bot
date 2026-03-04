@@ -61,7 +61,8 @@ int main(int argc, char *argv[]) {
   bot::twitch::TwitchChatClient twitch_client(
       cfg.twitch.user_id, cfg.twitch.token, cfg.twitch.client_id);
 #else
-  bot::irc::Client twitch_client(cfg.twitch.client_id, cfg.twitch.token);
+  bot::irc::Client twitch_client(cfg.irc.host, cfg.irc.port,
+                                 cfg.twitch.client_id, cfg.twitch.token);
 #endif
   bot::command::CommandLoader command_loader;
   command_loader.load_lua_directory("luascripts");

@@ -24,6 +24,11 @@ namespace bot {
       std::string port;
   };
 
+  struct IRCConfiguration {
+      std::string host = "wss://irc-ws.chat.twitch.tv";
+      std::string port = "443";
+  };
+
   struct TwitchConfiguration {
       unsigned int user_id;
       std::string client_id;
@@ -69,6 +74,7 @@ namespace bot {
   };
 
   struct Configuration {
+      IRCConfiguration irc;
       TwitchConfiguration twitch;
       KickCredentialsConfiguration kick_credentials;
       DatabaseConfiguration database;

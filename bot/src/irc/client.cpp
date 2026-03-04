@@ -18,12 +18,13 @@
 
 using namespace bot::irc;
 
-Client::Client(std::string client_id, std::string token) {
+Client::Client(std::string host, std::string port, std::string client_id,
+               std::string token) {
   this->client_id = client_id;
   this->token = token;
 
-  this->host = "wss://irc-ws.chat.twitch.tv";
-  this->port = "443";
+  this->host = host;
+  this->port = port;
 
   this->websocket.setUrl(this->host + ":" + this->port);
 

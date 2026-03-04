@@ -101,6 +101,7 @@ namespace bot {
     }
 
     Configuration cfg;
+    IRCConfiguration irc_cfg;
     TwitchConfiguration ttv_cfg;
     KickCredentialsConfiguration kick_crd_cfg;
     DatabaseConfiguration db_cfg;
@@ -123,7 +124,13 @@ namespace bot {
         c = tolower(c);
       }
 
-      if (key == "twitch.client_id") {
+      if (key == "irc.host") {
+        irc_cfg.host = value;
+      } else if (key == "irc.port") {
+        irc_cfg.port = value;
+      }
+
+      else if (key == "twitch.client_id") {
         ttv_cfg.client_id = value;
       } else if (key == "twitch.token") {
         ttv_cfg.token = value;
@@ -200,6 +207,7 @@ namespace bot {
       }
     }
 
+    cfg.irc = irc_cfg;
     cfg.url = url_cfg;
     cfg.commands = cmd_cfg;
     cfg.twitch = ttv_cfg;
