@@ -59,14 +59,14 @@ CREATE TABLE IF NOT EXISTS event_subscriptions (
 CREATE TABLE IF NOT EXISTS custom_commands (
   id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
   channel_id INTEGER NOT NULL REFERENCES channels(id) ON DELETE CASCADE,
-  name TEXT NOT NULL CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
+  name TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
   message TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS custom_command_aliases (
   id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
   command_id INTEGER NOT NULL REFERENCES custom_commands(id) ON DELETE CASCADE,
-  name TEXT NOT NULL CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
+  name TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
 
   CONSTRAINT unique_command_alias UNIQUE (command_id, name)
 );
