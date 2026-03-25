@@ -132,10 +132,14 @@ namespace bot {
         irc_cfg.password = value;
       }
 
-      else if (key == "twitch.client_id") {
-        ttv_cfg.client_id = value;
-      } else if (key == "twitch.token") {
-        ttv_cfg.token = value;
+      else if (key == "twitch.app_client_id") {
+        ttv_cfg.app_client_id = value;
+      } else if (key == "twitch.app_client_secret") {
+        ttv_cfg.app_client_secret = value;
+      } else if (key == "twitch.user_client_id") {
+        ttv_cfg.user_client_id = value;
+      } else if (key == "twitch.user_token") {
+        ttv_cfg.user_token = value;
       } else if (key == "twitch.user_id") {
         ttv_cfg.user_id = std::stoi(value);
       } else if (key == "twitch.trusted_user_ids") {

@@ -1,6 +1,7 @@
+#include <algorithm>
+#include <ctime>
+#include <optional>
 #ifdef USE_EVENTSUB_CONNECTION
-#include "twitch/chat.hpp"
-
 #include <stdexcept>
 #include <string>
 
@@ -11,9 +12,33 @@
 #include "ixwebsocket/IXWebSocketMessageType.h"
 #include "logger.hpp"
 #include "nlohmann/json.hpp"
+#include "twitch/chat.hpp"
 
 namespace bot::twitch {
+  void TwitchChatClient::authorize_app() {
+    cpr::Response response = cpr::Post(cpr::Url{fmt::format(
+        "https://id.twitch.tv/oauth2/"
+        "token?grant_type=client_credentials&client_id={}&client_secret={}",
+        this->app_client_id, this->app_client_secret)});
+
+    if (response.status_code != 200) {
+      throw std::runtime_error(fmt::format("Failed to get app access token: {}",
+                                           response.status_code));
+    }
+
+    nlohmann::json j = nlohmann::json::parse(response.text);
+
+    this->app_token = j["access_token"];
+    this->app_token_acquisition = std::time(nullptr);
+    this->app_token_expiration =
+        this->app_token_acquisition + (unsigned int)j["expires_in"];
+
+    log::info("TwitchChatClient", "Acquired app access token!");
+  }
+
   void TwitchChatClient::prepare() {
+    this->authorize_app();
+
     if (!this->validate_token()) {
       throw std::runtime_error("Invalid token.");
     }
@@ -43,7 +68,7 @@ namespace bot::twitch {
   bool TwitchChatClient::validate_token() {
     cpr::Response response =
         cpr::Get(cpr::Url{"https://id.twitch.tv/oauth2/validate"},
-                 cpr::Header{{"Authorization", "OAuth " + this->client_token}});
+                 cpr::Header{{"Authorization", "OAuth " + this->user_token}});
 
     if (response.status_code != 200) return false;
 
@@ -62,8 +87,8 @@ namespace bot::twitch {
 
   void TwitchChatClient::say(const irc::MessageSource &room,
                              const std::string &message) {
-    if (this->websocket_session_id.empty()) {
-      throw std::runtime_error("websocket_session_id is not set yet!");
+    if (this->app_token.empty()) {
+      throw std::runtime_error("app_token is not set yet!");
     }
 
     log::debug("TwitchChatClient",
@@ -75,8 +100,8 @@ namespace bot::twitch {
 
     cpr::Response response =
         cpr::Post(cpr::Url{"https://api.twitch.tv/helix/chat/messages"},
-                  cpr::Header{{"Authorization", "Bearer " + this->client_token},
-                              {"Client-Id", this->client_id},
+                  cpr::Header{{"Authorization", "Bearer " + this->app_token},
+                              {"Client-Id", this->app_client_id},
                               {"Content-Type", "application/json"}},
                   cpr::Body{j.dump()});
 
@@ -84,6 +109,39 @@ namespace bot::twitch {
       throw std::runtime_error(
           fmt::format("Failed to send chat message! API returned {} code.",
                       response.status_code));
+    }
+
+    // that's the most secure piece of code in this project
+    j = nlohmann::json::parse(response.text);
+    if (j.contains("data") && j["data"].is_array() && !j["data"].empty()) {
+      auto msg = j["data"][0];
+
+      if (msg.contains("is_sent") && msg["is_sent"].is_boolean() &&
+          !((bool)msg["is_sent"])) {
+        std::string code = "unknown";
+        std::string reason = "Failed to send a message. Try again later!";
+
+        if (msg.contains("drop_reason") && !msg["drop_reason"].is_null()) {
+          auto r = msg["drop_reason"];
+
+          if (r.contains("code") && r["code"].is_string()) {
+            code = r["code"];
+          }
+
+          if (r.contains("message") && r["message"].is_string()) {
+            reason = r["message"];
+          }
+        }
+
+        log::info("TwitchChatClient",
+                  fmt::format("Failed to send a message to room ID {}: {} ({}) "
+                              "(message - {})",
+                              room.id, reason, code, message));
+
+        if (reason != message) {
+          this->say(room, reason);
+        }
+      }
     }
   }
 
@@ -93,6 +151,7 @@ namespace bot::twitch {
     }
 
     log::info("TwitchChatClient", fmt::format("Joining {}...", room.id));
+    this->joined_channels.insert_or_assign(room.id, std::nullopt);
 
     using namespace nlohmann::literals;
 
@@ -107,8 +166,8 @@ namespace bot::twitch {
 
     cpr::Response response = cpr::Post(
         cpr::Url{"https://api.twitch.tv/helix/eventsub/subscriptions"},
-        cpr::Header{{"Authorization", "Bearer " + this->client_token},
-                    {"Client-Id", this->client_id},
+        cpr::Header{{"Authorization", "Bearer " + this->user_token},
+                    {"Client-Id", this->user_client_id},
                     {"Content-Type", "application/json"}},
         cpr::Body{j.dump()});
 
@@ -119,6 +178,49 @@ namespace bot::twitch {
                       "returned {} code.",
                       response.status_code));
     }
+
+    j = nlohmann::json::parse(response.text);
+
+    std::string id = j["data"][0]["id"];
+    this->joined_channels.insert_or_assign(room.id, id);
+    log::info("TwitchChatClient",
+              fmt::format("Joined #{} (ID {})!", room.login, id));
+  }
+
+  void TwitchChatClient::part(const irc::MessageSource &room) {
+    if (!std::any_of(this->joined_channels.begin(), this->joined_channels.end(),
+                     [&room](const auto &x) { return x.first == room.id; })) {
+      log::error("TwitchChatClient",
+                 fmt::format("Room ID {} is not joined!", room.id));
+      return;
+    }
+
+    std::optional<std::string> id = this->joined_channels.at(room.id);
+    if (!id.has_value()) {
+      log::error(
+          "TwitchChatClient",
+          fmt::format("Room ID {} does not have subscription ID!", room.id));
+      return;
+    }
+
+    cpr::Response response = cpr::Delete(
+        cpr::Url{"https://api.twitch.tv/helix/eventsub/subscriptions?id=" +
+                 *id},
+        cpr::Header{{"Authorization", "Bearer " + this->user_token},
+                    {"Client-Id", this->user_client_id},
+                    {"Content-Type", "application/json"}});
+
+    if (response.status_code != 204) {
+      log::info("nah", response.text);
+      throw std::runtime_error(
+          fmt::format("Failed to unsubscribe from channel.chat.message! API "
+                      "returned {} code.",
+                      response.status_code));
+    }
+
+    this->joined_channels.erase(room.id);
+
+    log::info("TwitchChatClient", fmt::format("Parted #{}!", room.login));
   }
 
   void TwitchChatClient::handleWebsocketMessage(const std::string &raw) {

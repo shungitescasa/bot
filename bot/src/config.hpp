@@ -32,8 +32,7 @@ namespace bot {
 
   struct TwitchConfiguration {
       unsigned int user_id;
-      std::string client_id;
-      std::string token;
+      std::string user_client_id, user_token, app_client_id, app_client_secret;
       std::vector<int> trusted_user_ids, superuser_ids;
   };
 

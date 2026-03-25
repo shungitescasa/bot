@@ -41,12 +41,22 @@ int main(int argc, char *argv[]) {
 
   bot::Configuration cfg = o_cfg.value();
 
-  if (cfg.twitch.client_id.empty() || cfg.twitch.token.empty()) {
+  if (cfg.twitch.user_client_id.empty() || cfg.twitch.user_token.empty()) {
     bot::log::error("Main",
-                    "TWITCH.CLIENT_ID and TWITCH.TOKEN "
+                    "TWITCH.USER_CLIENT_ID and TWITCH.USER_TOKEN "
                     "must be set in environmental file!");
     return 1;
   }
+
+#ifdef USE_EVENTSUB_CONNECTION
+  if (cfg.twitch.app_client_id.empty() ||
+      cfg.twitch.app_client_secret.empty()) {
+    bot::log::error("Main",
+                    "TWITCH.APP_CLIENT_ID and TWITCH.APP_CLIENT_SECRET "
+                    "must be set in environmental file!");
+    return 1;
+  }
+#endif
 
   if (cfg.database.name.empty() || cfg.database.user.empty() ||
       cfg.database.password.empty() || cfg.database.host.empty() ||
@@ -58,18 +68,18 @@ int main(int argc, char *argv[]) {
   }
 
 #ifdef USE_EVENTSUB_CONNECTION
-  bot::twitch::TwitchChatClient twitch_client(
-      cfg.twitch.user_id, cfg.twitch.token, cfg.twitch.client_id);
+  bot::twitch::TwitchChatClient twitch_client(cfg.twitch);
 #else
   bot::irc::Client twitch_client(cfg.irc.host, cfg.irc.port, cfg.irc.password,
-                                 cfg.twitch.client_id, cfg.twitch.token);
+                                 cfg.twitch.user_client_id,
+                                 cfg.twitch.user_token);
 #endif
   bot::command::CommandLoader command_loader;
   command_loader.load_lua_directory("luascripts");
 
   bot::loc::Localization localization("localization");
-  bot::api::twitch::HelixClient helix_client(cfg.twitch.token,
-                                             cfg.twitch.client_id);
+  bot::api::twitch::HelixClient helix_client(cfg.twitch.user_token,
+                                             cfg.twitch.user_client_id);
 
   bot::api::KickAPIClient kick_api_client(cfg.kick_credentials.client_id,
                                           cfg.kick_credentials.client_secret);
