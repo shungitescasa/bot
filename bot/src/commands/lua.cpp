@@ -517,6 +517,14 @@ namespace bot::command::lua {
 
         return o;
       });
+
+      state->set_function("str_startswith", [state](const std::string &haystack,
+                                                    const std::string &needle) {
+        if (needle.length() > haystack.length()) {
+          return false;
+        }
+        return haystack.substr(0, needle.length()) == needle;
+      });
     }
 
     void add_db_library(std::shared_ptr<sol::state> state,
@@ -657,6 +665,96 @@ namespace bot::command::lua {
       });
     }
 
+    void add_emote_library(std::shared_ptr<sol::state> state,
+                           const InstanceBundle &bundle) {
+      auto user_to_lua = [state](const emotespp::User &user) {
+        auto o = state->create_table();
+        o["username"] = user.username;
+        o["alias_id"] = user.alias_id;
+        o["emote_set_id"] = user.emote_set_id;
+        o["id"] = user.id;
+        return o;
+      };
+
+      auto emotes_to_lua = [state](const std::vector<emotespp::Emote> &emotes) {
+        auto e = state->create_table();
+        for (int i = 0; i < emotes.size(); i++) {
+          auto emote = emotes[i];
+          auto em = state->create_table();
+          em["id"] = emote.id;
+          em["code"] = emote.code;
+          if (emote.original_code.has_value()) {
+            em["original_code"] = *emote.original_code;
+          } else {
+            em["original_code"] = sol::lua_nil;
+          }
+          e[i + 1] = em;
+        }
+        return e;
+      };
+
+      state->set_function(
+          "stv_add_named_emote",
+          [bundle](const std::string &emote_set_id, const std::string &emote_id,
+                   const std::string &name) {
+            bundle.seventv_api_client.add_emote(emote_set_id, {emote_id, name});
+          });
+
+      state->set_function(
+          "stv_add_emote", [bundle](const std::string &emote_set_id,
+                                    const std::string &emote_id) {
+            bundle.seventv_api_client.add_emote(emote_set_id, {emote_id, ""});
+          });
+
+      state->set_function(
+          "stv_remove_emote", [bundle](const std::string &emote_set_id,
+                                       const std::string &emote_id) {
+            bundle.seventv_api_client.remove_emote(emote_set_id, {emote_id});
+          });
+
+      state->set_function(
+          "stv_rename_emote",
+          [bundle](const std::string &emote_set_id, const std::string &emote_id,
+                   const std::string &new_name) {
+            bundle.seventv_api_client.rename_emote(emote_set_id,
+                                                   {emote_id, new_name});
+          });
+
+      state->set_function("stv_get_user", [state, bundle, user_to_lua](
+                                              const unsigned int &twitch_id) {
+        auto user = bundle.seventv_api_client.get_user_by_twitch_id(twitch_id);
+
+        if (!user.has_value()) {
+          return sol::make_object(*state, sol::lua_nil);
+        }
+
+        return sol::make_object(*state, user_to_lua(*user));
+      });
+
+      state->set_function(
+          "stv_get_emoteset", [state, bundle, user_to_lua,
+                               emotes_to_lua](const std::string &emote_set_id) {
+            auto set = bundle.seventv_api_client.get_emote_set(emote_set_id);
+
+            if (!set.has_value()) {
+              return sol::make_object(*state, sol::lua_nil);
+            }
+
+            auto o = state->create_table();
+            o["id"] = set->id;
+            o["name"] = set->name;
+            o["owner"] = user_to_lua(set->owner);
+            o["emotes"] = emotes_to_lua(set->emotes);
+
+            return sol::make_object(*state, o);
+          });
+
+      state->set_function("stv_search_emotes", [state, bundle, emotes_to_lua](
+                                                   const std::string &name) {
+        return emotes_to_lua(bundle.seventv_api_client.search_emotes(name));
+      });
+    }
+
     void add_base_libraries(std::shared_ptr<sol::state> state) {
       add_bot_library(state);
       add_time_library(state);
@@ -676,6 +774,7 @@ namespace bot::command::lua {
       lua::library::add_kick_library(state, bundle);
       lua::library::add_db_library(state, bundle.configuration);
       lua::library::add_l10n_library(state, bundle);
+      lua::library::add_emote_library(state, bundle);
     }
 
     void add_irc_library(std::shared_ptr<sol::state> state,

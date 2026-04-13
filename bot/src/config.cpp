@@ -103,6 +103,7 @@ namespace bot {
     Configuration cfg;
     IRCConfiguration irc_cfg;
     TwitchConfiguration ttv_cfg;
+    EmoteConfiguration emote_cfg;
     KickCredentialsConfiguration kick_crd_cfg;
     DatabaseConfiguration db_cfg;
     CommandConfiguration cmd_cfg;
@@ -150,6 +151,10 @@ namespace bot {
         for (const std::string &x : utils::string::split_text(value, ',')) {
           ttv_cfg.superuser_ids.push_back(std::stoi(x));
         }
+      }
+
+      else if (key == "stv.key") {
+        emote_cfg.stv_api_key = value;
       }
 
       else if (key == "db_name") {
@@ -217,6 +222,7 @@ namespace bot {
     cfg.url = url_cfg;
     cfg.commands = cmd_cfg;
     cfg.twitch = ttv_cfg;
+    cfg.emote = emote_cfg;
     cfg.kick_credentials = kick_crd_cfg;
     cfg.database = db_cfg;
     cfg.tokens = token_cfg;

@@ -90,6 +90,10 @@ int main(int argc, char *argv[]) {
   emotespp::SevenTVWebsocketClient seventv_emote_listener;
   emotespp::SevenTVAPIClient seventv_api_client;
 
+  if (cfg.emote.stv_api_key.has_value()) {
+    seventv_api_client.set_authorization_key(cfg.emote.stv_api_key.value());
+  }
+
   std::unique_ptr<bot::db::BaseDatabase> conn = bot::db::create_connection(cfg);
 
   bot::db::DatabaseRows id_rows = conn->exec(
@@ -193,11 +197,10 @@ int main(int argc, char *argv[]) {
   });
 
   twitch_client.on_privmsg(
-      [&twitch_client, &command_loader, &localization, &cfg, &helix_client,
-       &kick_api_client](
-          const bot::irc::Message<bot::irc::MessageType::Privmsg> &message) {
-        bot::InstanceBundle bundle{twitch_client, helix_client, kick_api_client,
-                                   localization,  cfg,          command_loader};
+      [&](const bot::irc::Message<bot::irc::MessageType::Privmsg> &message) {
+        bot::InstanceBundle bundle{
+            twitch_client, helix_client,   kick_api_client,   localization,
+            cfg,           command_loader, seventv_api_client};
         bot::handlers::handle_private_message(bundle, command_loader, message);
       });
 

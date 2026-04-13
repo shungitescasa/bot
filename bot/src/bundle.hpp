@@ -1,5 +1,7 @@
 #pragma once
 
+#include <emotespp/seventv.hpp>
+
 #include "chat.hpp"
 namespace bot {
   namespace command {
@@ -28,5 +30,7 @@ namespace bot {
       const bot::loc::Localization &localization;
       const Configuration &configuration;
       const command::CommandLoader &command_loader;
+
+      const emotespp::SevenTVAPIClient &seventv_api_client;
   };
 }
