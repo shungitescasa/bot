@@ -20,7 +20,8 @@ namespace bot::twitch {
             user_token(cfg.user_token),
             user_client_id(cfg.user_client_id),
             app_client_id(cfg.app_client_id),
-            app_client_secret(cfg.app_client_secret) {
+            app_client_secret(cfg.app_client_secret),
+            websocket_url("wss://eventsub.wss.twitch.tv/ws") {
         prepare();
       }
 
@@ -35,6 +36,7 @@ namespace bot::twitch {
 
     private:
       void prepare();
+      ix::WebSocket connect_websocket(const std::string &url);
       bool validate_token();
       void authorize_app();
       void handleWebsocketMessage(const std::string &raw);
@@ -46,7 +48,7 @@ namespace bot::twitch {
           &app_client_secret;
       std::string app_token;
       unsigned int app_token_expiration, app_token_acquisition;
-      std::string websocket_session_id;
+      std::string websocket_session_id, websocket_url;
 
       std::unordered_map<unsigned int, std::optional<std::string>>
           joined_channels;

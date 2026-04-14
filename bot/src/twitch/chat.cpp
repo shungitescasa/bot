@@ -1,6 +1,8 @@
 #include <algorithm>
 #include <ctime>
 #include <optional>
+
+#include "ixwebsocket/IXWebSocket.h"
 #ifdef USE_EVENTSUB_CONNECTION
 #include <stdexcept>
 #include <string>
@@ -153,8 +155,6 @@ namespace bot::twitch {
     log::info("TwitchChatClient", fmt::format("Joining {}...", room.id));
     this->joined_channels.insert_or_assign(room.id, std::nullopt);
 
-    using namespace nlohmann::literals;
-
     nlohmann::json j = {{"type", "channel.chat.message"},
                         {"version", "1"},
                         {"condition",
@@ -231,6 +231,16 @@ namespace bot::twitch {
     if (message_type == "session_welcome") {
       this->websocket_session_id = j["payload"]["session"]["id"];
       this->onConnect();
+    } else if (message_type == "session_reconnect") {
+      if (this->read_websocket.getReadyState() == ix::ReadyState::Open) {
+        this->read_websocket.close();
+      }
+
+      auto s = j["payload"]["session"];
+
+      this->read_websocket.setUrl(s["reconnect_url"]);
+      this->websocket_session_id = s["id"];
+      this->read_websocket.start();
     } else if (message_type == "notification") {
       std::string subtype = j["metadata"]["subscription_type"];
 
