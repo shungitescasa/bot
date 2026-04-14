@@ -208,7 +208,7 @@ namespace bot::command {
 
     parts.erase(parts.begin());
 
-    command_id = (*cmd)->get_name();
+    // command_id = (*cmd)->get_name();
 
     Request req{command_id, std::nullopt, std::nullopt, irc_message, requester};
 

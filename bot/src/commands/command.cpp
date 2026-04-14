@@ -75,8 +75,14 @@ namespace bot {
       lua::library::add_chat_libraries(this->luaState, request, bundle);
 
       auto command = std::find_if(
-          this->commands.begin(), this->commands.end(),
-          [&](const auto &x) { return x->get_name() == request.command_id; });
+          this->commands.begin(), this->commands.end(), [&](const auto &x) {
+            auto aliases = x->get_aliases();
+            return x->get_name() == request.command_id ||
+                   std::any_of(aliases.begin(), aliases.end(),
+                               [&](const std::string &alias) {
+                                 return alias == request.command_id;
+                               });
+          });
 
       if (command == this->commands.end()) {
         return std::nullopt;
