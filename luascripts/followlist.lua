@@ -17,16 +17,13 @@ return {
 	description = [[
 Read the user's follows as plain text.
 After collecting the list of chatters, the bot returns a link to the paste from
-[the Pastebin-like service](https://tnd.quest).
+the Pastebin-like service.
 
 # Syntax
 
 `!followlist <username>`
 
 + `<username>` - Twitch username *(optional)*.
-
-# Responses
-+ `https://tnd.quest/XXXXX.txt`
 ]],
 	delay_sec = 5,
 	options = {},
@@ -55,21 +52,19 @@ After collecting the list of chatters, the bot returns a link to the paste from
 		end
 
 		response =
-			net_get_with_headers("https://tools.2807.eu/api/getfollows/" .. username, { Accept = "application/json" })
+			net_get_with_headers("https://tools.alright.party/" .. username .. "/follows", { Accept = "application/json" })
 
 		if response.code ~= 200 then
 			return l10n_custom_formatted_line_request(request, lines, "external_api_error", { username, response.code })
 		end
 
-		follows = json_parse(response.text)
+		followingList = json_parse(response.text)
 
-		body = #follows .. " channels\r\n---------------------\r\n\r\n"
+		body = followingList.totalCount .. " channels\r\n---------------------\r\n\r\n"
 
-		for i = 1, #follows, 1 do
-			follow = follows[i]
-			follow_timestamp = time_parse(follow.followedAt, "%Y-%m-%dT%H:%M:%SZ")
-			follow_diff = time_humanize(time_current() - follow_timestamp)
-			body = body .. follow.login .. " (" .. follow_diff .. " ago)" .. "\r\n"
+		for i = 1, #followingList.follows, 1 do
+			follow = followingList.follows[i]
+			body = body .. follow.login .. "\r\n"
 		end
 
 		time = time_format(time_current(), "%d.%m.%Y %H:%M:%S %z")
