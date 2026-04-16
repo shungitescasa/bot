@@ -189,10 +189,18 @@ int main(int argc, char *argv[]) {
 
   twitch_client.on_connect([&twitch_client, &id_rows]() {
     bot::log::info("Main", "Joining channels...");
+
+    int i = 1;
     twitch_client.join(twitch_client.get_me());
+
     for (const bot::db::DatabaseRow &row : id_rows) {
       twitch_client.join({row.at("alias_name"), std::stoi(row.at("alias_id"))});
       std::this_thread::sleep_for(std::chrono::milliseconds(500));
+      i++;
+      if (i >= 18) {
+        std::this_thread::sleep_for(std::chrono::seconds(15));
+        i = 0;
+      }
     }
   });
 
