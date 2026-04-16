@@ -104,7 +104,7 @@ The `!event` command gives the ability to manage events.
 
 <h1 id="event-types">Event types</h1>
 
-## Twitch livestreams
+## Twitch
 
 + live
 + offline
@@ -114,8 +114,12 @@ The `!event` command gives the ability to manage events.
 + game
 + + Placeholders: `{new}` - new game, `{old}` - old game
 + + Message example: This streamer is now playing {new} (previously, he played {old})
++ first_message
++ + Placeholders: `{channel_name}` - channel name, `{message}` - user's first message, `{sender_name}` - username
++ + Message example: {sender_name} has just said their first words in {channel_name}: {message}
++ + Target example: `forsen:first_message`
 
-## Kick livestreams
+## Kick
 + kick_live
 + kick_offline
 + kick_title

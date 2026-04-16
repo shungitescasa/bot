@@ -36,7 +36,9 @@ namespace bot::schemas {
       return EventType::BTTV_EMOTE_UPDATE;
     }
 #endif
-    else if (type == "rss") {
+    else if (type == "first_message") {
+      return EventType::FIRSTMSG;
+    } else if (type == "rss") {
       return EventType::RSS;
     } else if (type == "twitter") {
       return EventType::TWITTER;
@@ -82,7 +84,9 @@ namespace bot::schemas {
       return "bttv_updated_emote";
     }
 #endif
-    else if (type == RSS) {
+    else if (type == FIRSTMSG) {
+      return "first_message";
+    } else if (type == RSS) {
       return "rss";
     } else if (type == TWITTER) {
       return "twitter";

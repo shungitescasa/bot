@@ -27,6 +27,8 @@ namespace bot {
         std::string display_name;
         int id;
 
+        bool is_first_message = false;
+
         std::map<std::string, std::string> badges;
 
         // More fields will be here
@@ -70,6 +72,10 @@ namespace bot {
              utils::string::split_text(msg.tags.at("badges"), ',')) {
           auto b = utils::string::split_text_n(badge, "/", 1);
           sender.badges.insert_or_assign(b[0], b[1]);
+        }
+
+        if (msg.tags.count("first-msg")) {
+          sender.is_first_message = std::stoi(msg.tags.at("first-msg"));
         }
 
         source.login = msg.params.front();

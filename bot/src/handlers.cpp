@@ -23,6 +23,9 @@
 #include "logger.hpp"
 #include "nlohmann/json.hpp"
 #include "schemas/channel.hpp"
+#include "schemas/event.hpp"
+#include "schemas/stream.hpp"
+#include "utils/events.hpp"
 #include "utils/string.hpp"
 
 namespace bot::handlers {
@@ -142,6 +145,40 @@ namespace bot::handlers {
     return output;
   }
 
+  void handle_first_message(
+      const InstanceBundle &bundle, const command::Requester &requester,
+      const irc::Message<irc::MessageType::Privmsg> &message) {
+    std::vector<schemas::Event> events = utils::get_events(
+        db::create_connection(bundle.configuration), bundle.helix_client,
+        bundle.irc_client.get_me().id, schemas::EventType::FIRSTMSG,
+        requester.channel.get_alias_name());
+
+    for (schemas::Event event : events) {
+      std::string base = event.message;
+      if (!event.subs.empty()) {
+        base.append(" · ");
+      }
+
+      int pos = base.find("{channel_name}");
+      if (pos != std::string::npos)
+        base.replace(pos, 14, event.channel_alias_name);
+
+      pos = base.find("{message}");
+      if (pos != std::string::npos) base.replace(pos, 9, message.message);
+
+      pos = base.find("{sender_name}");
+      if (pos != std::string::npos) base.replace(pos, 13, message.sender.login);
+
+      std::vector<std::string> msgs =
+          utils::string::separate_by_length(base, event.subs, "@", " ", 500);
+
+      for (const std::string &msg : msgs) {
+        bundle.irc_client.say(
+            {event.channel_alias_name, event.channel_alias_id}, base + msg);
+      }
+    }
+  }
+
   void handle_private_message(
       const InstanceBundle &bundle, command::CommandLoader &command_loader,
       const irc::Message<irc::MessageType::Privmsg> &message) {
@@ -154,6 +191,10 @@ namespace bot::handlers {
     if (!requester.has_value() ||
         requester->user.get_alias_name() == bundle.irc_client.get_me().login) {
       return;
+    }
+
+    if (message.sender.is_first_message) {
+      handle_first_message(bundle, *requester, message);
     }
 
     std::optional<command::Response> response =

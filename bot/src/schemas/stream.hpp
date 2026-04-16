@@ -21,6 +21,7 @@ namespace bot::schemas {
     BTTV_EMOTE_DELETE,
     BTTV_EMOTE_UPDATE,
 #endif
+    FIRSTMSG = 30,
     GITHUB = 40,
     RSS = 45,
     TWITTER = 46,
