@@ -134,8 +134,8 @@ namespace bot {
         irc_cfg.host = value;
       } else if (key == "irc.port") {
         irc_cfg.port = value;
-      } else if (key == "irc.password") {
-        irc_cfg.password = value;
+      } else if (key == "irc.http_password") {
+        irc_cfg.http_password = value;
       }
 
       else if (key == "twitch.app_client_id") {

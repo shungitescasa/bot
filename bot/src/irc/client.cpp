@@ -18,17 +18,20 @@
 
 using namespace bot::irc;
 
-Client::Client(std::string host, std::string port,
-               std::optional<std::string> password, std::string client_id,
-               std::string token) {
+Client::Client(std::string host, std::string port, std::string client_id,
+               std::string token, std::optional<std::string> http_password) {
   this->client_id = client_id;
   this->token = token;
 
   this->host = host;
   this->port = port;
-  this->password = password.has_value() ? "oauth:" + *password : token;
+  this->password = "oauth:" + token;
 
   this->websocket.setUrl(this->host + ":" + this->port);
+
+  if (http_password.has_value()) {
+    this->websocket.setExtraHeaders({{"Authorization", http_password.value()}});
+  }
 
   // getting token owner
   cpr::Response response = cpr::Get(

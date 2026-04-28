@@ -70,9 +70,9 @@ int main(int argc, char *argv[]) {
 #ifdef USE_EVENTSUB_CONNECTION
   bot::twitch::TwitchChatClient twitch_client(cfg.twitch);
 #else
-  bot::irc::Client twitch_client(cfg.irc.host, cfg.irc.port, cfg.irc.password,
+  bot::irc::Client twitch_client(cfg.irc.host, cfg.irc.port,
                                  cfg.twitch.user_client_id,
-                                 cfg.twitch.user_token);
+                                 cfg.twitch.user_token, cfg.irc.http_password);
 #endif
   bot::command::CommandLoader command_loader;
   command_loader.load_lua_directory("luascripts");

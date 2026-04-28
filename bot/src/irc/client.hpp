@@ -13,9 +13,8 @@ namespace bot {
   namespace irc {
     class Client : public chat::ChatClient, public chat::EventChatClient {
       public:
-        Client(std::string host, std::string port,
-               std::optional<std::string> password, std::string client_id,
-               std::string token);
+        Client(std::string host, std::string port, std::string client_id,
+               std::string token, std::optional<std::string> http_password);
         ~Client() = default;
 
         void run();
