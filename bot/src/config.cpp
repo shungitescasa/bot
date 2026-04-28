@@ -76,6 +76,11 @@ namespace bot {
     } else {
       url["tinyemotes"] = sol::lua_nil;
     }
+    if (this->url.mogchart.has_value()) {
+      url["mogchart"] = this->url.mogchart.value();
+    } else {
+      url["mogchart"] = sol::lua_nil;
+    }
     o["url"] = url;
 
     sol::table rss = luaState->create_table();
@@ -199,6 +204,8 @@ namespace bot {
         url_cfg.stats = value;
       } else if (key == "url.tinyemotes") {
         url_cfg.tinyemotes = value;
+      } else if (key == "url.mogchart") {
+        url_cfg.mogchart = value;
       }
 
       else if (key == "rss.timeout") {
