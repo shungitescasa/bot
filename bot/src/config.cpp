@@ -132,8 +132,6 @@ namespace bot {
 
       if (key == "irc.host") {
         irc_cfg.host = value;
-      } else if (key == "irc.port") {
-        irc_cfg.port = value;
       } else if (key == "irc.http_password") {
         irc_cfg.http_password = value;
       }

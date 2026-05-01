@@ -70,8 +70,7 @@ int main(int argc, char *argv[]) {
 #ifdef USE_EVENTSUB_CONNECTION
   bot::twitch::TwitchChatClient twitch_client(cfg.twitch);
 #else
-  bot::irc::Client twitch_client(cfg.irc.host, cfg.irc.port,
-                                 cfg.twitch.user_client_id,
+  bot::irc::Client twitch_client(cfg.irc.host, cfg.twitch.user_client_id,
                                  cfg.twitch.user_token, cfg.irc.http_password);
 #endif
   bot::command::CommandLoader command_loader;

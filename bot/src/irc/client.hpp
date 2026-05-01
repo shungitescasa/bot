@@ -13,8 +13,8 @@ namespace bot {
   namespace irc {
     class Client : public chat::ChatClient, public chat::EventChatClient {
       public:
-        Client(std::string host, std::string port, std::string client_id,
-               std::string token, std::optional<std::string> http_password);
+        Client(std::string host, std::string client_id, std::string token,
+               std::optional<std::string> http_password);
         ~Client() = default;
 
         void run();
@@ -30,7 +30,7 @@ namespace bot {
 
         std::string client_id, token;
 
-        std::string host, port, password;
+        std::string host, password;
 
         ix::WebSocket websocket;
 
