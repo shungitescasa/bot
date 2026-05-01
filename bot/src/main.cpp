@@ -89,8 +89,8 @@ int main(int argc, char *argv[]) {
   emotespp::SevenTVWebsocketClient seventv_emote_listener;
   emotespp::SevenTVAPIClient seventv_api_client;
 
-  if (cfg.emote.stv_api_key.has_value()) {
-    seventv_api_client.set_authorization_key(cfg.emote.stv_api_key.value());
+  if (cfg.tokens.seventv_token.has_value()) {
+    seventv_api_client.set_authorization_key(cfg.tokens.seventv_token.value());
   }
 
   std::unique_ptr<bot::db::BaseDatabase> conn = bot::db::create_connection(cfg);

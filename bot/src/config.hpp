@@ -39,10 +39,6 @@ namespace bot {
       std::string client_id, client_secret;
   };
 
-  struct EmoteConfiguration {
-      std::optional<std::string> stv_api_key;
-  };
-
   struct CommandConfiguration {
       bool join_allowed = true;
       bool join_allow_from_other_chats = false;
@@ -65,6 +61,7 @@ namespace bot {
 
   struct TokenConfiguration {
       std::optional<std::string> github_token = std::nullopt;
+      std::optional<std::string> seventv_token = std::nullopt;
   };
 
   struct RssConfiguration {
@@ -80,7 +77,6 @@ namespace bot {
   struct Configuration {
       IRCConfiguration irc;
       TwitchConfiguration twitch;
-      EmoteConfiguration emote;
       KickCredentialsConfiguration kick_credentials;
       DatabaseConfiguration database;
       CommandConfiguration commands;
