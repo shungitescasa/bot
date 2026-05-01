@@ -32,7 +32,7 @@ set_target_properties(
 # BetterTTV Emote support
 set(BUILD_BETTERTTV OFF BOOL "Enable BetterTTV emotes")
 if (BUILD_BETTERTTV)
-  message("-- Bulding BetterTTV parts")
+  message("-- Building BetterTTV parts")
   target_compile_definitions(Bot PRIVATE BUILD_BETTERTTV=1)
 endif()
 
@@ -88,6 +88,9 @@ else()
 endif()
 
 # Getting libraries
+
+# boost
+find_package(Boost REQUIRED COMPONENTS url)
 
 # json
 FetchContent_Declare(
@@ -155,6 +158,7 @@ target_link_libraries(Bot PRIVATE
     emotespp
     pugixml
     fmt
+    Boost::url
 )
 
 if (NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/bin")

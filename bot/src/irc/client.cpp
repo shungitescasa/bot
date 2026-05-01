@@ -13,6 +13,7 @@
 #include "cpr/api.h"
 #include "cpr/cprtypes.h"
 #include "cpr/response.h"
+#include "ixwebsocket/IXWebSocketHttpHeaders.h"
 #include "message.hpp"
 #include "nlohmann/json.hpp"
 
@@ -22,15 +23,33 @@ Client::Client(std::string host, std::string client_id, std::string token,
                std::optional<std::string> http_password) {
   this->client_id = client_id;
   this->token = token;
-
-  this->host = host;
   this->password = "oauth:" + token;
 
-  this->websocket.setUrl(this->host);
+  boost::urls::url_view u(host);
+  std::string port, query;
+  if (u.has_port()) {
+    port = ":" + std::string(u.port());
+  }
+
+  if (u.has_query()) {
+    query = "?" + std::string(u.query());
+  }
+
+  std::string origin_host =
+      std::string(u.scheme()) + "://" + std::string(u.host()) + port;
+  std::string socket_host = origin_host + std::string(u.path()) + query;
+
+  this->websocket.setUrl(socket_host);
+
+  ix::WebSocketHttpHeaders headers;
 
   if (http_password.has_value()) {
-    this->websocket.setExtraHeaders({{"Authorization", http_password.value()}});
+    headers["Authorization"] = http_password.value();
   }
+
+  headers["Origin"] = origin_host;
+
+  this->websocket.setExtraHeaders(headers);
 
   // getting token owner
   cpr::Response response = cpr::Get(
@@ -129,6 +148,10 @@ void Client::run() {
               this->raw("JOIN #" + x);
             }
 
+            break;
+          }
+          case ix::WebSocketMessageType::Error: {
+            log::error("IRC", msg->errorInfo.reason);
             break;
           }
           default: {

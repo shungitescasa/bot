@@ -2,6 +2,7 @@
 
 #include <ixwebsocket/IXWebSocket.h>
 
+#include <boost/url.hpp>
 #include <optional>
 #include <string>
 #include <vector>
@@ -30,7 +31,8 @@ namespace bot {
 
         std::string client_id, token;
 
-        std::string host, password;
+        boost::urls::url_view host;
+        std::string password;
 
         ix::WebSocket websocket;
 
