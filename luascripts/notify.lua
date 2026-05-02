@@ -31,7 +31,7 @@ local function parse_target(value)
 
         -- kick
         if data.type >= 4 and data.type <= 7 then
-            users = kick_get_channels(data.target)
+            users = kick_get_channels({ data.target })
         else
             users = twitch_get_users({ logins = { data.target } })
         end

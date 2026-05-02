@@ -908,9 +908,10 @@ namespace bot::command::lua {
     void add_kick_library(std::shared_ptr<sol::state> state,
                           const InstanceBundle &bundle) {
       state->set_function(
-          "kick_get_channels", [state, &bundle](const std::string &slug) {
+          "kick_get_channels",
+          [state, &bundle](const std::vector<std::string> &slugs) {
             std::vector<api::KickChannel> channels =
-                bundle.kick_api_client.get_channels(slug);
+                bundle.kick_api_client.get_channels(slugs);
 
             sol::table o = state->create_table();
 

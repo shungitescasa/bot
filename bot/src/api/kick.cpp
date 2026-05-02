@@ -47,9 +47,16 @@ namespace bot::api {
       return {};
     }
 
+    std::string query;
+    for (int i = 0; i < ids.size(); i++) {
+      query += "broadcaster_user_id=" + std::to_string(ids.at(i));
+      if (i + 1 < ids.size()) {
+        query += "&";
+      }
+    }
+
     cpr::Response r = cpr::Get(
-        cpr::Url{this->base_url + "/public/v1/channels?broadcaster_user_id=" +
-                 utils::string::str(ids.begin(), ids.end(), ',')},
+        cpr::Url{this->base_url + "/public/v1/channels?" + query},
         cpr::Header{{"Authorization", "Bearer " + this->authorization_key}});
 
     if (r.status_code != 200) {
@@ -63,18 +70,26 @@ namespace bot::api {
   }
 
   std::vector<KickChannel> KickAPIClient::get_channels(
-      const std::string &slug) const {
+      const std::vector<std::string> &slugs) const {
     if (this->authorization_key.empty()) {
       log::error("api/kick", "You must be authorized before using Kick API");
       return {};
     }
 
-    if (slug.empty()) {
+    if (slugs.empty()) {
       return {};
     }
 
+    std::string query;
+    for (int i = 0; i < slugs.size(); i++) {
+      query += "slug=" + slugs.at(i);
+      if (i + 1 < slugs.size()) {
+        query += "&";
+      }
+    }
+
     cpr::Response r = cpr::Get(
-        cpr::Url{this->base_url + "/public/v1/channels?slug=" + slug},
+        cpr::Url{this->base_url + "/public/v1/channels?" + query},
         cpr::Header{{"Authorization", "Bearer " + this->authorization_key}});
 
     if (r.status_code != 200) {

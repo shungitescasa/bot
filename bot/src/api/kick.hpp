@@ -23,7 +23,8 @@ namespace bot::api {
       ~KickAPIClient() = default;
 
       std::vector<KickChannel> get_channels(const std::vector<int> &ids) const;
-      std::vector<KickChannel> get_channels(const std::string &slug) const;
+      std::vector<KickChannel> get_channels(
+          const std::vector<std::string> &slugs) const;
 
       void refresh_token_thread();
 
