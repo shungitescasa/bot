@@ -68,7 +68,9 @@ namespace bot {
 
     template <MessageType T>
     std::optional<Message<T>> parse_message(const IRCMessage &msg) {
-      if (T == MessageType::Privmsg && msg.command == "PRIVMSG") {
+      if constexpr (T == MessageType::Privmsg) {
+        if (msg.command != "PRIVMSG") return std::nullopt;
+
         MessageSender sender;
         MessageSource source;
 
@@ -86,7 +88,7 @@ namespace bot {
         }
 
         source.login = msg.params.front();
-        if (source.login[0] == '#') {
+        if (!source.login.empty() && source.login[0] == '#') {
           source.login = source.login.substr(1);
         }
         source.id = std::stoi(msg.tags.at("room-id"));
@@ -99,7 +101,7 @@ namespace bot {
             msg.tags.count("reply-parent-user-login") &&
             msg.tags.count("reply-parent-user-id") &&
             msg.tags.count("reply-parent-display-name")) {
-          reply = (MessageReply){};
+          reply = MessageReply{};
           reply->id = msg.tags.at("reply-parent-msg-id");
           reply->login = msg.tags.at("reply-parent-user-login");
           reply->display_name = msg.tags.at("reply-parent-display-name");
@@ -123,10 +125,12 @@ namespace bot {
         return message;
       }
 
-      else if (T == MessageType::Notice && msg.command == "NOTICE") {
+      if constexpr (T == MessageType::Notice) {
+        if (msg.command != "NOTICE") return std::nullopt;
+
         Message<MessageType::Notice> message;
 
-        if (msg.params.size() > 0) {
+        if (!msg.params.empty()) {
           message.room_name = msg.params.at(0);
         }
 
