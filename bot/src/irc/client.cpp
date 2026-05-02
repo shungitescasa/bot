@@ -120,6 +120,16 @@ void Client::run() {
                   this->raw("PONG" + text);
                   break;
                 }
+                case MessageType::Notice: {
+                  std::optional<Message<MessageType::Notice>> message =
+                      parse_message<MessageType::Notice>(*m);
+
+                  if (message.has_value()) {
+                    std::thread(onNotice, message.value()).detach();
+                  }
+
+                  break;
+                }
                 case MessageType::Connect:
                   std::thread(onConnect).detach();
                   break;

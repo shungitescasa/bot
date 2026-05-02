@@ -31,8 +31,14 @@ namespace bot::chat {
         this->onPrivmsg = std::move(fn);
       }
 
+      void on_notice(
+          std::function<void(irc::Message<irc::Notice> message)> fn) {
+        this->onNotice = std::move(fn);
+      }
+
     protected:
       typename irc::MessageHandler<irc::MessageType::Privmsg>::fn onPrivmsg;
       typename irc::MessageHandler<irc::MessageType::Connect>::fn onConnect;
+      typename irc::MessageHandler<irc::MessageType::Notice>::fn onNotice;
   };
 }

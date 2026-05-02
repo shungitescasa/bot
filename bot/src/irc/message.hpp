@@ -59,6 +59,13 @@ namespace bot {
         std::string message;
     };
 
+    template <>
+    struct Message<MessageType::Notice> {
+        std::optional<std::string> reason_id;
+        std::string room_name;
+        std::string reason;
+    };
+
     template <MessageType T>
     std::optional<Message<T>> parse_message(const IRCMessage &msg) {
       if (T == MessageType::Privmsg && msg.command == "PRIVMSG") {
@@ -116,6 +123,24 @@ namespace bot {
         return message;
       }
 
+      else if (T == MessageType::Notice && msg.command == "NOTICE") {
+        Message<MessageType::Notice> message;
+
+        if (msg.params.size() > 0) {
+          message.room_name = msg.params.at(0);
+        }
+
+        if (msg.params.size() > 1) {
+          message.reason = msg.params.at(1);
+        }
+
+        if (msg.tags.count("msg-id")) {
+          message.reason_id = msg.tags.at("msg-id");
+        }
+
+        return message;
+      }
+
       return std::nullopt;
     }
 
@@ -125,6 +150,11 @@ namespace bot {
     template <>
     struct MessageHandler<MessageType::Privmsg> {
         using fn = std::function<void(Message<Privmsg> message)>;
+    };
+
+    template <>
+    struct MessageHandler<MessageType::Notice> {
+        using fn = std::function<void(Message<Notice> message)>;
     };
 
     template <>

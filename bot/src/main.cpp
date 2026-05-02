@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <chrono>
 #include <emotespp/seventv.hpp>
 #include <map>
@@ -15,6 +16,7 @@
 #include "config.hpp"
 #include "database.hpp"
 #include "emotes.hpp"
+#include "fmt/format.h"
 #include "github.hpp"
 #include "handlers.hpp"
 #include "irc/message.hpp"
@@ -209,6 +211,47 @@ int main(int argc, char *argv[]) {
             twitch_client, helix_client,   kick_api_client,   localization,
             cfg,           command_loader, seventv_api_client};
         bot::handlers::handle_private_message(bundle, command_loader, message);
+      });
+
+  const std::vector<std::string> optout_msgids = {
+      "msg_banned", "msg_banned_phone_number_alias", "msg_channel_blocked",
+      "msg_channel_suspended", "tos_ban"};
+  twitch_client.on_notice(
+      [&](const bot::irc::Message<bot::irc::MessageType::Notice> &message) {
+        if (!message.reason_id.has_value()) {
+          return;
+        }
+
+        std::string room_name = message.room_name;
+        if (room_name[0] == '#') {
+          room_name = room_name.substr(1);
+        }
+
+        auto users = helix_client.get_users({room_name});
+        if (users.empty()) {
+          return;
+        }
+
+        auto user = users.at(0);
+
+        std::unique_ptr<bot::db::BaseDatabase> conn =
+            bot::db::create_connection(cfg);
+
+        if (std::any_of(optout_msgids.begin(), optout_msgids.end(),
+                        [&](const std::string &x) {
+                          return x == message.reason_id.value();
+                        })) {
+          bot::log::info(
+              "Bot", fmt::format("Parting from #{} (ID {})... ({})", user.login,
+                                 user.id, *message.reason_id));
+          conn->exec(
+              "UPDATE channels SET opted_out_at = UTC_TIMESTAMP() WHERE "
+              "alias_id = $1",
+              {std::to_string(user.id)});
+          twitch_client.part({user.login, user.id});
+        }
+
+        conn->close();
       });
 
   twitch_client.run();
