@@ -77,10 +77,13 @@ namespace bot {
         sender.login = msg.nick;
         sender.display_name = msg.tags.at("display-name");
         sender.id = std::stoi(msg.tags.at("user-id"));
-        for (const std::string &badge :
-             utils::string::split_text(msg.tags.at("badges"), ',')) {
-          auto b = utils::string::split_text_n(badge, "/", 1);
-          sender.badges.insert_or_assign(b[0], b[1]);
+
+        if (msg.tags.count("badges")) {
+          for (const std::string &badge :
+               utils::string::split_text(msg.tags.at("badges"), ',')) {
+            auto b = utils::string::split_text_n(badge, "/", 1);
+            sender.badges.insert_or_assign(b[0], b[1]);
+          }
         }
 
         if (msg.tags.count("first-msg")) {
