@@ -1,27 +1,31 @@
+#ifdef USE_EVENTSUB_CONNECTION
+#include "twitch/chat.hpp"
+
 #include <algorithm>
 #include <ctime>
 #include <optional>
-
-#include "ixwebsocket/IXWebSocket.h"
-#ifdef USE_EVENTSUB_CONNECTION
 #include <stdexcept>
 #include <string>
 
+#include "config.hpp"
 #include "cpr/cpr.h"
 #include "fmt/format.h"
 #include "irc/message.hpp"
+#include "ixwebsocket/IXWebSocket.h"
 #include "ixwebsocket/IXWebSocketMessage.h"
 #include "ixwebsocket/IXWebSocketMessageType.h"
 #include "logger.hpp"
 #include "nlohmann/json.hpp"
-#include "twitch/chat.hpp"
 
 namespace bot::twitch {
   void TwitchChatClient::authorize_app() {
-    cpr::Response response = cpr::Post(cpr::Url{fmt::format(
-        "https://id.twitch.tv/oauth2/"
-        "token?grant_type=client_credentials&client_id={}&client_secret={}",
-        this->app_client_id, this->app_client_secret)});
+    Configuration &cfg = Configuration::get_instance();
+    cpr::Response response = cpr::Post(
+        cpr::Url{fmt::format(
+            "https://id.twitch.tv/oauth2/"
+            "token?grant_type=client_credentials&client_id={}&client_secret={}",
+            this->app_client_id, this->app_client_secret)},
+        cpr::Header{{"User-Agent", cfg.url.user_agent}});
 
     if (response.status_code != 200) {
       throw std::runtime_error(fmt::format("Failed to get app access token: {}",
@@ -68,9 +72,11 @@ namespace bot::twitch {
   }
 
   bool TwitchChatClient::validate_token() {
+    Configuration &cfg = Configuration::get_instance();
     cpr::Response response =
         cpr::Get(cpr::Url{"https://id.twitch.tv/oauth2/validate"},
-                 cpr::Header{{"Authorization", "OAuth " + this->user_token}});
+                 cpr::Header{{"Authorization", "OAuth " + this->user_token},
+                             {"User-Agent", cfg.url.user_agent}});
 
     if (response.status_code != 200) return false;
 
@@ -100,11 +106,13 @@ namespace bot::twitch {
                         {"sender_id", this->user_id},
                         {"message", message}};
 
+    Configuration &cfg = Configuration::get_instance();
     cpr::Response response =
         cpr::Post(cpr::Url{"https://api.twitch.tv/helix/chat/messages"},
                   cpr::Header{{"Authorization", "Bearer " + this->app_token},
                               {"Client-Id", this->app_client_id},
-                              {"Content-Type", "application/json"}},
+                              {"Content-Type", "application/json"},
+                              {"User-Agent", cfg.url.user_agent}},
                   cpr::Body{j.dump()});
 
     if (response.status_code != 200) {
@@ -164,11 +172,14 @@ namespace bot::twitch {
                          {{"method", "websocket"},
                           {"session_id", this->websocket_session_id}}}};
 
+    Configuration &cfg = Configuration::get_instance();
+
     cpr::Response response = cpr::Post(
         cpr::Url{"https://api.twitch.tv/helix/eventsub/subscriptions"},
         cpr::Header{{"Authorization", "Bearer " + this->user_token},
                     {"Client-Id", this->user_client_id},
-                    {"Content-Type", "application/json"}},
+                    {"Content-Type", "application/json"},
+                    {"User-Agent", cfg.url.user_agent}},
         cpr::Body{j.dump()});
 
     if (response.status_code != 202) {

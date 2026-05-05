@@ -106,10 +106,10 @@ namespace bot {
       cpr::Response response = cpr::Get(
           cpr::Url{"https://api.github.com/repos/" + id + "/commits"},
           cpr::Header{
-              {"Authorization", "Bearer " + cfg.tokens.github_token.value()}},
-          cpr::Header{{"Accept", "application/vnd.github+json"},
-                      {"X-GitHub-Api-Version", "2022-11-28"},
-                      {"User-Agent", "https://github.com/ilotterytea/bot"}});
+              {"Authorization", "Bearer " + cfg.tokens.github_token.value()},
+              {"Accept", "application/vnd.github+json"},
+              {"X-GitHub-Api-Version", "2022-11-28"},
+              {"User-Agent", cfg.url.user_agent}});
 
       if (response.status_code != 200) {
         log::error("Github Listener", "Got HTTP status " +

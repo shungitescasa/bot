@@ -165,10 +165,9 @@ namespace bot::command::lua {
                                                 "text/x-lua; charset=utf-8"};
 
           cpr::Response response = cpr::Get(
-              cpr::Url{url},
-              cpr::Header{
-                  {"Accept", utils::string::join_vector(mimeTypes, ',')},
-                  {"User-Agent", "https://github.com/ilotterytea/bot"}});
+              cpr::Url{url}, cpr::Header{{"Accept", utils::string::join_vector(
+                                                        mimeTypes, ',')},
+                                         {"User-Agent", cfg.url.user_agent}});
 
           if (response.status_code != 200) {
             throw ResponseException<ResponseError::EXTERNAL_API_ERROR>(

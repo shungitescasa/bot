@@ -6,6 +6,7 @@
 #include <thread>
 #include <vector>
 
+#include "config.hpp"
 #include "cpr/api.h"
 #include "cpr/cprtypes.h"
 #include "cpr/response.h"
@@ -55,9 +56,12 @@ namespace bot::api {
       }
     }
 
+    Configuration &cfg = Configuration::get_instance();
+
     cpr::Response r = cpr::Get(
         cpr::Url{this->base_url + "/public/v1/channels?" + query},
-        cpr::Header{{"Authorization", "Bearer " + this->authorization_key}});
+        cpr::Header{{"Authorization", "Bearer " + this->authorization_key},
+                    {"User-Agent", cfg.url.user_agent}});
 
     if (r.status_code != 200) {
       log::error("api/kick", "Failed to get Kick channels. Status code: " +
@@ -88,9 +92,12 @@ namespace bot::api {
       }
     }
 
+    Configuration &cfg = Configuration::get_instance();
+
     cpr::Response r = cpr::Get(
         cpr::Url{this->base_url + "/public/v1/channels?" + query},
-        cpr::Header{{"Authorization", "Bearer " + this->authorization_key}});
+        cpr::Header{{"Authorization", "Bearer " + this->authorization_key},
+                    {"User-Agent", cfg.url.user_agent}});
 
     if (r.status_code != 200) {
       log::error("api/kick", "Failed to get Kick channels. Status code: " +
@@ -103,10 +110,12 @@ namespace bot::api {
   }
 
   void KickAPIClient::authorize() {
+    Configuration &cfg = Configuration::get_instance();
     cpr::Response r = cpr::Post(
         cpr::Url{"https://id.kick.com/oauth/"
                  "token?grant_type=client_credentials&client_id=" +
-                 this->client_id + "&client_secret=" + this->client_secret});
+                 this->client_id + "&client_secret=" + this->client_secret},
+        cpr::Header{{"User-Agent", cfg.url.user_agent}});
 
     if (r.status_code != 200) {
       throw std::runtime_error(

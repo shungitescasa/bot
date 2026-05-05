@@ -238,9 +238,10 @@ namespace bot {
   }
 
   std::optional<RSSChannel> get_rss_channel(const std::string &url) {
+    Configuration &cfg = Configuration::get_instance();
     cpr::Response response =
         cpr::Get(cpr::Url{url}, cpr::Header{{"Accept", "application/xml"},
-                                            {"User-Agent", "Mozilla/5.0"},
+                                            {"User-Agent", cfg.url.user_agent},
                                             {"Cache-Control", "no-cache"},
                                             {"Pragma", "no-cache"}});
 

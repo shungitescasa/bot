@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "../logger.hpp"
+#include "config.hpp"
 #include "cpr/api.h"
 #include "cpr/cprtypes.h"
 #include "cpr/response.h"
@@ -35,6 +36,8 @@ Client::Client(std::string host, std::string client_id, std::string token,
     query = "?" + std::string(u.query());
   }
 
+  Configuration &cfg = Configuration::get_instance();
+
   std::string origin_host =
       std::string(u.scheme()) + "://" + std::string(u.host()) + port;
   std::string socket_host = origin_host + std::string(u.path()) + query;
@@ -48,13 +51,15 @@ Client::Client(std::string host, std::string client_id, std::string token,
   }
 
   headers["Origin"] = origin_host;
+  headers["User-Agent"] = cfg.url.user_agent;
 
   this->websocket.setExtraHeaders(headers);
 
   // getting token owner
   cpr::Response response = cpr::Get(
       cpr::Url{"https://api.twitch.tv/helix/users"}, cpr::Bearer{this->token},
-      cpr::Header{{"Client-Id", this->client_id}});
+      cpr::Header{{"Client-Id", this->client_id},
+                  {"User-Agent", cfg.url.user_agent}});
 
   if (response.status_code != 200) {
     log::warn("IRC", "Failed to get bot username from Twitch API: " +

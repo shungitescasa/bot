@@ -287,7 +287,9 @@ namespace bot::command::lua {
       state->set_function("net_get", [state](const std::string &url) {
         sol::table t = state->create_table();
 
-        cpr::Response response = cpr::Get(cpr::Url{url});
+        Configuration &cfg = Configuration::get_instance();
+        cpr::Response response = cpr::Get(
+            cpr::Url{url}, cpr::Header{{"User-Agent", cfg.url.user_agent}});
 
         t["code"] = response.status_code;
         t["text"] = response.text;
@@ -298,6 +300,7 @@ namespace bot::command::lua {
       state->set_function(
           "net_get_with_headers",
           [state](const std::string &url, const sol::table &headers) {
+            Configuration &cfg = Configuration::get_instance();
             sol::table t = state->create_table();
 
             cpr::Header h{};
@@ -305,6 +308,7 @@ namespace bot::command::lua {
             for (auto &kv : headers) {
               h[kv.first.as<std::string>()] = kv.second.as<std::string>();
             }
+            h["User-Agent"] = cfg.url.user_agent;
 
             cpr::Response response = cpr::Get(cpr::Url{url}, h);
 
@@ -324,7 +328,11 @@ namespace bot::command::lua {
                   {kv.first.as<std::string>(), kv.second.as<std::string>()});
             }
 
-            cpr::Response response = cpr::Post(cpr::Url{url}, multipart);
+            Configuration &cfg = Configuration::get_instance();
+
+            cpr::Response response =
+                cpr::Post(cpr::Url{url}, multipart,
+                          cpr::Header{{"User-Agent", cfg.url.user_agent}});
 
             t["code"] = response.status_code;
             t["text"] = response.text;
@@ -336,6 +344,7 @@ namespace bot::command::lua {
           "net_post_multipart_with_headers",
           [state](const std::string &url, const sol::table &body,
                   const sol::table &headers) {
+            Configuration &cfg = Configuration::get_instance();
             sol::table t = state->create_table();
 
             cpr::Header h{};
@@ -343,6 +352,7 @@ namespace bot::command::lua {
             for (auto &kv : headers) {
               h[kv.first.as<std::string>()] = kv.second.as<std::string>();
             }
+            h["User-Agent"] = cfg.url.user_agent;
 
             cpr::Multipart multipart = {};
             for (auto &kv : body) {

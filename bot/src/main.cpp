@@ -66,6 +66,11 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
+  if (cfg.url.user_agent.empty()) {
+    cfg.url.user_agent = fmt::format(
+        "teabot/{} (+https://github.com/ilotterytea/bot)", BOT_VERSION);
+  }
+
 #ifdef USE_EVENTSUB_CONNECTION
   bot::twitch::TwitchChatClient twitch_client(cfg.twitch);
 #else

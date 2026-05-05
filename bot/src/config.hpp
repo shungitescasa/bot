@@ -57,6 +57,7 @@ namespace bot {
       std::optional<std::string> stats = std::nullopt;
       std::optional<std::string> tinyemotes = std::nullopt;
       std::optional<std::string> mogchart = std::nullopt;
+      std::string user_agent = "";
   };
 
   struct TokenConfiguration {

@@ -187,6 +187,8 @@ namespace bot {
         url.tinyemotes = value;
       } else if (key == "url.mogchart") {
         url.mogchart = value;
+      } else if (key == "url.useragent") {
+        url.user_agent = value;
       }
 
       else if (key == "rss.timeout") {
