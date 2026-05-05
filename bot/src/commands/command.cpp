@@ -93,8 +93,7 @@ namespace bot {
         return std::nullopt;
       }
 
-      std::unique_ptr<db::BaseDatabase> conn =
-          db::create_connection(bundle.configuration);
+      std::unique_ptr<db::BaseDatabase> conn = db::create_connection();
 
       if (request.requester.user_rights.get_level() < schemas::SUPERUSER) {
         db::DatabaseRows actions = conn->exec(

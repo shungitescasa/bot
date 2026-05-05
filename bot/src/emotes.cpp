@@ -61,8 +61,7 @@ namespace bot::emotes {
       return;
     }
 
-    std::unique_ptr<db::BaseDatabase> conn =
-        db::create_connection(bundle.configuration);
+    std::unique_ptr<db::BaseDatabase> conn = db::create_connection();
 
     db::DatabaseRows events = conn->exec(
         "SELECT e.id, e.message, is_massping, c.alias_name AS channel_aname, "
@@ -224,8 +223,7 @@ namespace bot::emotes {
     log::info("emotes/thread", "Started emote thread.");
 
     while (true) {
-      std::unique_ptr<db::BaseDatabase> conn =
-          db::create_connection(bundle->configuration);
+      std::unique_ptr<db::BaseDatabase> conn = db::create_connection();
 
       try {
         check_seventv_emotesets(bundle, conn);

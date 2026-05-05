@@ -18,13 +18,10 @@ namespace bot {
 
   class GithubListener {
     public:
-      GithubListener(const Configuration &configuration,
-                     chat::ChatClient &irc_client,
+      GithubListener(chat::ChatClient &irc_client,
                      const api::twitch::HelixClient &helix_client)
-          : configuration(configuration),
-            irc_client(irc_client),
-            helix_client(helix_client) {};
-      ~GithubListener() {};
+          : irc_client(irc_client), helix_client(helix_client){};
+      ~GithubListener(){};
 
       void run();
 
@@ -39,7 +36,6 @@ namespace bot {
       std::unordered_map<std::string, std::vector<std::string>> commits;
 
       chat::ChatClient &irc_client;
-      const Configuration &configuration;
       const api::twitch::HelixClient &helix_client;
   };
 }

@@ -23,7 +23,8 @@
 
 namespace bot {
   void GithubListener::run() {
-    if (this->configuration.tokens.github_token->empty()) {
+    Configuration &cfg = Configuration::get_instance();
+    if (cfg.tokens.github_token->empty()) {
       log::warn("Github Listener",
                 "Github token (token.github) must be set if you want to listen "
                 "for changes in repositories.");
@@ -60,8 +61,7 @@ namespace bot {
   }
 
   void GithubListener::check_for_listeners() {
-    std::unique_ptr<db::BaseDatabase> conn =
-        db::create_connection(this->configuration);
+    std::unique_ptr<db::BaseDatabase> conn = db::create_connection();
 
     db::DatabaseRows repos =
         conn->exec("SELECT name FROM events WHERE event_type = 40");
@@ -97,15 +97,16 @@ namespace bot {
   }
 
   std::unordered_map<std::string, std::vector<Commit>>
+
   GithubListener::check_new_commits() {
+    Configuration &cfg = Configuration::get_instance();
     std::unordered_map<std::string, std::vector<Commit>> new_commits;
 
     for (const std::string &id : this->ids) {
       cpr::Response response = cpr::Get(
           cpr::Url{"https://api.github.com/repos/" + id + "/commits"},
           cpr::Header{
-              {"Authorization",
-               "Bearer " + this->configuration.tokens.github_token.value()}},
+              {"Authorization", "Bearer " + cfg.tokens.github_token.value()}},
           cpr::Header{{"Accept", "application/vnd.github+json"},
                       {"X-GitHub-Api-Version", "2022-11-28"},
                       {"User-Agent", "https://github.com/ilotterytea/bot"}});
@@ -143,8 +144,7 @@ namespace bot {
 
   void GithubListener::notify_about_commits(
       const std::unordered_map<std::string, std::vector<Commit>> &new_commits) {
-    std::unique_ptr<db::BaseDatabase> conn =
-        db::create_connection(this->configuration);
+    std::unique_ptr<db::BaseDatabase> conn = db::create_connection();
 
     for (const auto &pair : new_commits) {
       // don't notify on startup

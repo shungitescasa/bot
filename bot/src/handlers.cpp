@@ -149,7 +149,7 @@ namespace bot::handlers {
       const InstanceBundle &bundle, const command::Requester &requester,
       const irc::Message<irc::MessageType::Privmsg> &message) {
     std::vector<schemas::Event> events = utils::get_events(
-        db::create_connection(bundle.configuration), bundle.helix_client,
+        db::create_connection(), bundle.helix_client,
         bundle.irc_client.get_me().id, schemas::EventType::FIRSTMSG,
         requester.channel.get_alias_name());
 
@@ -182,11 +182,10 @@ namespace bot::handlers {
   void handle_private_message(
       const InstanceBundle &bundle, command::CommandLoader &command_loader,
       const irc::Message<irc::MessageType::Privmsg> &message) {
-    std::unique_ptr<db::BaseDatabase> conn =
-        db::create_connection(bundle.configuration);
+    std::unique_ptr<db::BaseDatabase> conn = db::create_connection();
 
     std::optional<command::Requester> requester =
-        command::get_requester(message, conn, bundle.configuration);
+        command::get_requester(message, conn);
 
     if (!requester.has_value() ||
         requester->user.get_alias_name() == bundle.irc_client.get_me().login) {
@@ -223,11 +222,9 @@ namespace bot::handlers {
     conn->close();
   }
 
-  void handle_timers(chat::ChatClient *irc_client,
-                     Configuration *configuration) {
+  void handle_timers(chat::ChatClient *irc_client) {
     while (true) {
-      std::unique_ptr<db::BaseDatabase> conn =
-          db::create_connection(*configuration);
+      std::unique_ptr<db::BaseDatabase> conn = db::create_connection();
 
       db::DatabaseRows timers = conn->exec(
           "SELECT id, interval_sec, message, channel_id, last_executed_at FROM "
