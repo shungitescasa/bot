@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include "config.hpp"
 #include "cpr/api.h"
 #include "cpr/bearer.h"
 #include "cpr/cprtypes.h"
@@ -51,9 +52,11 @@ namespace bot::api::twitch {
 
   std::vector<schemas::User> HelixClient::get_users_by_query(
       const std::string &query) const {
+    Configuration &cfg = Configuration::get_instance();
     cpr::Response response = cpr::Get(
         cpr::Url{this->base_url + "/users" + query}, cpr::Bearer{this->token},
-        cpr::Header{{"Client-Id", this->client_id.c_str()}});
+        cpr::Header{{"Client-Id", this->client_id.c_str()},
+                    {"User-Agent", cfg.url.user_agent}});
 
     if (response.status_code != 200) {
       return {};
@@ -74,12 +77,14 @@ namespace bot::api::twitch {
 
   std::vector<schemas::User> HelixClient::get_chatters(
       const int &broadcaster_id, const int &moderator_id) const {
+    Configuration &cfg = Configuration::get_instance();
     cpr::Response response =
         cpr::Get(cpr::Url{this->base_url + "/chat/chatters?broadcaster_id=" +
                           std::to_string(broadcaster_id) +
                           "&moderator_id=" + std::to_string(moderator_id)},
                  cpr::Bearer{this->token},
-                 cpr::Header{{"Client-Id", this->client_id.c_str()}});
+                 cpr::Header{{"Client-Id", this->client_id.c_str()},
+                             {"User-Agent", cfg.url.user_agent}});
 
     if (response.status_code != 200) {
       return {};
@@ -107,10 +112,13 @@ namespace bot::api::twitch {
       s += "&user_id=" + std::to_string(*i);
     }
 
+    Configuration &cfg = Configuration::get_instance();
+
     cpr::Response response =
         cpr::Get(cpr::Url{this->base_url + "/streams?first=100" + s},
                  cpr::Bearer{this->token},
-                 cpr::Header{{"Client-Id", this->client_id.c_str()}});
+                 cpr::Header{{"Client-Id", this->client_id.c_str()},
+                             {"User-Agent", cfg.url.user_agent}});
 
     if (response.status_code != 200) {
       return {};
@@ -139,11 +147,14 @@ namespace bot::api::twitch {
       s.push_back("broadcaster_id=" + std::to_string(id));
     }
 
+    Configuration &cfg = Configuration::get_instance();
+
     cpr::Response response =
         cpr::Get(cpr::Url{this->base_url + "/channels?" +
                           utils::string::join_vector(s, '&')},
                  cpr::Bearer{this->token},
-                 cpr::Header{{"Client-Id", this->client_id.c_str()}});
+                 cpr::Header{{"Client-Id", this->client_id.c_str()},
+                             {"User-Agent", cfg.url.user_agent}});
 
     if (response.status_code != 200) {
       return {};
@@ -164,10 +175,12 @@ namespace bot::api::twitch {
   }
 
   std::vector<Emote> HelixClient::get_global_emotes() const {
+    Configuration &cfg = Configuration::get_instance();
     cpr::Response response =
         cpr::Get(cpr::Url{this->base_url + "/chat/emotes/global"},
                  cpr::Bearer{this->token},
-                 cpr::Header{{"Client-Id", this->client_id.c_str()}});
+                 cpr::Header{{"Client-Id", this->client_id.c_str()},
+                             {"User-Agent", cfg.url.user_agent}});
 
     if (response.status_code != 200) {
       throw std::runtime_error("Failed to get global emotes: " +
@@ -186,11 +199,13 @@ namespace bot::api::twitch {
 
   std::vector<Emote> HelixClient::get_channel_emotes(
       const int &channel_id) const {
+    Configuration &cfg = Configuration::get_instance();
     cpr::Response response = cpr::Get(
         cpr::Url{this->base_url +
                  "/chat/emotes?broadcaster_id=" + std::to_string(channel_id)},
         cpr::Bearer{this->token},
-        cpr::Header{{"Client-Id", this->client_id.c_str()}});
+        cpr::Header{{"Client-Id", this->client_id.c_str()},
+                    {"User-Agent", cfg.url.user_agent}});
 
     if (response.status_code != 200) {
       throw std::runtime_error("Failed to get channel emotes: " +
