@@ -34,14 +34,11 @@
 int main(int argc, char *argv[]) {
   bot::log::info("Main", "Starting up...");
 
-  std::optional<bot::Configuration> o_cfg =
-      bot::parse_configuration_from_file(".env");
+  bot::Configuration &cfg = bot::Configuration::get_instance();
 
-  if (!o_cfg.has_value()) {
+  if (!cfg.load_file(".env")) {
     return 1;
   }
-
-  bot::Configuration cfg = o_cfg.value();
 
   if (cfg.twitch.user_client_id.empty() || cfg.twitch.user_token.empty()) {
     bot::log::error("Main",
@@ -95,7 +92,7 @@ int main(int argc, char *argv[]) {
     seventv_api_client.set_authorization_key(cfg.tokens.seventv_token.value());
   }
 
-  std::unique_ptr<bot::db::BaseDatabase> conn = bot::db::create_connection(cfg);
+  std::unique_ptr<bot::db::BaseDatabase> conn = bot::db::create_connection();
 
   bot::db::DatabaseRows id_rows = conn->exec(
       "SELECT alias_id, alias_name FROM channels WHERE opted_out_at IS NULL "
@@ -107,16 +104,16 @@ int main(int argc, char *argv[]) {
   conn->close();
 
   bot::stream::StreamListenerClient stream_listener_client(
-      helix_client, kick_api_client, twitch_client, cfg);
+      helix_client, kick_api_client, twitch_client);
 
-  bot::GithubListener github_listener(cfg, twitch_client, helix_client);
+  bot::GithubListener github_listener(twitch_client, helix_client);
 
-  bot::emotes::EmoteEventBundle emote_bundle{
-      twitch_client,          helix_client,
+  bot::emotes::EmoteEventBundle emote_bundle{twitch_client, helix_client,
 #ifdef BUILD_BETTERTTV
-      bttv_ws_client,
+                                             bttv_ws_client,
 #endif
-      seventv_emote_listener, seventv_api_client, cfg};
+                                             seventv_emote_listener,
+                                             seventv_api_client};
 
   // ---------------
   // 7TV !!!
@@ -186,7 +183,7 @@ int main(int argc, char *argv[]) {
 
 #endif
 
-  bot::RSSListener rss_listener(twitch_client, helix_client, cfg);
+  bot::RSSListener rss_listener(twitch_client, helix_client);
 
   twitch_client.on_connect([&twitch_client, &id_rows]() {
     bot::log::info("Main", "Joining channels...");
@@ -207,9 +204,9 @@ int main(int argc, char *argv[]) {
 
   twitch_client.on_privmsg(
       [&](const bot::irc::Message<bot::irc::MessageType::Privmsg> &message) {
-        bot::InstanceBundle bundle{
-            twitch_client, helix_client,   kick_api_client,   localization,
-            cfg,           command_loader, seventv_api_client};
+        bot::InstanceBundle bundle{twitch_client,   helix_client,
+                                   kick_api_client, localization,
+                                   command_loader,  seventv_api_client};
         bot::handlers::handle_private_message(bundle, command_loader, message);
       });
 
@@ -235,7 +232,7 @@ int main(int argc, char *argv[]) {
         auto user = users.at(0);
 
         std::unique_ptr<bot::db::BaseDatabase> conn =
-            bot::db::create_connection(cfg);
+            bot::db::create_connection();
 
         if (std::any_of(optout_msgids.begin(), optout_msgids.end(),
                         [&](const std::string &x) {
@@ -257,8 +254,7 @@ int main(int argc, char *argv[]) {
   twitch_client.run();
 
   std::vector<std::thread> threads;
-  threads.push_back(
-      std::thread(bot::handlers::handle_timers, &twitch_client, &cfg));
+  threads.push_back(std::thread(bot::handlers::handle_timers, &twitch_client));
   threads.push_back(std::thread(&bot::stream::StreamListenerClient::run,
                                 &stream_listener_client));
   threads.push_back(std::thread(&bot::GithubListener::run, &github_listener));

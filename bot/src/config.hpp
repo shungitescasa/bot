@@ -74,7 +74,19 @@ namespace bot {
       std::vector<std::string> script_whitelist;
   };
 
-  struct Configuration {
+  class Configuration {
+    public:
+      Configuration(const Configuration &) = delete;
+      Configuration &operator=(const Configuration &) = delete;
+
+      static Configuration &get_instance() {
+        static Configuration instance;
+        return instance;
+      }
+
+      sol::table as_lua_table(std::shared_ptr<sol::state> luaState) const;
+      bool load_file(const std::string &file_path);
+
       IRCConfiguration irc;
       TwitchConfiguration twitch;
       KickCredentialsConfiguration kick_credentials;
@@ -85,9 +97,7 @@ namespace bot {
       RssConfiguration rss;
       LuaConfiguration lua;
 
-      sol::table as_lua_table(std::shared_ptr<sol::state> luaState) const;
+    private:
+      Configuration() = default;
   };
-
-  std::optional<Configuration> parse_configuration_from_file(
-      const std::string &file_path);
 }

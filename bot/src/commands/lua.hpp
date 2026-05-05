@@ -36,15 +36,13 @@ namespace bot::command::lua {
     void add_kick_library(std::shared_ptr<sol::state> state,
                           const InstanceBundle &bundle);
     void add_net_library(std::shared_ptr<sol::state> state);
-    void add_db_library(std::shared_ptr<sol::state> state,
-                        const Configuration &config);
+    void add_db_library(std::shared_ptr<sol::state> state);
     void add_irc_library(std::shared_ptr<sol::state> state,
                          const InstanceBundle &bundle);
     void add_l10n_library(std::shared_ptr<sol::state> state,
                           const InstanceBundle &bundle);
     void add_storage_library(std::shared_ptr<sol::state> state,
-                             const Request &request, const Configuration &cfg,
-                             const std::string &lua_id);
+                             const Request &request, const std::string &lua_id);
 
     void add_rss_library(std::shared_ptr<sol::state> state);
 
@@ -100,7 +98,8 @@ namespace bot::command::lua {
 
         command::Response run(const InstanceBundle &bundle,
                               const command::Request &request) const override {
-          if (!bundle.configuration.lua.allow_arbitrary_scripts &&
+          Configuration &cfg = Configuration::get_instance();
+          if (!cfg.lua.allow_arbitrary_scripts &&
               request.requester.user_rights.get_level() < schemas::TRUSTED) {
             throw ResponseException<ResponseError::ILLEGAL_COMMAND>(
                 request, bundle.localization);
@@ -129,14 +128,15 @@ namespace bot::command::lua {
                 request, bundle.localization, command::CommandArgument::VALUE);
           }
 
-          bool trusted_script =
-              std::any_of(bundle.configuration.lua.script_whitelist.begin(),
-                          bundle.configuration.lua.script_whitelist.end(),
-                          [&request](const std::string &i) {
-                            return i == request.message.value();
-                          });
+          Configuration &cfg = Configuration::get_instance();
 
-          if (!bundle.configuration.lua.allow_arbitrary_scripts &&
+          bool trusted_script = std::any_of(
+              cfg.lua.script_whitelist.begin(), cfg.lua.script_whitelist.end(),
+              [&request](const std::string &i) {
+                return i == request.message.value();
+              });
+
+          if (!cfg.lua.allow_arbitrary_scripts &&
               request.requester.user_rights.get_level() < schemas::TRUSTED &&
               !trusted_script) {
             throw ResponseException<ResponseError::ILLEGAL_COMMAND>(

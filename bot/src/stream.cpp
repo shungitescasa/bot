@@ -12,7 +12,6 @@
 #include "database.hpp"
 #include "logger.hpp"
 #include "schemas/stream.hpp"
-#include "utils/string.hpp"
 
 namespace bot::stream {
   void StreamListenerClient::listen_channel(const int &id,
@@ -234,8 +233,7 @@ namespace bot::stream {
   void StreamListenerClient::handler(const schemas::EventType &type,
                                      const api::twitch::schemas::Stream &stream,
                                      const StreamerData &data) {
-    std::unique_ptr<db::BaseDatabase> conn =
-        db::create_connection(this->configuration);
+    std::unique_ptr<db::BaseDatabase> conn = db::create_connection();
 
     db::DatabaseRows events = conn->exec(
         "SELECT e.id, e.message, is_massping, c.alias_name AS channel_aname, "
@@ -310,8 +308,7 @@ namespace bot::stream {
   }
 
   void StreamListenerClient::update_channel_ids() {
-    std::unique_ptr<db::BaseDatabase> conn =
-        db::create_connection(this->configuration);
+    std::unique_ptr<db::BaseDatabase> conn = db::create_connection();
 
     db::DatabaseRows ids =
         conn->exec("SELECT name, event_type FROM events WHERE event_type < 10");

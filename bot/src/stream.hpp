@@ -25,12 +25,10 @@ namespace bot::stream {
     public:
       StreamListenerClient(const api::twitch::HelixClient &helix_client,
                            const api::KickAPIClient &kick_api_client,
-                           chat::ChatClient &irc_client,
-                           const Configuration &configuration)
+                           chat::ChatClient &irc_client)
           : helix_client(helix_client),
             kick_api_client(kick_api_client),
-            irc_client(irc_client),
-            configuration(configuration) {};
+            irc_client(irc_client){};
       ~StreamListenerClient() = default;
 
       void run();
@@ -47,7 +45,6 @@ namespace bot::stream {
       const api::twitch::HelixClient &helix_client;
       const api::KickAPIClient &kick_api_client;
       chat::ChatClient &irc_client;
-      const Configuration &configuration;
 
       std::vector<StreamerData> streamers;
   };

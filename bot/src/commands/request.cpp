@@ -51,7 +51,9 @@ namespace bot::command {
 
   std::optional<Requester> get_requester(
       const irc::Message<irc::MessageType::Privmsg> &irc_message,
-      std::unique_ptr<db::BaseDatabase> &conn, const Configuration &cfg) {
+      std::unique_ptr<db::BaseDatabase> &conn) {
+    Configuration &cfg = Configuration::get_instance();
+
     // fetching channel
     std::vector<schemas::Channel> chans = conn->query_all<schemas::Channel>(
         "SELECT * FROM channels WHERE alias_id = $1",

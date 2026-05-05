@@ -268,4 +268,5 @@ namespace bot::db {
 #endif
 
   std::unique_ptr<BaseDatabase> create_connection(const Configuration &cfg);
+  std::unique_ptr<BaseDatabase> create_connection();
 }

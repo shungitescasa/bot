@@ -96,25 +96,13 @@ namespace bot {
     return o;
   }
 
-  std::optional<Configuration> parse_configuration_from_file(
-      const std::string &file_path) {
+  bool Configuration::load_file(const std::string &file_path) {
     std::ifstream ifs(file_path);
 
     if (!ifs.is_open()) {
       log::error("Configuration", "Failed to open the file at " + file_path);
-      return std::nullopt;
+      return false;
     }
-
-    Configuration cfg;
-    IRCConfiguration irc_cfg;
-    TwitchConfiguration ttv_cfg;
-    KickCredentialsConfiguration kick_crd_cfg;
-    DatabaseConfiguration db_cfg;
-    CommandConfiguration cmd_cfg;
-    UrlConfiguration url_cfg;
-    TokenConfiguration token_cfg;
-    RssConfiguration rss_cfg;
-    LuaConfiguration lua_cfg;
 
     std::string line;
     while (std::getline(ifs, line, '\n')) {
@@ -130,108 +118,98 @@ namespace bot {
       }
 
       if (key == "irc.host") {
-        irc_cfg.host = value;
+        irc.host = value;
       } else if (key == "irc.http_password") {
-        irc_cfg.http_password = value;
+        irc.http_password = value;
       }
 
       else if (key == "twitch.app_client_id") {
-        ttv_cfg.app_client_id = value;
+        twitch.app_client_id = value;
       } else if (key == "twitch.app_client_secret") {
-        ttv_cfg.app_client_secret = value;
+        twitch.app_client_secret = value;
       } else if (key == "twitch.user_client_id") {
-        ttv_cfg.user_client_id = value;
+        twitch.user_client_id = value;
       } else if (key == "twitch.user_token") {
-        ttv_cfg.user_token = value;
+        twitch.user_token = value;
       } else if (key == "twitch.user_id") {
-        ttv_cfg.user_id = std::stoi(value);
+        twitch.user_id = std::stoi(value);
       } else if (key == "twitch.trusted_user_ids") {
         for (const std::string &x : utils::string::split_text(value, ',')) {
-          ttv_cfg.trusted_user_ids.push_back(std::stoi(x));
+          twitch.trusted_user_ids.push_back(std::stoi(x));
         }
       } else if (key == "twitch.superuser_ids") {
         for (const std::string &x : utils::string::split_text(value, ',')) {
-          ttv_cfg.superuser_ids.push_back(std::stoi(x));
+          twitch.superuser_ids.push_back(std::stoi(x));
         }
       }
 
       else if (key == "db_name") {
-        db_cfg.name = value;
+        database.name = value;
       } else if (key == "db_user") {
-        db_cfg.user = value;
+        database.user = value;
       } else if (key == "db_password") {
-        db_cfg.password = value;
+        database.password = value;
       } else if (key == "db_host") {
-        db_cfg.host = value;
+        database.host = value;
       } else if (key == "db_port") {
-        db_cfg.port = value;
+        database.port = value;
       }
 
       else if (key == "kick.client_id") {
-        kick_crd_cfg.client_id = value;
+        kick_credentials.client_id = value;
       } else if (key == "kick.client_secret") {
-        kick_crd_cfg.client_secret = value;
+        kick_credentials.client_secret = value;
       }
 
       else if (key == "commands.join_allowed") {
-        cmd_cfg.join_allowed = std::stoi(value);
+        commands.join_allowed = std::stoi(value);
       } else if (key == "commands.join_allow_from_other_chats") {
-        cmd_cfg.join_allow_from_other_chats = std::stoi(value);
+        commands.join_allow_from_other_chats = std::stoi(value);
       } else if (key == "commands.randompost.path") {
-        cmd_cfg.rpost_path = value;
+        commands.rpost_path = value;
       } else if (key == "commands.paste_path") {
-        cmd_cfg.paste_path = value;
+        commands.paste_path = value;
       } else if (key == "paste_body_name") {
-        cmd_cfg.paste_body_name = value;
+        commands.paste_body_name = value;
       } else if (key == "paste_title_name") {
-        cmd_cfg.paste_title_name = value;
+        commands.paste_title_name = value;
       }
 
       else if (key == "url.help") {
-        url_cfg.help = value;
+        url.help = value;
       } else if (key == "url.chatters.paste_service") {
-        url_cfg.paste_service = value;
+        url.paste_service = value;
       } else if (key == "url.randompost") {
-        url_cfg.randompost = value;
+        url.randompost = value;
       } else if (key == "url.stats") {
-        url_cfg.stats = value;
+        url.stats = value;
       } else if (key == "url.tinyemotes") {
-        url_cfg.tinyemotes = value;
+        url.tinyemotes = value;
       } else if (key == "url.mogchart") {
-        url_cfg.mogchart = value;
+        url.mogchart = value;
       }
 
       else if (key == "rss.timeout") {
-        rss_cfg.timeout = std::stoi(value);
+        rss.timeout = std::stoi(value);
       } else if (key == "rss.bridge") {
-        rss_cfg.bridge = value;
+        rss.bridge = value;
       }
 
       else if (key == "lua.allow_arbitrary_scripts") {
-        lua_cfg.allow_arbitrary_scripts = std::stoi(value);
+        lua.allow_arbitrary_scripts = std::stoi(value);
       } else if (key == "lua.script_whitelist") {
-        lua_cfg.script_whitelist = utils::string::split_text(value, ',');
+        lua.script_whitelist = utils::string::split_text(value, ',');
       }
 
       else if (key == "token.github") {
-        token_cfg.github_token = value;
+        tokens.github_token = value;
       } else if (key == "token.seventv") {
-        token_cfg.seventv_token = value;
+        tokens.seventv_token = value;
       }
     }
 
-    cfg.irc = irc_cfg;
-    cfg.url = url_cfg;
-    cfg.commands = cmd_cfg;
-    cfg.twitch = ttv_cfg;
-    cfg.kick_credentials = kick_crd_cfg;
-    cfg.database = db_cfg;
-    cfg.tokens = token_cfg;
-    cfg.rss = rss_cfg;
-    cfg.lua = lua_cfg;
-
     log::info("Configuration",
               "Successfully loaded the file from '" + file_path + "'");
-    return cfg;
+    return true;
   }
 }

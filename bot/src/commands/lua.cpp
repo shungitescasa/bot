@@ -100,14 +100,8 @@ namespace bot::command::lua {
       state->set_function("bot_get_version", []() { return BOT_VERSION; });
 
       state->set_function("bot_config", [state]() {
-        std::optional<bot::Configuration> o_cfg =
-            bot::parse_configuration_from_file(".env");
-
-        if (!o_cfg.has_value()) {
-          return sol::make_object(*state, sol::lua_nil);
-        }
-
-        return sol::make_object(*state, o_cfg->as_lua_table(state));
+        Configuration &cfg = Configuration::get_instance();
+        return cfg.as_lua_table(state);
       });
     }
 
@@ -527,12 +521,10 @@ namespace bot::command::lua {
       });
     }
 
-    void add_db_library(std::shared_ptr<sol::state> state,
-                        const Configuration &cfg) {
-      state->set_function("db_execute", [state, cfg](
-                                            const std::string &query,
-                                            const sol::table &parameters) {
-        std::unique_ptr<db::BaseDatabase> conn = db::create_connection(cfg);
+    void add_db_library(std::shared_ptr<sol::state> state) {
+      state->set_function("db_execute", [state](const std::string &query,
+                                                const sol::table &parameters) {
+        std::unique_ptr<db::BaseDatabase> conn = db::create_connection();
 
         std::vector<std::string> params;
 
@@ -568,10 +560,9 @@ namespace bot::command::lua {
         conn->exec(query, params);
       });
 
-      state->set_function("db_query", [state, cfg](
-                                          const std::string &query,
-                                          const sol::table &parameters) {
-        std::unique_ptr<db::BaseDatabase> conn = db::create_connection(cfg);
+      state->set_function("db_query", [state](const std::string &query,
+                                              const sol::table &parameters) {
+        std::unique_ptr<db::BaseDatabase> conn = db::create_connection();
 
         std::vector<std::string> params;
 
@@ -772,7 +763,7 @@ namespace bot::command::lua {
       lua::library::add_irc_library(state, bundle);
       lua::library::add_twitch_library(state, request, bundle);
       lua::library::add_kick_library(state, bundle);
-      lua::library::add_db_library(state, bundle.configuration);
+      lua::library::add_db_library(state);
       lua::library::add_l10n_library(state, bundle);
       lua::library::add_emote_library(state, bundle);
     }
@@ -930,10 +921,10 @@ namespace bot::command::lua {
     }
 
     void add_storage_library(std::shared_ptr<sol::state> state,
-                             const Request &request, const Configuration &cfg,
+                             const Request &request,
                              const std::string &lua_id) {
-      state->set_function("storage_get", [state, &request, &cfg, &lua_id]() {
-        std::unique_ptr<db::BaseDatabase> conn = db::create_connection(cfg);
+      state->set_function("storage_get", [state, &request, &lua_id]() {
+        std::unique_ptr<db::BaseDatabase> conn = db::create_connection();
         std::vector<std::string> params{
             std::to_string(request.requester.user.get_id()), lua_id};
 
@@ -956,35 +947,34 @@ namespace bot::command::lua {
         return value;
       });
 
-      state->set_function("storage_put", [state, &request, &cfg,
-                                          &lua_id](const std::string &value) {
-        std::unique_ptr<db::BaseDatabase> conn = db::create_connection(cfg);
-        std::vector<std::string> params{
-            std::to_string(request.requester.user.get_id()), lua_id};
+      state->set_function(
+          "storage_put", [state, &request, &lua_id](const std::string &value) {
+            std::unique_ptr<db::BaseDatabase> conn = db::create_connection();
+            std::vector<std::string> params{
+                std::to_string(request.requester.user.get_id()), lua_id};
 
-        db::DatabaseRows rows = conn->exec(
-            "SELECT id FROM lua_user_storage WHERE user_id = $1 AND "
-            "lua_id = $2",
-            params);
+            db::DatabaseRows rows = conn->exec(
+                "SELECT id FROM lua_user_storage WHERE user_id = $1 AND "
+                "lua_id = $2",
+                params);
 
-        if (rows.empty()) {
-          params.push_back(value);
-          conn->exec(
-              "INSERT INTO lua_user_storage(user_id, lua_id, value) VALUES "
-              "($1, "
-              "$2, $3)",
-              params);
-        } else {
-          conn->exec("UPDATE lua_user_storage SET value = $1 WHERE id = $2",
-                     {value, rows[0].at("id")});
-        }
+            if (rows.empty()) {
+              params.push_back(value);
+              conn->exec(
+                  "INSERT INTO lua_user_storage(user_id, lua_id, value) VALUES "
+                  "($1, "
+                  "$2, $3)",
+                  params);
+            } else {
+              conn->exec("UPDATE lua_user_storage SET value = $1 WHERE id = $2",
+                         {value, rows[0].at("id")});
+            }
 
-        return true;
-      });
+            return true;
+          });
 
-      state->set_function("storage_channel_get", [state, &request, &cfg,
-                                                  &lua_id]() {
-        std::unique_ptr<db::BaseDatabase> conn = db::create_connection(cfg);
+      state->set_function("storage_channel_get", [state, &request, &lua_id]() {
+        std::unique_ptr<db::BaseDatabase> conn = db::create_connection();
         std::vector<std::string> params{
             std::to_string(request.requester.channel.get_id()), lua_id};
 
@@ -1007,34 +997,32 @@ namespace bot::command::lua {
         return value;
       });
 
-      state->set_function(
-          "storage_channel_put",
-          [state, &request, &cfg, &lua_id](const std::string &value) {
-            std::unique_ptr<db::BaseDatabase> conn = db::create_connection(cfg);
-            std::vector<std::string> params{
-                std::to_string(request.requester.channel.get_id()), lua_id};
+      state->set_function("storage_channel_put", [state, &request, &lua_id](
+                                                     const std::string &value) {
+        std::unique_ptr<db::BaseDatabase> conn = db::create_connection();
+        std::vector<std::string> params{
+            std::to_string(request.requester.channel.get_id()), lua_id};
 
-            db::DatabaseRows rows = conn->exec(
-                "SELECT id FROM lua_channel_storage WHERE channel_id = $1 AND "
-                "lua_id = $2",
-                params);
+        db::DatabaseRows rows = conn->exec(
+            "SELECT id FROM lua_channel_storage WHERE channel_id = $1 AND "
+            "lua_id = $2",
+            params);
 
-            if (rows.empty()) {
-              params.push_back(value);
-              conn->exec(
-                  "INSERT INTO lua_channel_storage(channel_id, lua_id, value) "
-                  "VALUES "
-                  "($1, "
-                  "$2, $3)",
-                  params);
-            } else {
-              conn->exec(
-                  "UPDATE lua_channel_storage SET value = $1 WHERE id = $2",
-                  {value, rows[0].at("id")});
-            }
+        if (rows.empty()) {
+          params.push_back(value);
+          conn->exec(
+              "INSERT INTO lua_channel_storage(channel_id, lua_id, value) "
+              "VALUES "
+              "($1, "
+              "$2, $3)",
+              params);
+        } else {
+          conn->exec("UPDATE lua_channel_storage SET value = $1 WHERE id = $2",
+                     {value, rows[0].at("id")});
+        }
 
-            return true;
-          });
+        return true;
+      });
     }
   }
 
@@ -1081,8 +1069,7 @@ namespace bot::command::lua {
     library::add_base_libraries(state);
 
     if (!lua_id.empty()) {
-      library::add_storage_library(state, request, bundle.configuration,
-                                   lua_id);
+      library::add_storage_library(state, request, lua_id);
     }
 
     sol::load_result s = state->load("return " + script);

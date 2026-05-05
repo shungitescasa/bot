@@ -14,6 +14,7 @@
 #include <thread>
 #include <vector>
 
+#include "config.hpp"
 #include "cpr/api.h"
 #include "cpr/cprtypes.h"
 #include "cpr/response.h"
@@ -56,7 +57,8 @@ namespace bot {
   }
 
   void RSSListener::run() {
-    if (!this->configuration.rss.bridge.has_value()) {
+    Configuration &cfg = Configuration::get_instance();
+    if (!cfg.rss.bridge.has_value()) {
       log::error("RSSListener", "RSS Bridge is not set!");
       return;
     }
@@ -64,8 +66,7 @@ namespace bot {
     while (true) {
       this->add_channels();
       this->check_channels();
-      std::this_thread::sleep_for(
-          std::chrono::seconds(this->configuration.rss.timeout));
+      std::this_thread::sleep_for(std::chrono::seconds(cfg.rss.timeout));
     }
   }
 
@@ -91,8 +92,8 @@ namespace bot {
   }
 
   void RSSListener::add_channels() {
-    std::unique_ptr<db::BaseDatabase> conn =
-        db::create_connection(this->configuration);
+    Configuration &cfg = Configuration::get_instance();
+    std::unique_ptr<db::BaseDatabase> conn = db::create_connection(cfg);
 
     db::DatabaseRows events = conn->exec(
         "SELECT event_type, name "
@@ -141,9 +142,7 @@ namespace bot {
       }
 
       std::string url =
-          useRSSBridge
-              ? fmt::format(*this->configuration.rss.bridge, bridge, name)
-              : name;
+          useRSSBridge ? fmt::format(*cfg.rss.bridge, bridge, name) : name;
 
       std::optional<RSSChannel> channel = get_rss_channel(url);
       if (!channel.has_value()) {
@@ -200,7 +199,7 @@ namespace bot {
 
       // getting channels
       std::vector<schemas::Event> events = utils::get_events(
-          db::create_connection(this->configuration), this->helix_client,
+          db::create_connection(), this->helix_client,
           this->irc_client.get_me().id, it->event->type, it->event->name);
 
       for (const schemas::Event &event : events) {
