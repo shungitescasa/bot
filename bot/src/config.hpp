@@ -29,6 +29,12 @@ namespace bot {
       std::optional<std::string> http_password = std::nullopt;
   };
 
+#ifdef IPC_SERVER
+  struct IPCConfiguration {
+      std::optional<std::string> socket_path;
+  };
+#endif
+
   struct TwitchConfiguration {
       unsigned int user_id;
       std::string user_client_id, user_token, app_client_id, app_client_secret;
@@ -97,6 +103,10 @@ namespace bot {
       TokenConfiguration tokens;
       RssConfiguration rss;
       LuaConfiguration lua;
+
+#ifdef IPC_SERVER
+      IPCConfiguration ipc;
+#endif
 
     private:
       Configuration() = default;

@@ -31,6 +31,10 @@
 #include "irc/client.hpp"
 #endif
 
+#ifdef IPC_SERVER
+#include "ipc.hpp"
+#endif
+
 int main(int argc, char *argv[]) {
   bot::log::info("Main", "Starting up...");
 
@@ -268,6 +272,14 @@ int main(int argc, char *argv[]) {
   threads.push_back(std::thread(&bot::api::KickAPIClient::refresh_token_thread,
                                 &kick_api_client));
   threads.push_back(std::thread(&bot::RSSListener::run, &rss_listener));
+
+#ifdef IPC_SERVER
+  if (cfg.ipc.socket_path.has_value()) {
+    bot::IPCServer ipc_server(*cfg.ipc.socket_path, twitch_client);
+    ipc_server.connect();
+    threads.push_back(std::thread(&bot::IPCServer::run, &ipc_server));
+  }
+#endif
 
   for (auto &thread : threads) {
     thread.join();

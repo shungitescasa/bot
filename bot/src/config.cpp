@@ -208,6 +208,11 @@ namespace bot {
       } else if (key == "token.seventv") {
         tokens.seventv_token = value;
       }
+#ifdef IPC_SERVER
+      else if (key == "ipc.socket_path") {
+        ipc.socket_path = value;
+      }
+#endif
     }
 
     log::info("Configuration",

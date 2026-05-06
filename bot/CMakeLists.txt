@@ -29,6 +29,13 @@ set_target_properties(
   RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin
 )
 
+# IPC server
+set(IPC_SERVER OFF BOOL "Enable IPC server")
+if (IPC_SERVER)
+  message("-- IPC server: enabled")
+  target_compile_definitions(Bot PRIVATE IPC_SERVER=1)
+endif()
+
 # BetterTTV Emote support
 set(BUILD_BETTERTTV OFF BOOL "Enable BetterTTV emotes")
 if (BUILD_BETTERTTV)
