@@ -28,6 +28,7 @@
 #ifdef USE_EVENTSUB_CONNECTION
 #include "twitch/chat.hpp"
 #else
+#include "core/irc/bot.hpp"
 #include "irc/client.hpp"
 #endif
 

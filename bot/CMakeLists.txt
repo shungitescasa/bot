@@ -166,6 +166,7 @@ target_link_libraries(Bot PRIVATE
     pugixml
     fmt
     Boost::url
+    Core
 )
 
 if (NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/bin")
