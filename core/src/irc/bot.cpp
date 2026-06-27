@@ -5,7 +5,10 @@
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
 #include <istream>
+#include <optional>
 #include <print>
+
+#include "core/irc/message.hpp"
 
 namespace bot::irc {
   void IRCChatBot::send_raw(const std::string &message) {
@@ -46,7 +49,18 @@ namespace bot::irc {
         line.pop_back();
       }
 
-      std::println("{}", line);
+      if (line.empty()) continue;
+      std::println(">>> {}", line);
+
+      std::optional<IRCMessage> message = IRCMessage::from(line);
+      if (!message.has_value()) continue;
+
+      std::println("command: {}", message->command);
+      std::println("nick: {}", message->nick);
+
+      for (const std::string &x : message->params) {
+        std::println("param: {}", x);
+      }
     }
 
     if (ec) {

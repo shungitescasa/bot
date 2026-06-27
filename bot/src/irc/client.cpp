@@ -11,6 +11,7 @@
 
 #include "../logger.hpp"
 #include "config.hpp"
+#include "core/irc/message.hpp"
 #include "cpr/api.h"
 #include "cpr/cprtypes.h"
 #include "cpr/response.h"
@@ -92,7 +93,7 @@ void Client::run() {
                                         }),
                          line.end());
 
-              std::optional<IRCMessage> m = IRCMessage::from_string(line);
+              std::optional<IRCMessage> m = IRCMessage::from(line);
               if (!m.has_value()) {
                 break;
               }
