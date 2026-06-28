@@ -2,16 +2,23 @@
 
 #include <openssl/tls1.h>
 
+#include <algorithm>
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
+#include <boost/beast/core/detail/base64.hpp>
+#include <format>
 #include <istream>
 #include <optional>
-#include <print>
+#include <ranges>
+#include <stdexcept>
+#include <string>
+#include <string_view>
 
 #include "core/irc/message.hpp"
 
 namespace bot::irc {
   void IRCChatBot::send_raw(const std::string &message) {
+    logger.debug("<<< " + message);
     boost::asio::write(this->socket, boost::asio::buffer(message + "\r\n"));
   }
 
@@ -50,21 +57,73 @@ namespace bot::irc {
       }
 
       if (line.empty()) continue;
-      std::println(">>> {}", line);
+      logger.debug(">>> " + line);
 
       std::optional<IRCMessage> message = IRCMessage::from(line);
       if (!message.has_value()) continue;
 
-      std::println("command: {}", message->command);
-      std::println("nick: {}", message->nick);
+      // -- authenticating on the server
+      if (message->command == "CAP" &&
+          std::ranges::contains(message->params, "LS")) {
+        bool sasl = false, server_time = false;
+        std::string tagCap = "";
 
-      for (const std::string &x : message->params) {
-        std::println("param: {}", x);
+        for (const auto &part :
+             std::ranges::views::split(message->params.back(), ' ')) {
+          std::string_view cap(part.begin(), part.end());
+
+          if (cap.contains("sasl")) {
+            sasl = true;
+          } else if (std::string(cap) == "message-tags" ||
+                     std::string(cap) == "twitch.tv/tags") {
+            tagCap = cap;
+          } else if (std::string(cap) == "server-time") {
+            server_time = true;
+          }
+        }
+
+        if (!tagCap.empty()) this->send_raw("CAP REQ :" + tagCap);
+        if (server_time) this->send_raw("CAP REQ :server-time");
+
+        if (sasl) {
+          this->send_raw("CAP REQ :sasl");
+          this->send_raw("AUTHENTICATE PLAIN");
+        } else {
+          logger.info("Authenticating with server password...");
+          this->send_raw("PASS " + this->pass);
+          this->send_raw("NICK " + this->nick);
+        }
+      }
+      // SASL (process)
+      else if (message->command == "AUTHENTICATE" &&
+               std::ranges::contains(message->params, "+")) {
+        logger.info("Authenticating with SASL...");
+        std::string auth = '\0' + this->nick + '\0' + this->pass;
+
+        // base64 encoding.....
+        namespace b64 = boost::beast::detail::base64;
+        std::string output;
+        output.resize(b64::encoded_size(auth.size()));
+        output.resize(b64::encode(output.data(), auth.data(), auth.size()));
+
+        this->send_raw("AUTHENTICATE " + output);
+      }
+      // SASL (success)
+      else if (message->command == "903") {
+        logger.info("Finishing...");
+        this->send_raw("CAP END");
+        this->send_raw("NICK " + this->nick);
+        this->send_raw(std::format("USER {0} 0 * :{0}", this->nick));
+      }
+      // SASL (error)
+      else if (message->command == "904") {
+        throw std::runtime_error(
+            "Invalid username or password (SASL authentication failed)");
       }
     }
 
     if (ec) {
-      std::println("Error reading from socket: {}", ec.message());
+      logger.error("Error reading from socket: " + ec.message());
     }
   }
 }
