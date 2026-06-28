@@ -62,9 +62,15 @@ namespace bot::irc {
       std::optional<IRCMessage> message = IRCMessage::from(line);
       if (!message.has_value()) continue;
 
+      // -- keep connection alive
+      if (message->command == "PING") {
+        this->send_raw("PONG" + (message->params.empty()
+                                     ? ""
+                                     : (" :" + message->params.front())));
+      }
       // -- authenticating on the server
-      if (message->command == "CAP" &&
-          std::ranges::contains(message->params, "LS")) {
+      else if (message->command == "CAP" &&
+               std::ranges::contains(message->params, "LS")) {
         bool sasl = false, server_time = false;
         std::string tagCap = "";
 
