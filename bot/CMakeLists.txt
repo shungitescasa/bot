@@ -110,7 +110,7 @@ FetchContent_MakeAvailable(json)
 FetchContent_Declare(
   cpr
   GIT_REPOSITORY https://github.com/libcpr/cpr.git
-  GIT_TAG 1.10.5
+  GIT_TAG 1.14.2
 )
 FetchContent_MakeAvailable(cpr)
 
@@ -118,7 +118,7 @@ FetchContent_MakeAvailable(cpr)
 FetchContent_Declare(
   ixwebsocket
   GIT_REPOSITORY https://github.com/machinezone/IXWebSocket
-  GIT_TAG v11.4.6
+  GIT_TAG v12.0.1
 )
 FetchContent_MakeAvailable(ixwebsocket)
 
@@ -144,7 +144,7 @@ FetchContent_MakeAvailable(emotespp)
 FetchContent_Declare(
   pugixml
   GIT_REPOSITORY https://github.com/zeux/pugixml.git
-  GIT_TAG v1.15
+  GIT_TAG v1.16
 )
 FetchContent_MakeAvailable(pugixml)
 
@@ -152,7 +152,7 @@ FetchContent_MakeAvailable(pugixml)
 FetchContent_Declare(
   fmt
   GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-  GIT_TAG 12.1.0
+  GIT_TAG 12.2.0
 )
 FetchContent_MakeAvailable(fmt)
 
