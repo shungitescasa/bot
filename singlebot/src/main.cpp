@@ -11,6 +11,13 @@ int main(int argc, char *argv[]) {
 
   std::string config_path = ".env";
 
+  for (int i = 0; i < argc; i++) {
+    if (i + 1 <= argc - 1) {
+      std::string k(argv[i]), v(argv[i + 1]);
+      if (k == "--config" || k == "-c") config_path = v;
+    }
+  }
+
   bot::Configuration &cfg = bot::Configuration::get_instance();
   cfg.load_file(config_path);
 
