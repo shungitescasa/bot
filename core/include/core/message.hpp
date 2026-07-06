@@ -39,11 +39,11 @@ namespace bot {
       MessageSender sender;
       MessageSource source;
       std::optional<MessageReply> reply;
-      std::string message = "";
+      std::string contents = "";
 
       Message(MessageSender sender, MessageSource source,
-              std::optional<MessageReply> reply, std::string message)
-          : sender(sender), source(source), reply(reply), message(message) {}
+              std::optional<MessageReply> reply, std::string contents)
+          : sender(sender), source(source), reply(reply), contents(contents) {}
   };
 
   template <>

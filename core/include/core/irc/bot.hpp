@@ -9,7 +9,7 @@
 #include "core/log.hpp"
 
 namespace bot::irc {
-  class IRCChatBot : public ChatBot {
+  class IRCChatBot : public EventChatBot, public ChatBot {
     public:
       IRCChatBot(std::string host, std::string port, std::string nick,
                  std::string pass)

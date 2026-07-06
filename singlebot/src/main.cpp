@@ -1,3 +1,4 @@
+#include <print>
 #include <stdexcept>
 #include <string>
 
@@ -29,6 +30,16 @@ int main(int argc, char *argv[]) {
 
   bot::irc::IRCChatBot chatbot(cfg.irc.host, cfg.irc.port, cfg.irc.nick,
                                cfg.irc.pass);
+
+  chatbot.on_chat_message(
+      [&](bot::Message<bot::MessageType::ChatMessage> message) {
+        std::println("#{} <{}>: {}", message.source.login, message.sender.login,
+                     message.contents);
+
+        if (message.contents == "ping") {
+          chatbot.send_message("#" + message.source.login, "pong");
+        }
+      });
 
   chatbot.connect();
 }

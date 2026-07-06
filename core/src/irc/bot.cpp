@@ -9,11 +9,11 @@
 #include <format>
 #include <istream>
 #include <optional>
-#include <print>
 #include <ranges>
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <thread>
 
 #include "core/irc/message.hpp"
 #include "core/message.hpp"
@@ -25,7 +25,9 @@ namespace bot::irc {
   }
 
   void IRCChatBot::send_message(const std::string &room,
-                                const std::string &message) {}
+                                const std::string &message) {
+    this->send_raw(std::format("PRIVMSG {} :{}", room, message));
+  }
 
   void IRCChatBot::connect() {
     boost::asio::ip::tcp::resolver resolver(this->io);
@@ -69,7 +71,9 @@ namespace bot::irc {
         std::optional<Message<MessageType::ChatMessage>> chat_message =
             message->as_message<MessageType::ChatMessage>();
 
-        std::println("{}", chat_message.has_value());
+        if (chat_message && this->onChatMessage) {
+          std::thread(this->onChatMessage, chat_message.value()).detach();
+        }
       }
       // -- keep connection alive
       else if (message->command == "PING") {
