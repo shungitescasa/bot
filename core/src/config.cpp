@@ -32,4 +32,17 @@ namespace bot {
         irc.pass = value;
     }
   }
+
+  void Configuration::load_from_args(int argc, char *argv[]) {
+    std::string config_path = ".env";
+
+    for (int i = 0; i < argc; i++) {
+      if (i + 1 <= argc - 1) {
+        std::string k(argv[i]), v(argv[i + 1]);
+        if (k == "--config" || k == "-c") config_path = v;
+      }
+    }
+
+    load_file(config_path);
+  }
 }

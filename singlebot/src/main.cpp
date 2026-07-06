@@ -10,17 +10,8 @@ int main(int argc, char *argv[]) {
   bot::Logger log("Main");
   log.info("Starting up...");
 
-  std::string config_path = ".env";
-
-  for (int i = 0; i < argc; i++) {
-    if (i + 1 <= argc - 1) {
-      std::string k(argv[i]), v(argv[i + 1]);
-      if (k == "--config" || k == "-c") config_path = v;
-    }
-  }
-
   bot::Configuration &cfg = bot::Configuration::get_instance();
-  cfg.load_file(config_path);
+  cfg.load_from_args(argc, argv);
 
   if (cfg.irc.host.empty() || cfg.irc.port.empty() || cfg.irc.nick.empty() ||
       cfg.irc.pass.empty()) {
