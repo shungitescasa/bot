@@ -9,12 +9,14 @@
 #include <format>
 #include <istream>
 #include <optional>
+#include <print>
 #include <ranges>
 #include <stdexcept>
 #include <string>
 #include <string_view>
 
 #include "core/irc/message.hpp"
+#include "core/message.hpp"
 
 namespace bot::irc {
   void IRCChatBot::send_raw(const std::string &message) {
@@ -62,8 +64,15 @@ namespace bot::irc {
       std::optional<IRCMessage> message = IRCMessage::from(line);
       if (!message.has_value()) continue;
 
+      // -- chat message
+      if (message->command == "PRIVMSG") {
+        std::optional<Message<MessageType::ChatMessage>> chat_message =
+            message->as_message<MessageType::ChatMessage>();
+
+        std::println("{}", chat_message.has_value());
+      }
       // -- keep connection alive
-      if (message->command == "PING") {
+      else if (message->command == "PING") {
         this->send_raw("PONG" + (message->params.empty()
                                      ? ""
                                      : (" :" + message->params.front())));
