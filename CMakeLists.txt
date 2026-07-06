@@ -71,6 +71,7 @@ set(LUA_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/lib/lua/src")
 add_subdirectory(core)
 
 add_subdirectory(lib/lua)
+add_subdirectory(singlebot)
 add_subdirectory(bot)
 
 add_subdirectory(www)
