@@ -40,6 +40,8 @@ namespace bot {
         script.loader = value;
       else if (key == "script.directory")
         script.directory = value;
+      else if (key == "script.timeout")
+        script.timeout = std::stoi(value);
     }
   }
 

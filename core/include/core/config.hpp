@@ -13,6 +13,7 @@ namespace bot {
 
   struct ScriptConfiguration {
       std::string loader = "lua", directory = "luascripts";
+      unsigned int timeout = 0;
   };
 
   struct Configuration {

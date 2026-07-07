@@ -35,8 +35,7 @@ int main(int argc, char *argv[]) {
 
   rpc::server server(cfg.rpc.port);
 
-  server.bind("execute_untrusted_script",
-              [](std::string script) { return std::make_optional("ok"); });
+  server.bind("alive", []() { return true; });
 
   server.bind("exec",
               [&](bot::Request request) { return loader->run(request); });

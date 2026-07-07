@@ -1,6 +1,6 @@
 #include <chrono>
+#include <format>
 #include <optional>
-#include <print>
 #include <stdexcept>
 #include <string>
 #include <thread>
@@ -36,8 +36,13 @@ int main(int argc, char *argv[]) {
 
   chatbot.on_chat_message(
       [&](bot::Message<bot::MessageType::ChatMessage> message) {
-        std::println("#{} <{}>: {}", message.source.login, message.sender.login,
-                     message.contents);
+        log.debug(std::format("{} <{}>: {}", message.source.login,
+                              message.sender.login, message.contents));
+
+        if (!script_vm.is_alive()) {
+          log.info("scriptVM RPC server is not alive! Reconnecting...");
+          script_vm.connect();
+        }
 
         // combining commands
         bot::CommandDataVec remote_commands = script_vm.list();
