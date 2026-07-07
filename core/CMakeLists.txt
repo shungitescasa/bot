@@ -12,6 +12,40 @@ target_include_directories(Core PUBLIC
     $<INSTALL_INTERFACE:include>
 )
 
+# ---------
+# Databases
+# ---------
+
+option(USE_POSTGRES "Use PostgreSQL backend" ON)
+option(USE_MARIADB "Use MariaDB backend" OFF)
+
+if (USE_POSTGRES)
+  FetchContent_Declare(
+    pqxx
+    GIT_REPOSITORY https://github.com/jtv/libpqxx.git
+    GIT_TAG 7.10.1
+  )
+  FetchContent_MakeAvailable(pqxx)
+  target_compile_definitions(Core PRIVATE USE_POSTGRES)
+  target_link_libraries(Core PRIVATE pqxx)
+elseif (USE_MARIADB)
+  target_compile_definitions(Core PRIVATE USE_MARIADB)
+
+  # searching for mysql
+  find_program(MYSQL_CONFIG_EXECUTABLE mysql_config REQUIRED)
+
+  execute_process(COMMAND ${MYSQL_CONFIG_EXECUTABLE} --cflags
+                  OUTPUT_VARIABLE MYSQL_CFLAGS
+                  OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+  execute_process(COMMAND ${MYSQL_CONFIG_EXECUTABLE} --libs
+                  OUTPUT_VARIABLE MYSQL_LIBS
+                  OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+  target_compile_options(Core PRIVATE ${MYSQL_CFLAGS})
+  target_link_libraries(Core PRIVATE ${MYSQL_LIBS})
+endif()
+
 # -- Getting libraries
 
 # boost

@@ -42,6 +42,17 @@ namespace bot {
         script.directory = value;
       else if (key == "script.timeout")
         script.timeout = std::stoi(value);
+
+      else if (key == "database.host")
+        database.host = value;
+      else if (key == "database.name")
+        database.name = value;
+      else if (key == "database.user")
+        database.user = value;
+      else if (key == "database.password")
+        database.password = value;
+      else if (key == "database.port")
+        database.port = std::stoi(value);
     }
   }
 

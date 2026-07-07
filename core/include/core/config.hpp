@@ -16,10 +16,21 @@ namespace bot {
       unsigned int timeout = 0;
   };
 
+  struct DatabaseConfiguration {
+      std::string host = "127.0.0.1", name = "bot";
+      std::string user = "default", password = "default";
+#if USE_POSTGRES
+      unsigned int port = 5432;
+#else
+      unsigned int port = 3306;
+#endif
+  };
+
   struct Configuration {
       IRCConfiguration irc;
       RPCConfiguration rpc;
       ScriptConfiguration script;
+      DatabaseConfiguration database;
 
       Configuration() = default;
       Configuration(const Configuration &) = delete;
