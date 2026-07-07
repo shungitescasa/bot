@@ -5,7 +5,7 @@
 #include <sstream>
 
 namespace bot {
-  void Logger::log(const LogLevel &level, const std::string &message) {
+  void Logger::log(const LogLevel &level, const std::string &message) const {
     std::ostringstream oss;
 
     std::time_t current_time = std::time(nullptr);
@@ -37,19 +37,19 @@ namespace bot {
 #endif
   }
 
-  void Logger::info(const std::string &message) {
+  void Logger::info(const std::string &message) const {
     this->log(LogLevel::INFO, message);
   }
 
-  void Logger::debug(const std::string &message) {
+  void Logger::debug(const std::string &message) const {
     this->log(LogLevel::DEBUG, message);
   }
 
-  void Logger::warn(const std::string &message) {
+  void Logger::warn(const std::string &message) const {
     this->log(LogLevel::WARN, message);
   }
 
-  void Logger::error(const std::string &message) {
+  void Logger::error(const std::string &message) const {
     this->log(LogLevel::ERROR, message);
   }
 }

@@ -10,14 +10,14 @@ namespace bot {
       Logger() : name("dnb") {}
       Logger(const std::string &name) : name(name) {}
 
-      void info(const std::string &message);
-      void debug(const std::string &message);
-      void warn(const std::string &message);
-      void error(const std::string &message);
+      void info(const std::string &message) const;
+      void debug(const std::string &message) const;
+      void warn(const std::string &message) const;
+      void error(const std::string &message) const;
 
     private:
       const std::string name;
 
-      void log(const LogLevel &level, const std::string &message);
+      void log(const LogLevel &level, const std::string &message) const;
   };
 }
