@@ -5,6 +5,7 @@
 #include "core/config.hpp"
 #include "core/irc/bot.hpp"
 #include "core/log.hpp"
+#include "scriptvm/client.hpp"
 
 int main(int argc, char *argv[]) {
   bot::Logger log("Main");
@@ -22,6 +23,8 @@ int main(int argc, char *argv[]) {
   bot::irc::IRCChatBot chatbot(cfg.irc.host, cfg.irc.port, cfg.irc.nick,
                                cfg.irc.pass);
 
+  scriptvm::RPCClient script_vm(cfg.rpc.host, cfg.rpc.port);
+
   chatbot.on_chat_message(
       [&](bot::Message<bot::MessageType::ChatMessage> message) {
         std::println("#{} <{}>: {}", message.source.login, message.sender.login,
@@ -29,6 +32,11 @@ int main(int argc, char *argv[]) {
 
         if (message.contents == "ping") {
           chatbot.send_message("#" + message.source.login, "pong");
+        }
+
+        auto response = script_vm.execute_untrusted_script(message.contents);
+        if (response.has_value()) {
+          std::println("script vm: {}", response.value());
         }
       });
 

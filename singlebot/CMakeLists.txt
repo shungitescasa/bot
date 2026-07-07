@@ -39,6 +39,7 @@ target_include_directories(SingleBot PRIVATE src)
 # ---------
 target_link_libraries(SingleBot PRIVATE
     Core
+    ScriptLib
 )
 
 if (NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/bin")

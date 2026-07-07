@@ -30,6 +30,11 @@ namespace bot {
         irc.nick = value;
       else if (key == "irc.pass")
         irc.pass = value;
+
+      else if (key == "rpc.host")
+        rpc.host = value;
+      else if (key == "rpc.port")
+        rpc.port = std::stoi(value);
     }
   }
 

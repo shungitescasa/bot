@@ -6,8 +6,14 @@ namespace bot {
       std::string host, port, nick, pass;
   };
 
+  struct RPCConfiguration {
+      std::string host = "127.0.0.1";
+      unsigned int port = 3002;
+  };
+
   struct Configuration {
       IRCConfiguration irc;
+      RPCConfiguration rpc;
 
       Configuration() = default;
       Configuration(const Configuration &) = delete;
@@ -19,5 +25,6 @@ namespace bot {
       }
 
       void load_file(const std::string &file_path);
+      void load_from_args(int argc, char *argv[]);
   };
 }
