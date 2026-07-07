@@ -16,24 +16,8 @@ target_include_directories(ScriptLib
 # Libraries
 # ---------
 
-# lua
-target_include_directories(ScriptLib BEFORE PUBLIC ${LUA_INCLUDE_DIR})
-target_link_libraries(ScriptLib PUBLIC lua)
-
-set(SOL2_LUA_VERSION "5.4.0" CACHE STRING "The version of Lua used")
-set(SOL2_BUILD_LUA FALSE CACHE BOOL "Always build Lua, do not search for it in the system")
-
-FetchContent_Declare(
-  sol
-  GIT_REPOSITORY https://github.com/ThePhD/sol2.git
-  GIT_TAG v3.5.0
-)
-FetchContent_MakeAvailable(sol)
-
-target_link_libraries(ScriptLib PUBLIC
-  Core
-  sol2::sol2
-)
+# yeah... all shit moved to Core module
+target_link_libraries(ScriptLib PUBLIC Core)
 
 # Script VM (executable)
 add_executable(ScriptVM src/main.cpp)

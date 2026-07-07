@@ -17,6 +17,11 @@ namespace bot {
       MessageSource() = default;
       MessageSource(const std::string &login, const int &id)
           : login(login), id(id) {}
+
+      std::string normalize() const {
+        if (login.starts_with("#")) return login.substr(1);
+        return login;
+      }
   };
 
   struct MessageSender {

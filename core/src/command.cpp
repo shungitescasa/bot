@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+#include "core/data/chat.hpp"
+
 namespace bot {
   const std::string Response::get_single() const {
     return this->single.value();
@@ -64,9 +66,159 @@ namespace bot {
 
   CommandVec &CommandLoader::get_commands() { return this->commands; }
 
-  Requester::Requester(const Message<MessageType::ChatMessage> &message) {
-    this->sender = message.sender;
-    this->source = message.source;
+  Requester::Requester(const Message<MessageType::ChatMessage> &message,
+                       std::unique_ptr<data::BaseDatabase> &conn) {
+    Configuration &cfg = Configuration::get_instance();
+
+    // fetching room
+    std::vector<data::Room> rooms = conn->query_all<data::Room>(
+        "SELECT * FROM rooms WHERE (name != '' AND name = $1) OR (alias_id != "
+        "-1 AND alias_id = $2) LIMIT 1",
+        {message.source.normalize(), std::to_string(message.source.id)});
+
+    if (rooms.empty()) {
+      conn->exec(
+          "INSERT INTO rooms(name, alias_id) VALUES ($1, $2)",
+          {message.source.normalize(), std::to_string(message.source.id)});
+
+      rooms = conn->query_all<data::Room>(
+          "SELECT * FROM rooms WHERE (name != '' AND name = $1) OR (alias_id "
+          "!= "
+          "-1 AND alias_id = $2) LIMIT 1",
+          {message.source.normalize(), std::to_string(message.source.id)});
+    }
+
+    room = rooms.front();
+
+    // updating room name
+    if (room.name != message.source.normalize()) {
+      conn->exec("UPDATE rooms SET name = $1 WHERE id = $2",
+                 {message.source.normalize(), std::to_string(room.id)});
+      room.name = message.source.normalize();
+    }
+
+    // fetching room preference
+    std::vector<data::RoomPreferences> prefs =
+        conn->query_all<data::RoomPreferences>(
+            "SELECT * FROM room_preferences WHERE id = $1 LIMIT 1",
+            {std::to_string(room.id)});
+
+    if (prefs.empty()) {
+      conn->exec(
+          "INSERT INTO room_preferences(id, prefix, locale) VALUES ($1, "
+          "$2, $3)",
+          {std::to_string(room.id), DEFAULT_PREFIX, DEFAULT_LOCALE_ID});
+
+      prefs = conn->query_all<data::RoomPreferences>(
+          "SELECT * FROM room_preferences WHERE id = $1",
+          {std::to_string(room.id)});
+    }
+
+    room_preferences = prefs.front();
+
+    // fetching sender
+    std::vector<data::Sender> senders = conn->query_all<data::Sender>(
+        "SELECT * FROM senders WHERE (name != '' AND name = $1) OR (alias_id "
+        "!= -1 AND alias_id = $2) LIMIT 1",
+        {message.sender.login, std::to_string(message.sender.id)});
+
+    if (senders.empty()) {
+      conn->exec("INSERT INTO senders(name, alias_id) VALUES ($1, $2)",
+                 {message.sender.login, std::to_string(message.sender.id)});
+
+      senders = conn->query_all<data::Sender>(
+          "SELECT * FROM senders WHERE (name != '' AND name = $1) OR (alias_id "
+          "!= -1 AND alias_id = $2) LIMIT 1",
+          {message.source.normalize(), std::to_string(message.source.id)});
+    }
+
+    sender = senders.front();
+
+    // updating sender name
+    if (sender.name != message.sender.login) {
+      conn->exec("UPDATE senders SET name = $1 WHERE id = $2",
+                 {message.sender.login, std::to_string(sender.id)});
+      sender.name = message.sender.login;
+    }
+
+    // -- setting permissions
+    data::PermissionLevel level = data::PermissionLevel::User;
+    const auto &badges = message.sender.badges;
+
+    if (sender.name == room.name) {
+      level = data::PermissionLevel::Broadcaster;
+    } else if (badges.contains("moderator") ||
+               badges.contains("lead_moderator")) {
+      level = data::PermissionLevel::Moderator;
+    } else if (badges.contains("vip")) {
+      level = data::PermissionLevel::VIP;
+    }
+
+    std::vector<data::SenderRights> sender_rights =
+        conn->query_all<data::SenderRights>(
+            "SELECT * FROM sender_rights WHERE sender_id = $1 AND room_id = $2 "
+            "LIMIT 1",
+            {std::to_string(sender.id), std::to_string(room.id)});
+
+    if (sender_rights.empty()) {
+      conn->exec(
+          "INSERT INTO sender_rights(sender_id, room_id, level) VALUES ($1, "
+          "$2, $3)",
+          {std::to_string(sender.id), std::to_string(room.id),
+           std::to_string((int)level)});
+
+      sender_rights = conn->query_all<data::SenderRights>(
+          "SELECT * FROM sender_rights WHERE sender_id = $1 AND room_id = $2 "
+          "LIMIT 1",
+          {std::to_string(sender.id), std::to_string(room.id)});
+    }
+
+    sender_right = sender_rights.front();
+
+    if (sender_right.level != static_cast<int>(level)) {
+      conn->exec("UPDATE sender_rights SET level = $1 WHERE id = $2",
+                 {std::to_string(static_cast<int>(level)),
+                  std::to_string(sender_right.id)});
+
+      sender_right.level = static_cast<int>(level);
+    }
+  }
+
+  sol::table Request::as_lua_table(std::shared_ptr<sol::state> state) const {
+    sol::table o = state->create_table();
+
+    o["command_id"] = command_id;
+    if (this->subcommand_id.has_value()) {
+      o["subcommand_id"] = subcommand_id.value();
+    } else {
+      o["subcommand_id"] = sol::lua_nil;
+    }
+    if (contents.has_value()) {
+      o["message"] = contents.value();
+    } else {
+      o["message"] = sol::lua_nil;
+    }
+
+    if (reply.has_value()) {
+      sol::table r = state->create_table();
+      r["id"] = reply->id;
+      r["login"] = reply->login;
+      r["display_name"] = reply->display_name;
+      r["user_id"] = reply->user_id;
+      r["message"] = reply->message;
+      o["reply"] = r;
+    } else {
+      o["reply"] = sol::lua_nil;
+    }
+
+    o["sender"] = requester.sender.as_lua_table(state);
+    o["channel"] = requester.room.as_lua_table(state);
+    o["room"] = requester.room.as_lua_table(state);
+    o["channel_preference"] = requester.room_preferences.as_lua_table(state);
+    o["room_preference"] = requester.room_preferences.as_lua_table(state);
+    o["rights"] = requester.sender_right.as_lua_table(state);
+
+    return o;
   }
 
   std::optional<Request> Request::create(

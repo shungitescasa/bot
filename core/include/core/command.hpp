@@ -6,6 +6,7 @@
 #include <utility>
 #include <vector>
 
+#include "core/data/chat.hpp"
 #include "core/message.hpp"
 #include "rpc/msgpack.hpp"
 
@@ -21,27 +22,33 @@ namespace bot {
   using CommandDataVec = std::vector<CommandData>;
 
   struct Requester {
-      MessageSender sender;
-      MessageSource source;
+      data::Room room;
+      data::RoomPreferences room_preferences;
+      data::Sender sender;
+      data::SenderRights sender_right;
 
-      MSGPACK_DEFINE(sender, source);
+      MSGPACK_DEFINE(room, room_preferences, sender, sender_right);
 
       Requester() = default;
-      Requester(const Message<MessageType::ChatMessage> &message);
+      Requester(const Message<MessageType::ChatMessage> &message,
+                std::unique_ptr<data::BaseDatabase> &conn);
   };
 
   struct Request {
       std::string command_id = "";
       std::optional<std::string> subcommand_id = std::nullopt,
                                  contents = std::nullopt;
+      std::optional<MessageReply> reply = std::nullopt;
       Requester requester;
 
-      MSGPACK_DEFINE(command_id, subcommand_id, contents, requester);
+      MSGPACK_DEFINE(command_id, subcommand_id, contents, requester, reply);
 
       static std::optional<Request> create(
           const CommandDataVec &commands,
           const Message<MessageType::ChatMessage> &message,
           const Requester &requester);
+
+      sol::table as_lua_table(std::shared_ptr<sol::state> state) const;
   };
 
   class Response {

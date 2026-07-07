@@ -67,6 +67,15 @@ else()
     set(BOT_VERSION_STRING "v${PROJECT_VERSION}")
 endif()
 
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(BOT_DEFAULT_PREFIX "~")
+else()
+    set(BOT_DEFAULT_PREFIX "!")
+endif()
+
+set(BOT_DEFAULT_LOCALE_ID "english")
+string(TIMESTAMP PROJECT_COMPILE_TIME "%s")
+
 set(LUA_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/lib/lua/src")
 add_subdirectory(lib/lua)
 
