@@ -11,9 +11,14 @@ namespace bot {
       unsigned int port = 3002;
   };
 
+  struct ScriptConfiguration {
+      std::string loader = "lua", directory = "luascripts";
+  };
+
   struct Configuration {
       IRCConfiguration irc;
       RPCConfiguration rpc;
+      ScriptConfiguration script;
 
       Configuration() = default;
       Configuration(const Configuration &) = delete;

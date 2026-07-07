@@ -67,10 +67,10 @@ else()
     set(BOT_VERSION_STRING "v${PROJECT_VERSION}")
 endif()
 
-set(LUA_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/lib/lua/src")
-add_subdirectory(core)
-
+set(LUA_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/lib/lua/src")
 add_subdirectory(lib/lua)
+
+add_subdirectory(core)
 
 add_subdirectory(scriptvm)
 

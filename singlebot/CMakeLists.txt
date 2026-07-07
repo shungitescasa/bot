@@ -39,6 +39,7 @@ target_include_directories(SingleBot PRIVATE src)
 # ---------
 target_link_libraries(SingleBot PRIVATE
     Core
+    lua
     ScriptLib
 )
 
