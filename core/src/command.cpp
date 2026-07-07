@@ -26,21 +26,31 @@ namespace bot {
     return !this->single.has_value() && !this->multiple.has_value();
   }
 
+  const CommandData Command::data() const {
+    return {this->name, this->delay_seconds, this->aliases, this->subcommands};
+  }
+
   void CommandLoader::add(CommandBox command) {
     auto it = std::find_if(
         this->commands.begin(), this->commands.end(),
-        [&](const auto &x) { return command->get_name() == x->get_name(); });
+        [&](const auto &x) { return command->data().name == x->data().name; });
     if (it != this->commands.end()) {
       this->commands.erase(it);
     }
     this->commands.push_back(command);
   }
 
+  bool CommandLoader::has(const std::string &command_id) const {
+    return std::any_of(
+        this->commands.begin(), this->commands.end(),
+        [&](const CommandBox &x) { return x->data().name == command_id; });
+  }
+
   const Response CommandLoader::run(const Request &request) const {
     auto command = std::find_if(
-        this->commands.begin(), this->commands.end(), [&](const auto &x) {
-          auto aliases = x->get_aliases();
-          return x->get_name() == request.command_id ||
+        this->commands.begin(), this->commands.end(), [&](const CommandBox &x) {
+          auto aliases = x->data().aliases;
+          return x->data().name == request.command_id ||
                  std::any_of(aliases.begin(), aliases.end(),
                              [&](const std::string &alias) {
                                return alias == request.command_id;
@@ -60,7 +70,7 @@ namespace bot {
   }
 
   std::optional<Request> Request::create(
-      const CommandVec &commands,
+      const CommandDataVec &commands,
       const Message<MessageType::ChatMessage> &message,
       const Requester &requester) {
     std::string contents = message.contents;
@@ -71,9 +81,9 @@ namespace bot {
     std::string command_id(parts.front().begin(), parts.front().end());
 
     auto cmd = std::find_if(
-        commands.begin(), commands.end(), [&command_id](const auto &c) {
-          auto aliases = c->get_aliases();
-          return c->get_name() == command_id ||
+        commands.begin(), commands.end(), [&command_id](const CommandData &c) {
+          auto aliases = c.aliases;
+          return c.name == command_id ||
                  std::any_of(aliases.begin(), aliases.end(),
                              [&command_id](const std::string &alias) {
                                return alias == command_id;

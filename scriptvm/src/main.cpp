@@ -38,8 +38,17 @@ int main(int argc, char *argv[]) {
   server.bind("execute_untrusted_script",
               [](std::string script) { return std::make_optional("ok"); });
 
-  server.bind("exec", [&](const bot::Request &request) {
-    return loader->run(request);
+  server.bind("exec",
+              [&](bot::Request request) { return loader->run(request); });
+
+  server.bind("list", [&]() {
+    bot::CommandDataVec list;
+    list.reserve(loader->get_commands().size());
+
+    for (const bot::CommandBox &c : loader->get_commands())
+      list.push_back(c->data());
+
+    return list;
   });
 
   server.run();

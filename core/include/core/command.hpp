@@ -3,6 +3,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "core/message.hpp"
@@ -13,9 +14,11 @@
 
 namespace bot {
   class Command;
+  struct CommandData;
 
   using CommandBox = std::shared_ptr<Command>;
   using CommandVec = std::vector<CommandBox>;
+  using CommandDataVec = std::vector<CommandData>;
 
   struct Requester {
       MessageSender sender;
@@ -36,7 +39,7 @@ namespace bot {
       MSGPACK_DEFINE(command_id, subcommand_id, contents, requester);
 
       static std::optional<Request> create(
-          const CommandVec &commands,
+          const CommandDataVec &commands,
           const Message<MessageType::ChatMessage> &message,
           const Requester &requester);
   };
@@ -62,16 +65,34 @@ namespace bot {
       std::optional<std::vector<std::string>> multiple;
   };
 
+  struct CommandData {
+      std::string name;
+      int delay_seconds;
+      std::vector<std::string> aliases, subcommands;
+
+      MSGPACK_DEFINE(name, delay_seconds, aliases, subcommands);
+  };
+
   class Command {
     public:
+      explicit Command(std::string name, int delay_seconds = 5,
+                       std::vector<std::string> aliases = {},
+                       std::vector<std::string> subcommands = {})
+          : name(std::move(name)),
+            delay_seconds(delay_seconds),
+            aliases(std::move(aliases)),
+            subcommands(std::move(subcommands)) {};
+
       ~Command() = default;
 
-      virtual const std::string get_name() const = 0;
       virtual const Response run(const Request &request) const = 0;
 
-      std::vector<std::string> get_aliases() const { return {}; }
-      int get_delay_seconds() const { return 5; }
-      std::vector<std::string> get_subcommands() const { return {}; }
+      const CommandData data() const;
+
+    protected:
+      std::string name;
+      int delay_seconds;
+      std::vector<std::string> aliases, subcommands;
   };
 
   class CommandLoader {
@@ -80,11 +101,12 @@ namespace bot {
       ~CommandLoader() = default;
 
       void add(CommandBox command);
+      bool has(const std::string &command_id) const;
       CommandVec &get_commands();
 
       const Response run(const Request &request) const;
 
-    private:
+    protected:
       CommandVec commands;
   };
 }

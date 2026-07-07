@@ -3,6 +3,7 @@
 #include <optional>
 #include <string>
 
+#include "core/command.hpp"
 #include "rpc/client.h"
 
 namespace scriptvm {
@@ -12,6 +13,10 @@ namespace scriptvm {
 
       std::optional<std::string> execute_untrusted_script(
           const std::string &script);
+
+      bot::Response execute(const bot::Request &request);
+
+      bot::CommandDataVec list();
 
     private:
       rpc::client client;

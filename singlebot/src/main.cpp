@@ -1,7 +1,9 @@
+#include <chrono>
 #include <optional>
 #include <print>
 #include <stdexcept>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include "core/builtin.hpp"
@@ -37,26 +39,42 @@ int main(int argc, char *argv[]) {
         std::println("#{} <{}>: {}", message.source.login, message.sender.login,
                      message.contents);
 
-        bot::CommandVec commands;
-        commands.insert(commands.end(), command_loader.get_commands().begin(),
-                        command_loader.get_commands().end());
+        // combining commands
+        bot::CommandDataVec remote_commands = script_vm.list();
 
+        bot::CommandDataVec all_commands;
+        all_commands.reserve(remote_commands.size() +
+                             command_loader.get_commands().size());
+
+        for (const bot::CommandBox &c : command_loader.get_commands())
+          all_commands.push_back(c->data());
+
+        all_commands.insert(all_commands.end(), remote_commands.begin(),
+                            remote_commands.end());
+
+        // parsing request
         bot::Requester requester{message};
         std::optional<bot::Request> request =
-            bot::Request::create(commands, message, requester);
+            bot::Request::create(all_commands, message, requester);
+
+        bot::Response response;
 
         if (request.has_value()) {
-          auto response = command_loader.run(*request);
-
-          if (response.is_single()) {
-            chatbot.send_message("#" + message.source.login,
-                                 response.get_single());
+          if (command_loader.has(request->command_id)) {
+            response = command_loader.run(*request);
+          } else {
+            response = script_vm.execute(*request);
           }
         }
 
-        auto response = script_vm.execute_untrusted_script(message.contents);
-        if (response.has_value()) {
-          std::println("script vm: {}", response.value());
+        if (response.is_single()) {
+          chatbot.send_message("#" + message.source.login,
+                               response.get_single());
+        } else if (response.is_multiple()) {
+          for (const std::string &text : response.get_multiple()) {
+            chatbot.send_message("#" + message.source.login, text);
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+          }
         }
       });
 

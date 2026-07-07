@@ -7,7 +7,7 @@
 namespace bot::builtin {
   class PingCommand : public Command {
     public:
-      const std::string get_name() const override { return "ping"; }
+      PingCommand() : Command("ping2") {}
 
       const Response run(const Request &request) const override {
         return Response{"Pong!"};

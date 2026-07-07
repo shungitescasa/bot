@@ -43,12 +43,13 @@ namespace scriptvm::lua {
   }
 
   LuaCommand::LuaCommand(std::shared_ptr<sol::state> state,
-                         const std::string &contents) {
+                         const std::string &contents)
+      : bot::Command("temp") {
     this->state = state;
 
     sol::table data = state->script(contents);
-    this->name = data["name"];
-    this->delay = data["delay_sec"];
+    name = data["name"];
+    delay_seconds = data["delay_sec"];
 
     sol::table subcommands = data["subcommands"];
     for (auto &k : subcommands) {
