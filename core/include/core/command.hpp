@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "core/message.hpp"
+#include "rpc/msgpack.hpp"
 
 #define ADD_COMMAND(loader, name) \
   loader.add(std::make_unique<bot::builtin::name>());
@@ -20,6 +21,9 @@ namespace bot {
       MessageSender sender;
       MessageSource source;
 
+      MSGPACK_DEFINE(sender, source);
+
+      Requester() = default;
       Requester(const Message<MessageType::ChatMessage> &message);
   };
 
@@ -29,6 +33,8 @@ namespace bot {
                                  contents = std::nullopt;
       Requester requester;
 
+      MSGPACK_DEFINE(command_id, subcommand_id, contents, requester);
+
       static std::optional<Request> create(
           const CommandVec &commands,
           const Message<MessageType::ChatMessage> &message,
@@ -37,9 +43,10 @@ namespace bot {
 
   class Response {
     public:
-      Response();
-      Response(std::string single);
-      Response(std::vector<std::string> multiple);
+      Response() = default;
+      Response(std::string single) : single(single), multiple(std::nullopt) {}
+      Response(std::vector<std::string> multiple)
+          : single(std::nullopt), multiple(multiple) {}
 
       const std::string get_single() const;
       const std::vector<std::string> get_multiple() const;
@@ -47,6 +54,8 @@ namespace bot {
       const bool is_single() const;
       const bool is_multiple() const;
       const bool is_empty() const;
+
+      MSGPACK_DEFINE(single, multiple);
 
     private:
       std::optional<std::string> single;

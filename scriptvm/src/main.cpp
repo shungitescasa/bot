@@ -3,6 +3,7 @@
 #include <optional>
 #include <stdexcept>
 
+#include "core/command.hpp"
 #include "core/config.hpp"
 #include "core/log.hpp"
 #include "rpc/server.h"
@@ -36,6 +37,10 @@ int main(int argc, char *argv[]) {
 
   server.bind("execute_untrusted_script",
               [](std::string script) { return std::make_optional("ok"); });
+
+  server.bind("exec", [&](const bot::Request &request) {
+    return loader->run(request);
+  });
 
   server.run();
 

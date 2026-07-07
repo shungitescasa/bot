@@ -20,8 +20,17 @@ set(Boost_NO_BOOST_CMAKE ON)
 find_package(Boost REQUIRED)
 find_package(OpenSSL REQUIRED)
 
+# rpc
+FetchContent_Declare(
+  rpc
+  GIT_REPOSITORY https://github.com/rpclib/rpclib.git
+  GIT_TAG v2.3.0
+)
+FetchContent_MakeAvailable(rpc)
+
 target_link_libraries(Core PUBLIC
     Boost::headers
     OpenSSL::SSL
     OpenSSL::Crypto
+    rpc
 )

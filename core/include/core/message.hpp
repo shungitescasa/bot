@@ -5,10 +5,14 @@
 #include <optional>
 #include <string>
 
+#include "rpc/msgpack.hpp"
+
 namespace bot {
   struct MessageSource {
       std::string login = "";
       unsigned int id = 0;
+
+      MSGPACK_DEFINE(login, id);
 
       MessageSource() = default;
       MessageSource(const std::string &login, const int &id)
@@ -22,11 +26,15 @@ namespace bot {
       bool is_first_message = false;
 
       std::map<std::string, std::string> badges;
+
+      MSGPACK_DEFINE(login, display_name, id, is_first_message, badges);
   };
 
   struct MessageReply {
       std::string id = "", login = "", display_name = "", message = "";
       unsigned int user_id = 0;
+
+      MSGPACK_DEFINE(id, login, display_name, message, user_id);
   };
 
   enum class MessageType { ChatMessage, Notification, Connect };

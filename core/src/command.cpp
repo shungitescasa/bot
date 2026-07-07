@@ -8,21 +8,6 @@
 #include <vector>
 
 namespace bot {
-  Response::Response() {
-    this->single = std::nullopt;
-    this->multiple = std::nullopt;
-  }
-
-  Response::Response(std::string single) {
-    this->single = single;
-    this->multiple = std::nullopt;
-  }
-
-  Response::Response(std::vector<std::string> multiple) {
-    this->single = std::nullopt;
-    this->multiple = multiple;
-  }
-
   const std::string Response::get_single() const {
     return this->single.value();
   }
