@@ -77,25 +77,37 @@ namespace bot::data {
       DatabaseRows exec(const std::string &sql,
                         const std::vector<std::string> &parameters) override {
         pqxx::work work(conn);
-        pqxx::result r = work.exec(sql, parameters);
+        pqxx::params p;
+        for (const auto &x : parameters) p.append(x);
+        pqxx::result r = work.exec(sql, p);
         work.commit();
 
         std::vector<std::map<std::string, std::string>> rows;
         for (auto const &row : r) {
           std::map<std::string, std::string> m;
+
           for (auto const &f : row) {
-            m[f.name()] = f.c_str() ? f.c_str() : "";
+            if (f.is_null()) {
+              m[f.name()] = "";
+              continue;
+            }
+
+            if (f.type() == 16) {
+              m[f.name()] = (*f.c_str() == 't') ? "1" : "0";
+            } else {
+              m[f.name()] = f.c_str();
+            }
           }
-          rows.push_back(m);
+
+          rows.push_back(std::move(m));
         }
         return rows;
       }
 
       void close() override { conn.close(); }
   };
-#endif
 
-#ifdef USE_MARIADB
+#elifdef USE_MARIADB
   struct MariaDatabase : public BaseDatabase {
     public:
       MYSQL *conn = nullptr;
@@ -268,6 +280,8 @@ namespace bot::data {
   };
 #endif
 
-  std::unique_ptr<BaseDatabase> create_connection(const Configuration &cfg);
-  std::unique_ptr<BaseDatabase> create_connection();
+  using DatabaseConnection = std::unique_ptr<BaseDatabase>;
+
+  DatabaseConnection create_connection(const Configuration &cfg);
+  DatabaseConnection create_connection();
 }
