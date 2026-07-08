@@ -9,8 +9,10 @@
 #include "core/builtin.hpp"
 #include "core/command.hpp"
 #include "core/config.hpp"
+#include "core/data/database.hpp"
 #include "core/irc/bot.hpp"
 #include "core/log.hpp"
+#include "core/message.hpp"
 #include "scriptvm/client.hpp"
 
 int main(int argc, char *argv[]) {
@@ -39,6 +41,10 @@ int main(int argc, char *argv[]) {
         log.debug(std::format("{} <{}>: {}", message.source.login,
                               message.sender.login, message.contents));
 
+        bot::data::DatabaseConnection conn = bot::data::create_connection();
+        bot::Requester requester{message, conn};
+        if (requester.room.parted_at.has_value()) return;
+
         if (!script_vm.is_alive()) {
           log.info("scriptVM RPC server is not alive! Reconnecting...");
           script_vm.connect();
@@ -58,7 +64,6 @@ int main(int argc, char *argv[]) {
                             remote_commands.end());
 
         // parsing request
-        bot::Requester requester{message};
         std::optional<bot::Request> request =
             bot::Request::create(all_commands, message, requester);
 

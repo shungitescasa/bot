@@ -12,6 +12,13 @@ target_include_directories(ScriptLib
         $<INSTALL_INTERFACE:include>
 )
 
+target_compile_definitions(ScriptLib PRIVATE
+  BOT_VERSION="${BOT_VERSION_STRING}"
+  BOT_COMPILED_TIMESTAMP=${PROJECT_COMPILE_TIME}
+  DEFAULT_PREFIX="${BOT_DEFAULT_PREFIX}"
+  DEFAULT_LOCALE_ID="${BOT_DEFAULT_LOCALE_ID}"
+)
+
 # ---------
 # Libraries
 # ---------
@@ -28,6 +35,13 @@ set_target_properties(
   RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin
 )
 target_link_libraries(ScriptVM PRIVATE Core ScriptLib)
+
+target_compile_definitions(ScriptVM PRIVATE
+  BOT_VERSION="${BOT_VERSION_STRING}"
+  BOT_COMPILED_TIMESTAMP=${PROJECT_COMPILE_TIME}
+  DEFAULT_PREFIX="${BOT_DEFAULT_PREFIX}"
+  DEFAULT_LOCALE_ID="${BOT_DEFAULT_LOCALE_ID}"
+)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_definitions(ScriptVM PRIVATE DEBUG_MODE)

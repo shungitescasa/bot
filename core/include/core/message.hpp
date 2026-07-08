@@ -4,6 +4,7 @@
 #include <map>
 #include <optional>
 #include <string>
+#include <utility>
 
 #include "rpc/msgpack.hpp"
 
@@ -15,8 +16,11 @@ namespace bot {
       MSGPACK_DEFINE(login, id);
 
       MessageSource() = default;
-      MessageSource(const std::string &login, const int &id)
-          : login(login), id(id) {}
+      MessageSource(const std::string &login)
+          : login(std::move(login)), id(0) {}
+      MessageSource(const unsigned int &id) : login(""), id(id) {}
+      MessageSource(const std::string &login, const unsigned int &id)
+          : login(std::move(login)), id(id) {}
 
       std::string normalize() const {
         if (login.starts_with("#")) return login.substr(1);

@@ -1,6 +1,9 @@
 #include "core/utils.hpp"
 
 #include <iomanip>
+#include <ranges>
+#include <string>
+#include <vector>
 
 namespace bot::utils {
 
@@ -13,6 +16,23 @@ namespace bot::utils {
         str.replace(pos, from.length(), to);
         pos += to.length();
       }
+    }
+
+    std::vector<std::string> split_and_collect(std::string input,
+                                               char delimiter) {
+      std::vector<std::string> parts;
+      for (auto sv : std::ranges::views::split(input, delimiter)) {
+        parts.emplace_back(std::string(sv.begin(), sv.end()));
+      }
+      return parts;
+    }
+
+    std::string join(std::vector<std::string> v, std::string delimiter) {
+      std::string o;
+      for (const auto &part :
+           std::views::all(v) | std::views::join_with(delimiter))
+        o += part;
+      return o;
     }
   }
 

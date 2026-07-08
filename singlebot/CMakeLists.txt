@@ -9,17 +9,14 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_compile_definitions(SingleBot PRIVATE DEBUG_MODE DEFAULT_PREFIX="~")
-else()
-    target_compile_definitions(SingleBot PRIVATE DEFAULT_PREFIX="!")
+    target_compile_definitions(SingleBot PRIVATE DEBUG_MODE)
 endif()
-
-string(TIMESTAMP PROJECT_COMPILE_TIME "%s")
 
 target_compile_definitions(SingleBot PRIVATE
   BOT_VERSION="${BOT_VERSION_STRING}"
   BOT_COMPILED_TIMESTAMP=${PROJECT_COMPILE_TIME}
-  DEFAULT_LOCALE_ID="english"
+  DEFAULT_PREFIX="${BOT_DEFAULT_PREFIX}"
+  DEFAULT_LOCALE_ID="${BOT_DEFAULT_LOCALE_ID}"
 )
 
 set_target_properties(

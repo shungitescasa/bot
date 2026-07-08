@@ -3,11 +3,11 @@
 #include <algorithm>
 #include <memory>
 #include <optional>
-#include <ranges>
 #include <string>
 #include <vector>
 
 #include "core/data/chat.hpp"
+#include "core/utils.hpp"
 
 namespace bot {
   const std::string Response::get_single() const {
@@ -129,7 +129,7 @@ namespace bot {
       senders = conn->query_all<data::Sender>(
           "SELECT * FROM senders WHERE (name != '' AND name = $1) OR (alias_id "
           "!= -1 AND alias_id = $2) LIMIT 1",
-          {message.source.normalize(), std::to_string(message.source.id)});
+          {message.sender.login, std::to_string(message.sender.id)});
     }
 
     sender = senders.front();
@@ -226,11 +226,19 @@ namespace bot {
       const Message<MessageType::ChatMessage> &message,
       const Requester &requester) {
     std::string contents = message.contents;
-    if (contents.empty()) return std::nullopt;
+    if (contents.empty() ||
+        !contents.starts_with(requester.room_preferences.prefix) ||
+        requester.room_preferences.silent_mode ||
+        requester.room.parted_at.has_value() ||
+        requester.sender_right.level ==
+            static_cast<int>(data::PermissionLevel::Suspended))
+      return std::nullopt;
 
-    auto parts = std::ranges::views::split(contents, ' ');
+    contents = contents.substr(requester.room_preferences.prefix.length());
 
-    std::string command_id(parts.front().begin(), parts.front().end());
+    auto parts = utils::string::split_and_collect(contents, ' ');
+
+    std::string command_id = parts.front();
 
     auto cmd = std::find_if(
         commands.begin(), commands.end(), [&command_id](const CommandData &c) {
@@ -244,8 +252,23 @@ namespace bot {
 
     if (cmd == commands.end()) return std::nullopt;
 
-    Request r{.requester = requester};
-    r.command_id = command_id;
+    Request r{.command_id = command_id,
+              .reply = message.reply,
+              .requester = requester};
+
+    parts.erase(parts.begin());
+    if (parts.empty()) return r;
+
+    if (std::any_of(cmd->subcommands.begin(), cmd->subcommands.end(),
+                    [&](const std::string &x) {
+                      return x == "*" || x == parts.front();
+                    })) {
+      r.subcommand_id = parts.front();
+      parts.erase(parts.begin());
+    }
+
+    std::string rcontents = utils::string::join(parts, " ");
+    if (!rcontents.empty()) r.contents = rcontents;
 
     return r;
   }
