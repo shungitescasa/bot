@@ -15,6 +15,10 @@ namespace bot {
                                 const std::string &message) = 0;
 
       virtual void connect() = 0;
+
+      virtual void join(const MessageSource &source) = 0;
+
+      virtual const MessageSource &get_me() const = 0;
   };
 
   class EventChatBot {

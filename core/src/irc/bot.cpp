@@ -29,7 +29,16 @@ namespace bot::irc {
     this->send_raw(std::format("PRIVMSG {} :{}", room, message));
   }
 
+  void IRCChatBot::join(const MessageSource &source) {
+    std::string room = source.login;
+    if (!room.starts_with("#")) room = "#" + room;
+    this->send_raw("JOIN " + room);
+  }
+
   void IRCChatBot::connect() {
+    this->logger.info(
+        std::format("Connecting to {}:{}...", this->host, this->port));
+
     boost::asio::ip::tcp::resolver resolver(this->io);
     boost::asio::connect(socket.next_layer(),
                          resolver.resolve(this->host, this->port));
@@ -80,6 +89,10 @@ namespace bot::irc {
         this->send_raw("PONG" + (message->params.empty()
                                      ? ""
                                      : (" :" + message->params.front())));
+      }
+      // -- connected
+      else if (onConnect && message->command == "001") {
+        std::thread(this->onConnect).detach();
       }
       // -- authenticating on the server
       else if (message->command == "CAP" &&
@@ -145,4 +158,6 @@ namespace bot::irc {
       logger.error("Error reading from socket: " + ec.message());
     }
   }
+
+  const MessageSource &IRCChatBot::get_me() const { return this->me; }
 }

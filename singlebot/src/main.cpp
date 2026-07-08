@@ -36,6 +36,12 @@ int main(int argc, char *argv[]) {
 
   scriptvm::RPCClient script_vm(cfg.rpc.host, cfg.rpc.port);
 
+  chatbot.on_connect([&]() {
+    log.info("Connected!");
+
+    chatbot.join(chatbot.get_me());
+  });
+
   chatbot.on_chat_message(
       [&](bot::Message<bot::MessageType::ChatMessage> message) {
         log.debug(std::format("{} <{}>: {}", message.source.login,
