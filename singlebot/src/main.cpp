@@ -34,7 +34,8 @@ int main(int argc, char *argv[]) {
   bot::CommandLoader command_loader;
   ADD_COMMAND(command_loader, PingCommand)
 
-  scriptvm::RPCClient script_vm(cfg.rpc.host, cfg.rpc.port);
+  scriptvm::RPCClient &script_vm = scriptvm::RPCClient::get_instance();
+  script_vm.connect(cfg.rpc.host, cfg.rpc.port);
 
   chatbot.on_connect([&]() {
     log.info("Connected!");

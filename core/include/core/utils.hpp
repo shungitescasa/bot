@@ -19,5 +19,7 @@ namespace bot::utils {
     std::chrono::system_clock::time_point string_to_time_point(
         const std::string &value,
         const std::string &format = "%Y-%m-%d %H:%M:%S");
+
+    std::string humanize_timestamp(long long seconds);
   }
 }

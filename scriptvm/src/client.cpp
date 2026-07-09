@@ -26,7 +26,21 @@ namespace scriptvm {
     return this->client->call("list").as<bot::CommandDataVec>();
   }
 
+  bool RPCClient::connect(std::string host, unsigned int port,
+                          unsigned int timeout) {
+    this->host = host;
+    this->port = port;
+    this->timeout = timeout;
+    this->log = {"ScriptVM-Client/" + host + ":" + std::to_string(port)};
+    return this->connect();
+  }
+
   bool RPCClient::connect() {
+    if (this->host.empty()) {
+      this->log.warn("No host provided");
+      return false;
+    }
+
     try {
       this->log.info(
           std::format("Connecting to {}:{}...", this->host, this->port));
@@ -49,5 +63,10 @@ namespace scriptvm {
     } catch (...) {
       return false;
     }
+  }
+
+  long long RPCClient::uptime() {
+    if (!this->is_alive()) return -1;
+    return this->client->call("uptime").as<long long>();
   }
 }

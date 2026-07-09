@@ -1,5 +1,7 @@
 #include "core/utils.hpp"
 
+#include <cmath>
+#include <format>
 #include <iomanip>
 #include <ranges>
 #include <string>
@@ -49,6 +51,30 @@ namespace bot::utils {
       }
 
       return std::chrono::system_clock::from_time_t(std::mktime(&tm));
+    }
+
+    std::string humanize_timestamp(long long seconds) {
+      int d = std::round(seconds / (60 * 60 * 24));
+      int h = std::round(seconds / (60 * 60) % 24);
+      int m = std::round(seconds % (60 * 60) / 60);
+      int s = std::round(seconds % 60);
+
+      // Only seconds:
+      if (d == 0 && h == 0 && m == 0) {
+        return std::format("{}s", s);
+      }
+      // Minutes and seconds:
+      else if (d == 0 && h == 0) {
+        return std::format("{}m{}s", m, s);
+      }
+      // Hours and minutes:
+      else if (d == 0) {
+        return std::format("{}h{}m", h, m);
+      }
+      // Days and hours:
+      else {
+        return std::format("{}d{}h", d, h);
+      }
     }
   }
 }

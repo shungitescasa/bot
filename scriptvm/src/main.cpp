@@ -1,3 +1,4 @@
+#include <chrono>
 #include <format>
 #include <memory>
 #include <optional>
@@ -9,6 +10,9 @@
 #include "rpc/server.h"
 #include "scriptvm/lua.hpp"
 #include "scriptvm/script.hpp"
+
+const std::chrono::time_point<std::chrono::steady_clock> START_TIME =
+    std::chrono::steady_clock::now();
 
 int main(int argc, char *argv[]) {
   bot::Logger logger("ScriptVM-Main");
@@ -36,6 +40,12 @@ int main(int argc, char *argv[]) {
   rpc::server server(cfg.rpc.port);
 
   server.bind("alive", []() { return true; });
+  server.bind("uptime", []() {
+    return static_cast<long long>(
+        std::chrono::duration_cast<std::chrono::seconds>(
+            std::chrono::steady_clock::now() - START_TIME)
+            .count());
+  });
 
   server.bind("exec",
               [&](bot::Request request) { return loader->run(request); });

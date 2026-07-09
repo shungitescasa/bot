@@ -12,6 +12,7 @@
 namespace scriptvm {
   class RPCClient {
     public:
+      RPCClient() = default;
       RPCClient(std::string host, unsigned int port, unsigned int timeout = 0)
           : host(std::move(host)),
             port(port),
@@ -19,9 +20,14 @@ namespace scriptvm {
             log("ScriptVM-Client/" + host + ":" + std::to_string(port)) {
         connect();
       }
+      RPCClient(const RPCClient &) = delete;
+      RPCClient &operator=(const RPCClient &) = delete;
 
       bool is_alive();
+      long long uptime();
       bool connect();
+      bool connect(std::string host, unsigned int port,
+                   unsigned int timeout = 0);
 
       std::optional<std::string> execute_untrusted_script(
           const std::string &script);
@@ -30,11 +36,16 @@ namespace scriptvm {
 
       bot::CommandDataVec list();
 
-    private:
-      const bot::Logger log;
+      static RPCClient &get_instance() {
+        static RPCClient instance;
+        return instance;
+      }
 
-      const std::string host;
-      const unsigned int port, timeout;
+    private:
+      bot::Logger log;
+
+      std::string host;
+      unsigned int port, timeout;
 
       std::unique_ptr<rpc::client> client;
   };

@@ -16,7 +16,7 @@ namespace bot {
       void error(const std::string &message) const;
 
     private:
-      const std::string name;
+      std::string name;
 
       void log(const LogLevel &level, const std::string &message) const;
   };
