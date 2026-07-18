@@ -87,6 +87,21 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(sol)
 
+# json
+FetchContent_Declare(
+  json
+  URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
+)
+FetchContent_MakeAvailable(json)
+
+# http request maker
+FetchContent_Declare(
+  cpr
+  GIT_REPOSITORY https://github.com/libcpr/cpr.git
+  GIT_TAG 1.14.2
+)
+FetchContent_MakeAvailable(cpr)
+
 target_link_libraries(Core PUBLIC
     Boost::headers
     OpenSSL::SSL
@@ -94,4 +109,6 @@ target_link_libraries(Core PUBLIC
     rpc
     lua
     sol2::sol2
+    nlohmann_json::nlohmann_json
+    cpr::cpr
 )

@@ -18,6 +18,19 @@ extern "C" {
 #include "scriptvm/script.hpp"
 
 namespace scriptvm::lua {
+  namespace libraries {
+    void open_base_libraries(std::shared_ptr<sol::state> state);
+    void open_extended_libraries(std::shared_ptr<sol::state> state);
+
+    void open_storage_library(std::shared_ptr<sol::state> state,
+                              const bot::Requester &request,
+                              const std::string &lua_id);
+  }
+
+  bot::Response run_safe_lua_script(const bot::Request &request,
+                                    const std::string &script,
+                                    std::string lua_id, bool moon_prefix);
+
   class LuaCommand : public bot::Command {
     public:
       LuaCommand(std::shared_ptr<sol::state> state,

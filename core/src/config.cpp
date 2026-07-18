@@ -22,7 +22,12 @@ namespace bot {
       std::getline(iss, key, '=');
       std::getline(iss, value);
 
-      if (key == "irc.host")
+      if (key == "instance.name")
+        instance.name = value;
+      else if (key == "instance.user_agent")
+        instance.user_agent = value;
+
+      else if (key == "irc.host")
         irc.host = value;
       else if (key == "irc.port")
         irc.port = value;
@@ -67,5 +72,12 @@ namespace bot {
     }
 
     load_file(config_path);
+  }
+
+  sol::table Configuration::as_lua_table(
+      std::shared_ptr<sol::state> state) const {
+    sol::table o = state->create_table();
+
+    return o;
   }
 }
