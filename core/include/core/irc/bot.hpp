@@ -26,6 +26,7 @@ namespace bot::irc {
                         const std::string &message) override;
       void connect() override;
       void join(const MessageSource &source) override;
+      void part(const MessageSource &source) override;
 
       void send_raw(const std::string &message);
 

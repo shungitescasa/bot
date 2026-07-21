@@ -11,9 +11,11 @@
 #include <ranges>
 #include <string>
 
+#include "core/bot.hpp"
 #include "core/builtin.hpp"
 #include "core/command.hpp"
 #include "core/config.hpp"
+#include "core/message.hpp"
 
 namespace scriptvm::lua {
   bot::Response parse_lua_response(const sol::table &r, sol::object &res,
@@ -748,15 +750,18 @@ namespace scriptvm::lua {
     }
 
     void open_irc_library(std::shared_ptr<sol::state> state) {
-      state->set_function("irc_join_channel",
-                          [](const sol::table &room) { return false; });
+      state->set_function("irc_join_channel", [](const sol::table &room) {
+        bot::RPCChatBot::get_instance().join({room});
+      });
 
-      state->set_function("irc_send_message",
-                          [](const sol::table &room,
-                             const std::string &message) { return false; });
+      state->set_function("irc_send_message", [](const sol::table &room,
+                                                 const std::string &message) {
+        bot::RPCChatBot::get_instance().send_message({room}, message);
+      });
 
-      state->set_function("irc_part_channel",
-                          [](const sol::table &room) { return false; });
+      state->set_function("irc_part_channel", [](const sol::table &room) {
+        bot::RPCChatBot::get_instance().part({room});
+      });
     }
 
     void open_twitch_library(std::shared_ptr<sol::state> state) {

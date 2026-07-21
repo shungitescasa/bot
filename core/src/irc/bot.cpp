@@ -30,9 +30,11 @@ namespace bot::irc {
   }
 
   void IRCChatBot::join(const MessageSource &source) {
-    std::string room = source.login;
-    if (!room.starts_with("#")) room = "#" + room;
-    this->send_raw("JOIN " + room);
+    this->send_raw("JOIN " + source.unnormalize());
+  }
+
+  void IRCChatBot::part(const MessageSource &source) {
+    this->send_raw("PART " + source.unnormalize());
   }
 
   void IRCChatBot::connect() {

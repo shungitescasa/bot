@@ -3,6 +3,7 @@
 #include <functional>
 #include <map>
 #include <optional>
+#include <sol/sol.hpp>
 #include <string>
 #include <utility>
 
@@ -21,9 +22,18 @@ namespace bot {
       MessageSource(const unsigned int &id) : login(""), id(id) {}
       MessageSource(const std::string &login, const unsigned int &id)
           : login(std::move(login)), id(id) {}
+      MessageSource(const sol::table &table) {
+        if (table["login"].valid()) this->login = table["login"];
+        if (table["id"].valid()) this->id = table["id"];
+      }
 
       std::string normalize() const {
         if (login.starts_with("#")) return login.substr(1);
+        return login;
+      }
+
+      std::string unnormalize() const {
+        if (!login.starts_with("#")) return "#" + login;
         return login;
       }
   };

@@ -1,11 +1,13 @@
 #include <chrono>
 #include <format>
+#include <memory>
 #include <optional>
 #include <stdexcept>
 #include <string>
 #include <thread>
 #include <vector>
 
+#include "core/bot.hpp"
 #include "core/builtin.hpp"
 #include "core/command.hpp"
 #include "core/config.hpp"
@@ -28,8 +30,11 @@ int main(int argc, char *argv[]) {
         "irc.host, irc.port, irc.nick, irc.pass must be set for IRC chatbot");
   }
 
-  bot::irc::IRCChatBot chatbot(cfg.irc.host, cfg.irc.port, cfg.irc.nick,
-                               cfg.irc.pass);
+  std::shared_ptr<bot::irc::IRCChatBot> chatbot =
+      std::make_shared<bot::irc::IRCChatBot>(cfg.irc.host, cfg.irc.port,
+                                             cfg.irc.nick, cfg.irc.pass);
+
+  bot::RPCChatBotServer rpc_server(chatbot, cfg.rpc.client_port);
 
   bot::CommandLoader command_loader;
   ADD_COMMAND(command_loader, PingCommand)
@@ -37,13 +42,13 @@ int main(int argc, char *argv[]) {
   scriptvm::RPCClient &script_vm = scriptvm::RPCClient::get_instance();
   script_vm.connect(cfg.rpc.host, cfg.rpc.port);
 
-  chatbot.on_connect([&]() {
+  chatbot->on_connect([&]() {
     log.info("Connected!");
 
-    chatbot.join(chatbot.get_me());
+    chatbot->join(chatbot->get_me());
   });
 
-  chatbot.on_chat_message(
+  chatbot->on_chat_message(
       [&](bot::Message<bot::MessageType::ChatMessage> message) {
         log.debug(std::format("{} <{}>: {}", message.source.login,
                               message.sender.login, message.contents));
@@ -85,15 +90,17 @@ int main(int argc, char *argv[]) {
         }
 
         if (response.is_single()) {
-          chatbot.send_message("#" + message.source.login,
-                               response.get_single());
+          chatbot->send_message("#" + message.source.login,
+                                response.get_single());
         } else if (response.is_multiple()) {
           for (const std::string &text : response.get_multiple()) {
-            chatbot.send_message("#" + message.source.login, text);
+            chatbot->send_message("#" + message.source.login, text);
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
           }
         }
       });
 
-  chatbot.connect();
+  rpc_server.run();
+
+  chatbot->connect();
 }

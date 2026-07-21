@@ -26,8 +26,8 @@ namespace bot {
   };
 
   struct RPCConfiguration {
-      std::string host = "127.0.0.1";
-      unsigned int port = 3002;
+      std::string host = "127.0.0.1", client_host = "127.0.0.1";
+      unsigned int port = 3002, client_port = 3003;
   };
 
   struct ScriptConfiguration {

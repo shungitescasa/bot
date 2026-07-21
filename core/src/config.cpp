@@ -40,6 +40,10 @@ namespace bot {
         rpc.host = value;
       else if (key == "rpc.port")
         rpc.port = std::stoi(value);
+      else if (key == "rpc.client_host")
+        rpc.client_host = value;
+      else if (key == "rpc.client_port")
+        rpc.client_port = std::stoi(value);
 
       else if (key == "script.loader")
         script.loader = value;

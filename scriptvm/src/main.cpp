@@ -4,6 +4,7 @@
 #include <optional>
 #include <stdexcept>
 
+#include "core/bot.hpp"
 #include "core/command.hpp"
 #include "core/config.hpp"
 #include "core/log.hpp"
@@ -20,6 +21,10 @@ int main(int argc, char *argv[]) {
 
   bot::Configuration &cfg = bot::Configuration::get_instance();
   cfg.load_from_args(argc, argv);
+
+  // connecting to RPC chatbot
+  bot::RPCChatBot &chatbot = bot::RPCChatBot::get_instance();
+  chatbot.connect(cfg.rpc.client_host, cfg.rpc.client_port);
 
   // loading scripts
   logger.info("Loading scripts...");

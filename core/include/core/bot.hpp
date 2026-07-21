@@ -1,9 +1,14 @@
 #pragma once
 
+#include <format>
 #include <functional>
+#include <memory>
 #include <string>
 
+#include "core/log.hpp"
 #include "core/message.hpp"
+#include "rpc/client.h"
+#include "rpc/server.h"
 
 namespace bot {
   class ChatBot {
@@ -17,6 +22,7 @@ namespace bot {
       virtual void connect() = 0;
 
       virtual void join(const MessageSource &source) = 0;
+      virtual void part(const MessageSource &source) = 0;
 
       virtual const MessageSource &get_me() const = 0;
   };
@@ -41,5 +47,54 @@ namespace bot {
       typename MessageHandler<MessageType::ChatMessage>::fn onChatMessage;
       typename MessageHandler<MessageType::Connect>::fn onConnect;
       typename MessageHandler<MessageType::Notification>::fn onNotification;
+  };
+
+  class RPCChatBotServer {
+    public:
+      RPCChatBotServer(std::shared_ptr<ChatBot> bot, unsigned int port)
+          : bot(std::move(bot)), server(port) {}
+      ~RPCChatBotServer() = default;
+
+      void run();
+
+    private:
+      rpc::server server;
+      std::shared_ptr<ChatBot> bot;
+  };
+
+  class RPCChatBot {
+    public:
+      RPCChatBot() = default;
+      RPCChatBot(std::string host, unsigned int port, unsigned int timeout = 0)
+          : host(std::move(host)),
+            port(port),
+            timeout(timeout),
+            log(std::format("TinyBot-RPCClient/{}:{}", host, port)) {
+        connect();
+      }
+      RPCChatBot(const RPCChatBot &) = delete;
+      RPCChatBot &operator=(const RPCChatBot &) = delete;
+
+      bool is_alive();
+
+      bool connect();
+      bool connect(std::string host, unsigned int port,
+                   unsigned int timeout = 0);
+
+      void send_message(const MessageSource &source,
+                        const std::string &message);
+      void join(const MessageSource &source);
+      void part(const MessageSource &source);
+
+      static RPCChatBot &get_instance() {
+        static RPCChatBot instance;
+        return instance;
+      }
+
+    private:
+      bot::Logger log;
+      std::string host;
+      unsigned int port, timeout;
+      std::unique_ptr<rpc::client> client;
   };
 }
