@@ -12,6 +12,7 @@
 #include "core/command.hpp"
 #include "core/config.hpp"
 #include "core/data/database.hpp"
+#include "core/externalapi/twitch.hpp"
 #include "core/irc/bot.hpp"
 #include "core/log.hpp"
 #include "core/message.hpp"
@@ -33,6 +34,10 @@ int main(int argc, char *argv[]) {
   std::shared_ptr<bot::irc::IRCChatBot> chatbot =
       std::make_shared<bot::irc::IRCChatBot>(cfg.irc.host, cfg.irc.port,
                                              cfg.irc.nick, cfg.irc.pass);
+
+  bot::externalapi::twitch::HelixClient &twitch_api =
+      bot::externalapi::twitch::HelixClient::get_instance();
+  twitch_api.set_token(cfg.twitch.token);
 
   bot::RPCChatBotServer rpc_server(chatbot, cfg.rpc.client_port);
 
@@ -100,7 +105,13 @@ int main(int argc, char *argv[]) {
         }
       });
 
-  rpc_server.run();
+  std::vector<std::thread> threads;
+  threads.push_back(std::thread(&bot::RPCChatBotServer::run, &rpc_server));
+  threads.push_back(std::thread(&bot::ChatBot::connect, chatbot));
 
-  chatbot->connect();
+  for (auto &t : threads) {
+    if (t.joinable()) t.join();
+  }
+
+  return 0;
 }

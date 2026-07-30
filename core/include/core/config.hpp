@@ -45,12 +45,17 @@ namespace bot {
 #endif
   };
 
+  struct TwitchConfiguration {
+      std::string token = "";
+  };
+
   struct Configuration {
       InstanceConfiguration instance;
       IRCConfiguration irc;
       RPCConfiguration rpc;
       ScriptConfiguration script;
       DatabaseConfiguration database;
+      TwitchConfiguration twitch;
 
       Configuration() = default;
       Configuration(const Configuration &) = delete;

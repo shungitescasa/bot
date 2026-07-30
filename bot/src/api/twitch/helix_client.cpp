@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "config.hpp"
+#include "core/externalapi/twitch.hpp"
 #include "cpr/api.h"
 #include "cpr/bearer.h"
 #include "cpr/cprtypes.h"
@@ -15,12 +16,8 @@
 #include "schemas/user.hpp"
 #include "utils/string.hpp"
 
-namespace bot::api::twitch {
-  HelixClient::HelixClient(const std::string &token,
-                           const std::string &client_id) {
-    this->token = token;
-    this->client_id = client_id;
-  }
+namespace bot::externalapi::twitch {
+  void HelixClient::verify_token() {};
 
   std::vector<schemas::User> HelixClient::get_users(
       const std::vector<std::string> &logins) const {

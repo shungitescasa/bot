@@ -766,19 +766,98 @@ namespace scriptvm::lua {
 
     void open_twitch_library(std::shared_ptr<sol::state> state) {
       // TODO: ratelimits
-      state->set_function("twitch_get_chatters",
-                          [state]() { return state->create_table(); });
+      state->set_function(
+          "twitch_get_chatters", [state](const int &broadcaster_id) {
+            auto &chatbot = bot::RPCChatBot::get_instance();
+            auto users =
+                bot::RPCChatBot::get_instance().get_chatters(broadcaster_id);
+
+            sol::table o = state->create_table();
+
+            for (auto &user : users) {
+              sol::table u = state->create_table();
+              u["id"] = user.id;
+              u["login"] = user.login;
+              o.add(u);
+            }
+
+            return o;
+          });
 
       state->set_function("twitch_get_users", [state](const sol::table &names) {
-        return state->create_table();
+        std::vector<int> ids;
+        std::vector<std::string> logins;
+
+        for (auto &[k, v] : names) {
+          if (!v.is<sol::table>() || !k.is<std::string>()) {
+            continue;
+          }
+
+          sol::table t = v.as<sol::table>();
+          std::string name = k.as<std::string>();
+
+          if (name == "logins") {
+            for (auto &[_, x] : t) {
+              if (x.is<std::string>()) {
+                logins.push_back(x.as<std::string>());
+              }
+            }
+          } else if (name == "ids") {
+            for (auto &[_, x] : t) {
+              if (x.is<long long>()) {
+                ids.push_back(x.as<long long>());
+              }
+            }
+          } else {
+            throw std::runtime_error("Unknown key: " + name);
+          }
+        }
+
+        if (ids.empty() && logins.empty()) {
+          throw std::runtime_error("No IDs or logins to search for.");
+        }
+
+        auto users = bot::RPCChatBot::get_instance().get_users(ids, logins);
+
+        sol::table o = state->create_table();
+
+        for (auto &user : users) {
+          sol::table u = state->create_table();
+          u["id"] = user.id;
+          u["login"] = user.login;
+          o.add(u);
+        }
+
+        return o;
       });
 
-      state->set_function("twitch_get_global_emotes",
-                          [state]() { return state->create_table(); });
+      state->set_function("twitch_get_global_emotes", [state]() {
+        auto emotes = bot::RPCChatBot::get_instance().get_global_emotes();
+        sol::table o = state->create_table();
 
-      state->set_function(
-          "twitch_get_channel_emotes",
-          [state](const unsigned int &id) { return state->create_table(); });
+        for (auto emote : emotes) {
+          sol::table e = state->create_table();
+          e["id"] = emote.id;
+          e["name"] = emote.code;
+          o.add(e);
+        }
+
+        return o;
+      });
+
+      state->set_function("twitch_get_channel_emotes", [state](const int &id) {
+        auto emotes = bot::RPCChatBot::get_instance().get_channel_emotes(id);
+        sol::table o = state->create_table();
+
+        for (auto emote : emotes) {
+          sol::table e = state->create_table();
+          e["id"] = emote.id;
+          e["name"] = emote.code;
+          o.add(e);
+        }
+
+        return o;
+      });
     }
 
     void open_kick_library(std::shared_ptr<sol::state> state) {

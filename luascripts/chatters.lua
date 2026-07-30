@@ -43,7 +43,7 @@ After collecting the list of chatters, the bot returns a link to the paste from
 			return l10n_custom_formatted_line_request(request, lines, "command_unavailable", {})
 		end
 
-		chatters = twitch_get_chatters()
+		chatters = twitch_get_chatters(request.channel.alias_id)
 		body = #chatters .. " chatters\r\n---------------------\r\n\r\n"
 
 		for i = 1, #chatters, 1 do

@@ -62,6 +62,9 @@ namespace bot {
         database.password = value;
       else if (key == "database.port")
         database.port = std::stoi(value);
+
+      else if (key == "twitch.token")
+        twitch.token = value;
     }
   }
 

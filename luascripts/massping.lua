@@ -8,7 +8,7 @@ return {
     aliases = {},
     minimal_rights = "moderator",
     handle = function(request)
-        local chatters = twitch_get_chatters()
+        local chatters = twitch_get_chatters(request.channel.alias_id)
 
         local m = ""
 

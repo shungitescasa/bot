@@ -4,7 +4,9 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <vector>
 
+#include "core/externalapi/twitch.hpp"
 #include "core/log.hpp"
 #include "core/message.hpp"
 #include "rpc/client.h"
@@ -52,12 +54,15 @@ namespace bot {
   class RPCChatBotServer {
     public:
       RPCChatBotServer(std::shared_ptr<ChatBot> bot, unsigned int port)
-          : bot(std::move(bot)), server(port) {}
+          : bot(bot),
+            server(port),
+            log(std::format("RPCChatBotServer:{}", port)) {}
       ~RPCChatBotServer() = default;
 
       void run();
 
     private:
+      bot::Logger log;
       rpc::server server;
       std::shared_ptr<ChatBot> bot;
   };
@@ -85,6 +90,18 @@ namespace bot {
                         const std::string &message);
       void join(const MessageSource &source);
       void part(const MessageSource &source);
+
+      MessageSource get_me();
+
+      // --- Twitch API
+
+      std::vector<externalapi::twitch::User> get_chatters(
+          const int &broadcaster_id);
+      std::vector<externalapi::twitch::User> get_users(
+          const std::vector<int> &ids, const std::vector<std::string> &logins);
+      std::vector<externalapi::twitch::MsgPackEmote> get_global_emotes();
+      std::vector<externalapi::twitch::MsgPackEmote> get_channel_emotes(
+          const int &id);
 
       static RPCChatBot &get_instance() {
         static RPCChatBot instance;

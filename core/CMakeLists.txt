@@ -13,7 +13,7 @@ target_include_directories(Core PUBLIC
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_compile_definitions(Core PRIVATE DEBUG_MODE)
+  target_compile_definitions(Core PRIVATE DEBUG_MODE)
 endif()
 
 target_compile_definitions(Core PRIVATE
@@ -102,6 +102,14 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(cpr)
 
+# emotespp
+FetchContent_Declare(
+  emotespp
+  GIT_REPOSITORY https://git.shungites.casa/lib/emotespp.git
+  GIT_TAG master
+)
+FetchContent_MakeAvailable(emotespp)
+
 target_link_libraries(Core PUBLIC
     Boost::headers
     OpenSSL::SSL
@@ -111,4 +119,5 @@ target_link_libraries(Core PUBLIC
     sol2::sol2
     nlohmann_json::nlohmann_json
     cpr::cpr
+    emotespp
 )

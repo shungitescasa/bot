@@ -406,7 +406,7 @@ The `!event` command gives the ability to manage events.
             local names = {}
 
             if event.is_massping == "1" then
-                local chatters = twitch_get_chatters()
+                local chatters = twitch_get_chatters(request.channel.alias_id)
                 for i = 1, #chatters, 1 do
                     table.insert(names, chatters[i].login)
                 end

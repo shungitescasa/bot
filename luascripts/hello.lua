@@ -6,6 +6,7 @@ return {
     subcommands = {},
     minimal_rights = "user",
     handle = function(request)
+        irc_send_message({ login = "#ilotterytea" }, "test")
         return "hello, " .. request.sender.alias_name .. "!"
     end
 }
