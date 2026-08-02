@@ -65,6 +65,20 @@ namespace bot {
 
       else if (key == "twitch.token")
         twitch.token = value;
+
+      else if (key == "anonbin.url")
+        anonbin.url = value;
+      else if (key == "anonbin.contents")
+        anonbin.contents = value;
+      else if (key == "anonbin.subject")
+        anonbin.subject = value;
+      else if (key == "anonbin.path")
+        anonbin.path = value;
+
+      else if (key == "anonupload.url")
+        anonupload.url = value;
+      else if (key == "anonupload.base64_contents")
+        anonupload.base64_contents = value;
     }
   }
 

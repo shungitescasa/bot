@@ -49,6 +49,17 @@ namespace bot {
       std::string token = "";
   };
 
+  struct AnonbinConfiguration {
+      std::optional<std::string> url = std::nullopt;
+      std::string contents = "contents", subject = "subject",
+                  path = "data.urls.download_url";
+  };
+
+  struct AnonuploadConfiguration {
+      std::optional<std::string> url = std::nullopt;
+      std::string base64_contents = "base64";
+  };
+
   struct Configuration {
       InstanceConfiguration instance;
       IRCConfiguration irc;
@@ -56,6 +67,8 @@ namespace bot {
       ScriptConfiguration script;
       DatabaseConfiguration database;
       TwitchConfiguration twitch;
+      AnonbinConfiguration anonbin;
+      AnonuploadConfiguration anonupload;
 
       Configuration() = default;
       Configuration(const Configuration &) = delete;

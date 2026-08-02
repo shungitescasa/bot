@@ -9,6 +9,7 @@
 #include <memory>
 #include <nlohmann/json.hpp>
 #include <ranges>
+#include <stdexcept>
 #include <string>
 
 #include "core/bot.hpp"
@@ -697,6 +698,54 @@ namespace scriptvm::lua {
 
             return t;
           });
+
+      state->set_function("paste_upload", [state](const std::string &contents,
+                                                  const sol::object &subject) {
+        bot::Configuration &cfg = bot::Configuration::get_instance();
+
+        cpr::Multipart multipart = {{cfg.anonbin.contents, contents}};
+        if (subject.is<std::string>()) {
+          multipart.parts.push_back(
+              {cfg.anonbin.subject, subject.as<std::string>()});
+        }
+
+        cpr::Response response =
+            cpr::Post(cpr::Url{*cfg.anonbin.url}, multipart,
+                      cpr::Header{{"Accept", "application/json"},
+                                  {"User-Agent", cfg.instance.user_agent}});
+
+        if (response.status_code >= 400) {
+          throw std::runtime_error("Failed to upload paste: " +
+                                   std::to_string(response.status_code));
+        }
+
+        nlohmann::json o = nlohmann::json::parse(response.text);
+        for (const auto &part :
+             std::ranges::views::split(cfg.anonbin.path, '.'))
+          o = o[std::string(part.begin(), part.end())];
+        return parse_json_object(state, o);
+      });
+
+      state->set_function("image_upload_base64", [state](const std::string &base64) {
+        bot::Configuration &cfg = bot::Configuration::get_instance();
+
+        cpr::Response response =
+            cpr::Post(cpr::Url{*cfg.anonupload.url},
+                cpr::Multipart{{cfg.anonupload.base64_contents, base64}},
+                      cpr::Header{{"Accept", "application/json"},
+                                  {"User-Agent", cfg.instance.user_agent}});
+
+        if (response.status_code >= 400) {
+          throw std::runtime_error("Failed to upload image: " +
+                                   std::to_string(response.status_code));
+        }
+
+        nlohmann::json o = nlohmann::json::parse(response.text);
+        for (const auto &part :
+             std::ranges::views::split(cfg.anonbin.path, '.'))
+          o = o[std::string(part.begin(), part.end())];
+        return parse_json_object(state, o);
+      });
     }
 
     void open_rss_library(std::shared_ptr<sol::state> state) {

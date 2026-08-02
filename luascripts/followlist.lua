@@ -1,20 +1,18 @@
 local lines = {
-	english = {
-		["command_unavailable"] = "{sender.alias_name}: This command is not available.",
-		["external_api_error"] = "{sender.alias_name}: Failed to get followlist for %s. Try again later. (%s)",
-		["success"] = "{sender.alias_name}: %s",
-	},
-	russian = {
-		["command_unavailable"] = "{sender.alias_name}: Эта команда недоступна.",
-		["external_api_error"] = "{sender.alias_name}: Не удалось получить фолловлист %s. Попробуйте позже. (%s)",
-		["success"] = "{sender.alias_name}: %s",
-	},
+    english = {
+        ["external_api_error"] = "{sender.alias_name}: Failed to get followlist for %s. Try again later. (%s)",
+        ["success"] = "{sender.alias_name}: %s",
+    },
+    russian = {
+        ["external_api_error"] = "{sender.alias_name}: Не удалось получить фолловлист %s. Попробуйте позже. (%s)",
+        ["success"] = "{sender.alias_name}: %s",
+    },
 }
 
 return {
-	name = "followlist",
-	summary = "Get user's followlist.",
-	description = [[
+    name = "followlist",
+    summary = "Get user's followlist.",
+    description = [[
 Read the user's follows as plain text.
 After collecting the list of chatters, the bot returns a link to the paste from
 the Pastebin-like service.
@@ -25,68 +23,44 @@ the Pastebin-like service.
 
 + `<username>` - Twitch username *(optional)*.
 ]],
-	delay_sec = 5,
-	options = {},
-	subcommands = {},
-	aliases = { "flist", "follows" },
-	minimal_rights = "user",
-	handle = function(request)
-		cfg = bot_config()
-		if cfg == nil then
-			return l10n_custom_formatted_line_request(request, lines, "command_unavailable", {})
-		end
+    delay_sec = 5,
+    options = {},
+    subcommands = {},
+    aliases = { "flist", "follows" },
+    minimal_rights = "user",
+    handle = function(request)
+        local username = request.sender.alias_name
 
-		if
-			cfg.url.paste_service == nil
-			or cfg.commands.paste_path == nil
-			or cfg.commands.paste_body_name == nil
-			or cfg.commands.paste_title_name == nil
-		then
-			return l10n_custom_formatted_line_request(request, lines, "command_unavailable", {})
-		end
+        if request.message ~= nil then
+            username = request.message
+        end
 
-		username = request.sender.alias_name
+        local response =
+            net_get_with_headers("https://tools.alright.party/" .. username .. "/follows",
+                { Accept = "application/json" })
 
-		if request.message ~= nil then
-			username = request.message
-		end
+        if response.code ~= 200 then
+            return l10n_custom_formatted_line_request(request, lines, "external_api_error", { username, response.code })
+        end
 
-		response =
-			net_get_with_headers("https://tools.alright.party/" .. username .. "/follows", { Accept = "application/json" })
+        local followingList = json_parse(response.text)
 
-		if response.code ~= 200 then
-			return l10n_custom_formatted_line_request(request, lines, "external_api_error", { username, response.code })
-		end
+        local body = followingList.totalCount .. " channels\r\n---------------------\r\n\r\n"
 
-		followingList = json_parse(response.text)
+        for i = 1, #followingList.follows, 1 do
+            local follow = followingList.follows[i]
+            body = body .. follow.login .. "\r\n"
+        end
 
-		body = followingList.totalCount .. " channels\r\n---------------------\r\n\r\n"
+        if #followingList.follows == 0 then
+            body = body ..
+                "It appears that Twitch restricted the request and did not send a list of channels the user follows."
+        end
 
-		for i = 1, #followingList.follows, 1 do
-			follow = followingList.follows[i]
-			body = body .. follow.login .. "\r\n"
-		end
+        local time = time_format(time_current(), "%d.%m.%Y %H:%M:%S %z")
 
-		time = time_format(time_current(), "%d.%m.%Y %H:%M:%S %z")
+        local link = paste_upload(body, username .. "'s followlist on " .. time)
 
-		response = net_post_multipart_with_headers(cfg.url.paste_service, {
-			[cfg.commands.paste_body_name] = body,
-			[cfg.commands.paste_title_name] = username .. "'s followlist on " .. time,
-		}, {
-			Accept = "application/json",
-		})
-
-		if response.code ~= 201 and response.code ~= 200 then
-			return l10n_custom_formatted_line_request(request, lines, "external_api_error", { response.code })
-		end
-
-		body = json_parse(response.text)
-
-		link = json_get_value(body, cfg.commands.paste_path)
-		if link == nil then
-			return l10n_custom_formatted_line_request(request, lines, "command_unavailable", {})
-		end
-
-		return l10n_custom_formatted_line_request(request, lines, "success", { link })
-	end,
+        return l10n_custom_formatted_line_request(request, lines, "success", { link })
+    end,
 }
