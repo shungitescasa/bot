@@ -50,7 +50,31 @@ int main(int argc, char *argv[]) {
   chatbot->on_connect([&]() {
     log.info("Connected!");
 
+    // wait for NICK announce
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
     chatbot->join(chatbot->get_me());
+
+    bot::data::DatabaseConnection conn = bot::data::create_connection();
+    bot::data::DatabaseRows rows =
+        conn->exec("SELECT name, alias_id FROM rooms WHERE parted_at IS NULL");
+
+    int i = 0;
+
+    for (bot::data::DatabaseRow row : rows) {
+      if (i >= 5) {
+        log.info("Initial JOIN cooldown... (30 seconds)");
+        std::this_thread::sleep_for(std::chrono::seconds(30));
+        i = 0;
+      }
+
+      std::string name = row.at("name");
+      log.info(std::format("Joining #{}...", name));
+      chatbot->join({name});
+
+      std::this_thread::sleep_for(std::chrono::milliseconds(500));
+      i++;
+    }
   });
 
   chatbot->on_chat_message(
