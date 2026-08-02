@@ -154,6 +154,12 @@ namespace bot::irc {
         throw std::runtime_error(
             "Invalid username or password (SASL authentication failed)");
       }
+      // setting actual nickname
+      else if (message->command == "NICK") {
+        logger.info(std::format("Renamed this bot from {} to {}",
+                                this->me.login, message->params.at(0)));
+        this->me.login = message->params.at(0);
+      }
     }
 
     if (ec) {
