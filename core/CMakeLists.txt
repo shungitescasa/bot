@@ -110,6 +110,14 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(emotespp)
 
+# xml
+FetchContent_Declare(
+  pugixml
+  GIT_REPOSITORY https://github.com/zeux/pugixml.git
+  GIT_TAG v1.16
+)
+FetchContent_MakeAvailable(pugixml)
+
 target_link_libraries(Core PUBLIC
     Boost::headers
     OpenSSL::SSL
@@ -120,4 +128,5 @@ target_link_libraries(Core PUBLIC
     nlohmann_json::nlohmann_json
     cpr::cpr
     emotespp
+    pugixml
 )

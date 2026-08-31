@@ -13,6 +13,14 @@ namespace bot::utils {
                                                char delimiter);
 
     std::string join(std::vector<std::string> v, std::string delimiter);
+
+    std::vector<std::vector<std::string>> separate_by_length(
+        const std::vector<std::string> &vector, const int &max_length);
+
+    std::vector<std::string> separate_by_length(
+        const std::string &base, const std::vector<std::string> &values,
+        const std::string &prefix, const std::string &separator,
+        const long long &max_length);
   }
 
   namespace chrono {

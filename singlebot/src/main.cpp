@@ -12,10 +12,13 @@
 #include "core/command.hpp"
 #include "core/config.hpp"
 #include "core/data/database.hpp"
+#include "core/data/event.hpp"
+#include "core/event.hpp"
 #include "core/externalapi/twitch.hpp"
 #include "core/irc/bot.hpp"
 #include "core/log.hpp"
 #include "core/message.hpp"
+#include "core/utils.hpp"
 #include "scriptvm/client.hpp"
 
 int main(int argc, char *argv[]) {
@@ -129,9 +132,44 @@ int main(int argc, char *argv[]) {
         }
       });
 
+  bot::RSSEventRepository event_repository;
+  event_repository.on_event([log, chatbot](
+                                const std::string &type,
+                                const std::string &name,
+                                const std::vector<bot::RSSItem> &items) {
+    std::vector<bot::data::Event> events = bot::data::get_events(type, name);
+    constexpr int max_events_per_announce = 5;
+    int events_exceed = items.size() - max_events_per_announce;
+
+    for (bot::data::Event event : events) {
+      int announcement_counter = 0;
+      for (bot::RSSItem item : items) {
+        if (announcement_counter >= max_events_per_announce) break;
+
+        std::string event_msg = event.create_event_message(type, name, item);
+
+        std::vector<std::string> user_lines =
+            bot::utils::string::separate_by_length(event_msg, event.subs, "",
+                                                   " ", 400);
+
+        for (const std::string &line : user_lines) {
+          chatbot->send_message(event.room_name, event_msg + line);
+        }
+      }
+
+      if (events_exceed >= max_events_per_announce) {
+        chatbot->send_message(
+            event.room_name,
+            std::format("...and {} more announcements", events_exceed));
+      }
+    }
+  });
+
   std::vector<std::thread> threads;
   threads.push_back(std::thread(&bot::RPCChatBotServer::run, &rpc_server));
   threads.push_back(std::thread(&bot::ChatBot::connect, chatbot));
+  threads.push_back(
+      std::thread(&bot::RSSEventRepository::poll, event_repository));
 
   for (auto &t : threads) {
     if (t.joinable()) t.join();

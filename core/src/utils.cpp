@@ -36,6 +36,54 @@ namespace bot::utils {
         o += part;
       return o;
     }
+
+    std::vector<std::vector<std::string>> separate_by_length(
+        const std::vector<std::string> &vector, const int &max_length) {
+      std::vector<std::vector<std::string>> output;
+      std::vector<std::string> active;
+      int length = 0;
+
+      for (const std::string &str : vector) {
+        length += str.length();
+
+        if (length >= max_length) {
+          output.push_back(active);
+          active = {str};
+        } else {
+          active.push_back(str);
+        }
+      }
+
+      if (!active.empty()) output.push_back(active);
+
+      return output;
+    }
+
+    std::vector<std::string> separate_by_length(
+        const std::string &base, const std::vector<std::string> &values,
+        const std::string &prefix, const std::string &separator,
+        const long long &max_length) {
+      std::vector<std::string> lines = {""};
+      int index = 0;
+
+      std::for_each(values.begin(), values.end(), [&](const std::string &v) {
+        const std::string &m = lines.at(index);
+        std::string x = prefix + v;
+
+        if (base.length() + m.length() + x.length() + separator.length() >=
+            max_length) {
+          index += 1;
+        }
+
+        if (index > lines.size() - 1) {
+          lines.push_back(x);
+        } else {
+          lines[index] = m + separator + x;
+        }
+      });
+
+      return lines;
+    }
   }
 
   namespace chrono {

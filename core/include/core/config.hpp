@@ -60,6 +60,11 @@ namespace bot {
       std::string base64_contents = "base64";
   };
 
+  struct RSSConfiguration {
+      std::optional<std::string> url = std::nullopt;
+      unsigned int timeout = 30;
+  };
+
   struct Configuration {
       InstanceConfiguration instance;
       IRCConfiguration irc;
@@ -69,6 +74,7 @@ namespace bot {
       TwitchConfiguration twitch;
       AnonbinConfiguration anonbin;
       AnonuploadConfiguration anonupload;
+      RSSConfiguration rss;
 
       Configuration() = default;
       Configuration(const Configuration &) = delete;

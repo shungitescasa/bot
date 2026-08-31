@@ -79,6 +79,11 @@ namespace bot {
         anonupload.url = value;
       else if (key == "anonupload.base64_contents")
         anonupload.base64_contents = value;
+
+      else if (key == "rss.url")
+        rss.url = value;
+      else if (key == "rss.timeout")
+        rss.timeout = std::stoi(value);
     }
   }
 
