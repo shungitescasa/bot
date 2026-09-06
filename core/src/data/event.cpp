@@ -52,44 +52,30 @@ namespace bot::data {
         ss << "(BTTV)";
       }
 
-      int event_type = 0;
-      if (item.title.contains(" added a new emote ")) {
-        event_type = 1;
-      } else if (item.title.contains(" removed emote ")) {
-        event_type = 2;
-      } else if (item.title.contains(" updated an emote ")) {
-        event_type = 3;
-      }
+      int new_value = msg.find("{new}");
+      if (new_value != std::string::npos) {
+        std::string s = t;
 
-      int author_value = msg.find("{author}");
-      if (author_value != std::string::npos) {
-        msg.replace(author_value, 8, t.substr(0, t.find(" ")));
-      }
-
-      int emote_value = msg.find("{emote}");
-      if (emote_value != std::string::npos) {
-        int shift = 0;
-        switch (event_type) {
-          case 1:
-            shift = 19;
-            break;
-          case 2:
-            shift = 15;
-            break;
-          case 3:
-            shift = 18;
-            break;
-          default:
-            break;
+        if (t.starts_with("added a new emote: ") ||
+            t.starts_with("removed emote")) {
+          int st = s.find(": ") + 2;
+          s = s.substr(st, s.find(" (") - st);
+        } else if (t.starts_with("renamed emote: ")) {
+          s = s.substr(s.find(" to ") + 4);
         }
 
-        msg.replace(emote_value, 7,
-                    t.substr(t.find(" ") + shift, t.find(" (")));
+        msg.replace(new_value, 5, s);
       }
 
-      int old_emote_value = msg.find("{old_emote}");
-      if (event_type == 3 && old_emote_value != std::string::npos) {
-        msg.replace(old_emote_value, 11, t.substr(t.find(" ("), t.size() - 1));
+      int old_value = msg.find("{old}");
+      if (old_value != std::string::npos) {
+        if (t.contains(" (")) {
+          int st = t.find(" (") + 2;
+          msg.replace(old_value, 5, t.substr(st, t.size() - st - 1));
+        } else if (t.contains(" to ")) {
+          int st = t.find(": ") + 2;
+          msg.replace(old_value, 5, t.substr(st, t.find(" to ") - st));
+        }
       }
     }
     // GitHub

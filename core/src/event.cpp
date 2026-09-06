@@ -46,20 +46,20 @@ namespace bot {
          has_category("game_change")) ||
 
         // 7TV
-        (type == "7tv.new-emote" && has_category("7tv") &&
-         has_category("new-emote")) ||
-        (type == "7tv.deleted-emote" && has_category("7tv") &&
-         has_category("deleted-emote")) ||
-        (type == "7tv.updated-emote" && has_category("7tv") &&
-         has_category("updated-emote")) ||
+        (type == "7tv.added-emote" && has_category("7TV") &&
+         has_category("New")) ||
+        (type == "7tv.deleted-emote" && has_category("7TV") &&
+         has_category("Deleted")) ||
+        (type == "7tv.renamed-emote" && has_category("7TV") &&
+         has_category("Renamed")) ||
 
         // BetterTTV
-        (type == "bttv.new-emote" && has_category("bttv") &&
-         has_category("new-emote")) ||
-        (type == "bttv.deleted-emote" && has_category("bttv") &&
-         has_category("deleted-emote")) ||
-        (type == "bttv.updated-emote" && has_category("bttv") &&
-         has_category("updated-emote")) ||
+        (type == "bttv.added-emote" && has_category("BetterTTV") &&
+         has_category("New")) ||
+        (type == "bttv.deleted-emote" && has_category("BetterTTV") &&
+         has_category("Deleted")) ||
+        (type == "bttv.renamed-emote" && has_category("BetterTTV") &&
+         has_category("Renamed")) ||
 
         // GitHub
         (type == "github.commit" && has_category("github") &&
@@ -103,10 +103,10 @@ namespace bot {
       url << "KickLivestreamBridge";
       url << "&channel=" << this->name;
     } else if (this->type.starts_with("7tv.")) {
-      url << "7TVEmoteBridge";
+      url << "TwitchEmoteUpdatesBridge&provider=stv";
       url << "&channel=" << this->name;
     } else if (this->type.starts_with("bttv.")) {
-      url << "BTTVEmoteBridge";
+      url << "TwitchEmoteUpdatesBridge&provider=bttv";
       url << "&channel=" << this->name;
     } else if (this->type.starts_with("github.")) {
       url << "GithubCommitBridge";
