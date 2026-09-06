@@ -96,11 +96,6 @@ namespace bot::data {
     else if (type.starts_with("github.")) {
       ss << "👨🏻‍💻";
 
-      int author_value = msg.find("{author}");
-      if (author_value != std::string::npos) {
-        msg.replace(author_value, 8, t.substr(0, t.find(": ")));
-      }
-
       int sha_value = msg.find("{sha}");
       if (sha_value != std::string::npos) {
         msg.replace(sha_value, 5, t.substr(t.size() - 9, t.size() - 1));
@@ -123,16 +118,18 @@ namespace bot::data {
 
       int msg_value = msg.find("{message}");
       if (msg_value != std::string::npos) msg.replace(msg_value, 9, item.title);
-
-      int channel_value = msg.find("{channel_name}");
-      if (channel_value != std::string::npos)
-        msg.replace(channel_value, 14, item.origin);
     }
 
     // setting a link
     int link_value = msg.find("{link}");
     if (link_value != std::string::npos && !item.link.empty()) {
       msg.replace(link_value, 6, item.link);
+    }
+
+    // setting an author
+    int author_value = msg.find("{author}");
+    if (author_value != std::string::npos && !item.author.empty()) {
+      msg.replace(author_value, 8, item.author);
     }
 
     ss << " ";

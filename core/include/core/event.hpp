@@ -9,7 +9,7 @@ namespace bot {
   class RSSEvent;
 
   struct RSSItem {
-      std::string id = "", title = "", link = "", origin = "";
+      std::string id = "", title = "", link = "", origin = "", author = "";
       std::vector<std::string> categories;
       long timestamp = 0;
 

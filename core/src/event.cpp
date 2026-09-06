@@ -248,6 +248,7 @@ namespace bot {
           for (pugi::xml_node i : channel.children("item")) {
             std::string title = i.child("title").text().as_string(),
                         link = i.child("link").text().as_string(),
+                        author = i.child("author").text().as_string(),
                         origin = e.get_name();
             if (title.starts_with("Bridge returned error")) continue;
 
@@ -272,6 +273,7 @@ namespace bot {
                             title,
                             link,
                             origin,
+                            author,
                             categories,
                             timestamp};
             items.push_back(item);
