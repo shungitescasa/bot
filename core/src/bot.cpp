@@ -15,7 +15,7 @@ namespace bot {
 
     this->server.bind("bot_send_message", [&](const MessageSource &source,
                                               const std::string &message) {
-      this->bot->send_message(source.login, message);
+      this->bot->send_message(source, message);
     });
 
     this->server.bind("bot_part", [&](const MessageSource &source,

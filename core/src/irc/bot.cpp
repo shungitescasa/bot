@@ -24,8 +24,10 @@ namespace bot::irc {
     boost::asio::write(this->socket, boost::asio::buffer(message + "\r\n"));
   }
 
-  void IRCChatBot::send_message(const std::string &room,
+  void IRCChatBot::send_message(const MessageSource &source,
                                 const std::string &message) {
+    std::string room = source.unnormalize();
+    this->logger.debug(std::format("Sending '{}' to {}...", message, room));
     this->send_raw(std::format("PRIVMSG {} :{}", room, message));
   }
 

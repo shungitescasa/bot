@@ -22,7 +22,7 @@ namespace bot::irc {
             socket(this->io, this->ssl),
             logger("IRCChatBot:" + host) {}
 
-      void send_message(const std::string &room,
+      void send_message(const MessageSource &source,
                         const std::string &message) override;
       void connect() override;
       void join(const MessageSource &source) override;

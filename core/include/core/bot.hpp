@@ -18,7 +18,7 @@ namespace bot {
       ChatBot() = default;
       ~ChatBot() = default;
 
-      virtual void send_message(const std::string &room,
+      virtual void send_message(const MessageSource &source,
                                 const std::string &message) = 0;
 
       virtual void connect() = 0;
