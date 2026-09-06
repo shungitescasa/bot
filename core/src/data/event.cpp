@@ -135,7 +135,7 @@ namespace bot::data {
         "r.alias_id AS room_alias_id FROM "
         "events e "
         "INNER JOIN rooms r ON r.id = e.room_id "
-        "WHERE e.event_type = $1 AND e.name = $2",
+        "WHERE e.event_type = $1 AND e.name = $2 AND r.parted_at IS NULL",
         {type, name});
 
     for (const DatabaseRow &row : rows) {

@@ -161,7 +161,10 @@ namespace bot {
   void RSSEventRepository::update_events() {
     data::DatabaseConnection conn = data::create_connection();
 
-    data::DatabaseRows rows = conn->exec("SELECT event_type, name FROM events");
+    data::DatabaseRows rows = conn->exec(
+        "SELECT DISTINCT e.event_type, e.name FROM events e "
+        "INNER JOIN rooms r ON r.id = e.room_id "
+        "WHERE r.parted_at IS NULL");
 
     std::unordered_set<std::string> keys;
     for (data::DatabaseRow row : rows) {
