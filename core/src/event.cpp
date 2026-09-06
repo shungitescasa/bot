@@ -66,12 +66,11 @@ namespace bot {
          has_category("commit")) ||
 
         // Twitter
-        (type == "twitter.post" && has_category("twitter") &&
-         has_category("post")) ||
+        (type == "twitter.post" &&
+         this->link.starts_with("https://twitter.com/")) ||
 
-        // GitHub
-        (type == "telegram.post" && has_category("telegram") &&
-         has_category("post")) ||
+        // Telegram
+        (type == "telegram.post" && this->link.starts_with("https://t.me/")) ||
 
         // RSS
         type == "rss";
@@ -113,9 +112,9 @@ namespace bot {
       url << "&u=" << this->name.substr(0, this->name.find("/"));
       url << "&p=" << this->name.substr(this->name.find("/") + 1);
     } else if (this->type.starts_with("twitter.")) {
-      url << "TwitterBridge";
-      url << "&context=By+username";
-      url << "&u=" << this->name;
+      url << "FarsideNitterBridge";
+      url << "&noreply=on&noretweet=on&linkbacktotwitter=on";
+      url << "&username=" << this->name;
     } else if (this->type.starts_with("telegram.")) {
       url << "TelegramBridge";
       url << "&username=%40" << this->name;
