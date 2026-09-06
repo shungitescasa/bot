@@ -163,17 +163,42 @@ namespace bot {
 
     data::DatabaseRows rows = conn->exec("SELECT event_type, name FROM events");
 
-    std::vector<RSSEvent> new_events;
+    std::unordered_set<std::string> keys;
     for (data::DatabaseRow row : rows) {
       std::string name = row.at("name");
       std::string type = row.at("event_type");
+      keys.insert(type + '\0' + name);
+    }
 
-      if (!std::any_of(this->events.begin(), this->events.end(),
-                       [&name, &type](const RSSEvent &e) {
-                         return e.get_name() == name && e.get_type() == type;
-                       })) {
-        RSSEvent event{type, name};
-        new_events.push_back(event);
+    this->events.erase(
+        std::remove_if(
+            this->events.begin(), this->events.end(),
+            [&keys, this](const RSSEvent &e) {
+              bool r =
+                  keys.find(e.get_type() + '\0' + e.get_name()) == keys.end();
+              if (r)
+                this->logger.debug(std::format("Deleted event: {}:{}",
+                                               e.get_name(), e.get_type()));
+
+              return r;
+            }),
+        this->events.end());
+
+    std::vector<RSSEvent> new_events;
+    for (const data::DatabaseRow &row : rows) {
+      const std::string &name = row.at("name");
+      const std::string &type = row.at("event_type");
+
+      const bool already_exists =
+          std::any_of(this->events.begin(), this->events.end(),
+                      [&name, &type](const RSSEvent &e) {
+                        return e.get_name() == name && e.get_type() == type;
+                      });
+
+      if (!already_exists) {
+        this->logger.debug(
+            std::format("Created a new event: {}:{}", name, type));
+        new_events.emplace_back(type, name);
       }
     }
 
