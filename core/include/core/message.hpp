@@ -12,15 +12,15 @@
 namespace bot {
   struct MessageSource {
       std::string login = "";
-      unsigned int id = 0;
+      int id = 0;
 
       MSGPACK_DEFINE(login, id);
 
       MessageSource() = default;
       MessageSource(const std::string &login)
           : login(std::move(login)), id(0) {}
-      MessageSource(const unsigned int &id) : login(""), id(id) {}
-      MessageSource(const std::string &login, const unsigned int &id)
+      MessageSource(const int &id) : login(""), id(id) {}
+      MessageSource(const std::string &login, const int &id)
           : login(std::move(login)), id(id) {}
       MessageSource(const sol::table &table) {
         if (table["login"].valid()) this->login = table["login"];
