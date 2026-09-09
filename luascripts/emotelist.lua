@@ -54,7 +54,7 @@ Get channel emote list.
         local cfg = bot_config()
 
         local providers = { "7tv", "bttv", "ffz", "twitch" }
-        if cfg.url.tinyemotes ~= nil then
+        if cfg.tinyemotes.url ~= nil then
             table.insert(providers, "tinyemotes")
         end
 
@@ -70,8 +70,8 @@ Get channel emote list.
         end
 
         -- searching for user id
-        local id = request.channel.alias_id
-        local name = request.channel.alias_name
+        local id = request.room.alias_id
+        local name = request.room.name
         if request.message ~= nil and #request.message > 0 then
             local users = twitch_get_users({ logins = { request.message } })
             if #users == 0 then
@@ -131,7 +131,7 @@ Get channel emote list.
             end
         elseif provider == "tinyemotes" then
             local response = net_get_with_headers(
-                cfg.url.tinyemotes .. "/users.php?alias_id=" .. id,
+                cfg.tinyemotes.url .. "/users/twitch/" .. id,
                 { Accept = "application/json" })
 
             if response.code == 200 then

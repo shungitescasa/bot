@@ -49,17 +49,14 @@ namespace bot::data {
         if (alias_id != -1) o["alias_id"] = alias_id;
 
         if (!name.empty()) {
-          o["alias_name"] = name;  // backward compatibility
           o["name"] = name;
         }
 
         o["joined_at"] = joined_at;
 
         if (this->parted_at.has_value()) {
-          o["opted_out_at"] = parted_at.value();  // backward compatibility
           o["parted_at"] = parted_at.value();
         } else {
-          o["opted_out_at"] = sol::lua_nil;  // backward compatibility
           o["parted_at"] = sol::lua_nil;
         }
 
@@ -93,10 +90,6 @@ namespace bot::data {
 
       sol::table as_lua_table(std::shared_ptr<sol::state> state) const {
         sol::table o = state->create_table();
-
-        o["id"] = room_id;          // backward compatibility
-        o["channel_id"] = room_id;  // backward compatibility
-        o["room_id"] = room_id;     // backward compatibility
 
         o["prefix"] = prefix;
         o["language"] = locale;
@@ -142,17 +135,14 @@ namespace bot::data {
         if (alias_id != -1) o["alias_id"] = alias_id;
 
         if (!name.empty()) {
-          o["alias_name"] = name;  // backward compatibility
           o["name"] = name;
         }
 
         o["joined_at"] = joined_at;
 
         if (this->parted_at.has_value()) {
-          o["opted_out_at"] = parted_at.value();  // backward compatibility
           o["parted_at"] = parted_at.value();
         } else {
-          o["opted_out_at"] = sol::lua_nil;  // backward compatibility
           o["parted_at"] = sol::lua_nil;
         }
 
@@ -194,13 +184,10 @@ namespace bot::data {
         sol::table o = state->create_table();
         o["id"] = id;
 
-        o["user_id"] = sender_id;  // backward compatibility
         o["sender_id"] = sender_id;
-        o["channel_id"] = room_id;  // backward compatibility
         o["room_id"] = room_id;
 
         o["level"] = level;
-        o["is_fixed"] = false;  // backward compatibility
         return o;
       }
 

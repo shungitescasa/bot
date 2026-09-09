@@ -177,7 +177,7 @@ In numerology, `!gematria` is the practice of assigning a numerical value to a n
         local parts = {}
 
         for index, value in pairs(results) do
-            local part = l10n_custom_formatted_line_request(request, lines, index, { value })
+            local part = l10n_custom_formatted_line_request(request, lines, index, { tostring(value) })
             table.insert(parts, part)
         end
 

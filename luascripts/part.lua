@@ -28,12 +28,10 @@ return {
             return l10n_custom_formatted_line_request(request, lines, "command_unavailable", {})
         end
 
-        local channel_name = request.channel.alias_name
-        local channel_id = request.channel.alias_id
+        local room_name = request.room.name
+        local room_id = request.room.alias_id
 
-        if request.message ~= nil and
-            array_contains_int(cfg.twitch.superuser_ids, request.sender.alias_id)
-        then
+        if request.message ~= nil and array_contains(cfg.instance.supernicks, request.sender.name) then
             local users = twitch_get_users({ logins = { request.message } })
 
             if #users == 0 then
@@ -42,26 +40,25 @@ return {
 
             local user = users[1]
 
-            channel_name = user.login
-            channel_id = tonumber(user.id)
+            room_name = user.login
+            room_id = tonumber(user.id)
         end
 
-        local db_channels = db_query('SELECT id FROM channels WHERE alias_id = $1 AND opted_out_at IS NULL',
-            { channel_id })
+        local db_channels = db_query('SELECT id FROM rooms WHERE name = $1 AND parted_at IS NULL',
+            { room_name })
 
         if #db_channels == 0 then
             return l10n_custom_formatted_line_request(request, lines, "already_out", {})
         end
 
         irc_send_message(
-            {login = channel_name, id = channel_id},
+            { login = room_name, id = room_id },
             l10n_custom_formatted_line_request(request, lines, "success", {})
         )
 
-        irc_part_channel({login = channel_name, id = channel_id})
+        irc_part_channel({ login = room_name, id = room_id })
 
-        db_execute('UPDATE channels SET opted_out_at = UTC_TIMESTAMP() WHERE alias_id = $1',
-            { channel_id })
+        db_execute('UPDATE rooms SET parted_at = UTC_TIMESTAMP() WHERE name = $1', { room_name })
 
         return nil
     end

@@ -40,7 +40,7 @@ If it's not specified, today's date will be used.
 
 # Important notes
 
-+ The information is obtained from the third-party service ["ilotterytea/holidays"](https://ilt.su/holidays/)
++ The information is obtained from the third-party service ["ilotterytea/holidays"](https://holiday.shungites.casa/)
 ]],
     delay_sec = 1,
     options = {},
@@ -79,11 +79,14 @@ If it's not specified, today's date will be used.
             end
         end
 
-        local response = net_get_with_headers("https://ilt.su/holidays/?month=" .. month .. "&day=" .. day,
+        day = tostring(day)
+        month = tostring(month)
+
+        local response = net_get_with_headers("https://holiday.shungites.casa/ru/" .. month .. "/" .. day,
             { Accept = "application/json" })
 
         if response.code ~= 200 then
-            return l10n_custom_formatted_line_request(request, lines, "external_api_error", { response.code })
+            return l10n_custom_formatted_line_request(request, lines, "external_api_error", { tostring(response.code) })
         end
 
         local holidays = json_parse(response.text)
@@ -93,19 +96,21 @@ If it's not specified, today's date will be used.
             table.insert(holiday_names, holidays[i].name)
         end
 
-        if #holiday_names == 0 then
+        local holiday_count = #holiday_names
+
+        if holiday_count == 0 then
             return l10n_custom_formatted_line_request(request, lines, "no_holidays",
                 { day, month })
         end
 
         if request.subcommand_id ~= nil and request.subcommand_id == "all" then
             return l10n_custom_formatted_line_request(request, lines, "all_holidays",
-                { #holiday_names, day, month, table.concat(holiday_names, ", ") })
+                { tostring(holiday_count), day, month, table.concat(holiday_names, ", ") })
         end
 
-        local index = math.random(1, #holiday_names)
+        local index = math.random(1, holiday_count)
 
         return l10n_custom_formatted_line_request(request, lines, "holiday",
-            { day, month, index, #holiday_names, holiday_names[index] })
+            { day, month, tostring(index), tostring(holiday_count), holiday_names[index] })
     end
 }

@@ -1,9 +1,10 @@
-#include "core/event.hpp"
+#include "core/rss.hpp"
 
 #include <algorithm>
 #include <chrono>
 #include <exception>
 #include <format>
+#include <sol/table.hpp>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -76,6 +77,20 @@ namespace bot {
         type == "rss";
   }
 
+  sol::table RSSItem::as_lua_table(std::shared_ptr<sol::state> state) const {
+    sol::table o = state->create_table();
+    o["id"] = id;
+    o["title"] = title;
+    o["link"] = link;
+    o["origin"] = origin;
+    o["author"] = author;
+    o["timestamp"] = timestamp;
+    sol::table c = state->create_table();
+    for (std::string x : categories) c.add(x);
+    o["categories"] = c;
+    return o;
+  }
+
   RSSEvent::RSSEvent(const std::string &type, const std::string &name) {
     this->name = name;
     this->type = type;
@@ -125,6 +140,67 @@ namespace bot {
     }
 
     this->url = url.str();
+  }
+
+  std::vector<RSSItem> RSSEvent::fetch_items() const {
+    auto &cfg = Configuration::get_instance();
+
+    std::string url = this->get_url();
+    cpr::Response response = cpr::Get(
+        cpr::Url{url}, cpr::Header{{"Accept", "application/xml"},
+                                   {"User-Agent", cfg.instance.user_agent},
+                                   {"Cache-Control", "no-cache"},
+                                   {"Pragma", "no-cache"}});
+
+    if (response.status_code != 200) {
+      throw std::runtime_error(
+          std::format("{} returned {} status code", url, response.status_code));
+    }
+
+    pugi::xml_document doc;
+    if (!doc.load_string(response.text.c_str())) {
+      throw std::runtime_error("Not valid XML format");
+    }
+
+    pugi::xml_node channel = doc.child("rss").child("channel");
+
+    // parsing RSS items
+    std::vector<RSSItem> items;
+    for (pugi::xml_node i : channel.children("item")) {
+      std::string title = i.child("title").text().as_string(),
+                  link = i.child("link").text().as_string(),
+                  author = i.child("author").text().as_string(),
+                  origin = this->get_name();
+      if (title.starts_with("Bridge returned error")) continue;
+
+      // parsing timestamp
+      long timestamp = 0;
+      std::string pubdate = i.child("pubDate").text().as_string();
+      pubdate = pubdate.substr(0, pubdate.size() - 6);
+      std::tm tm = {};
+      std::istringstream ss(pubdate);
+      ss >> std::get_time(&tm, "%a, %d %b %Y %H:%M:%S");
+      if (!ss.fail()) {
+        timestamp = timegm(&tm);
+      }
+
+      std::vector<std::string> categories;
+
+      for (pugi::xml_node i : i.children("category")) {
+        categories.push_back(i.text().as_string());
+      }
+
+      RSSItem item = {i.child("guid").text().as_string(),
+                      title,
+                      link,
+                      origin,
+                      author,
+                      categories,
+                      timestamp};
+      items.push_back(item);
+    }
+
+    return items;
   }
 
   const std::string &RSSEvent::get_type() const { return this->type; }
@@ -220,68 +296,8 @@ namespace bot {
 
       for (RSSEvent &e : this->events) {
         try {
-          std::string url = e.get_url();
-          cpr::Response response =
-              cpr::Get(cpr::Url{url},
-                       cpr::Header{{"Accept", "application/xml"},
-                                   {"User-Agent", cfg.instance.user_agent},
-                                   {"Cache-Control", "no-cache"},
-                                   {"Pragma", "no-cache"}});
-
-          this->logger.debug(std::format("Fetching {}...", url));
-
-          if (response.status_code != 200) {
-            this->logger.warn(std::format("{} returned {} status code", url,
-                                          response.status_code));
-            continue;
-          }
-
-          pugi::xml_document doc;
-          if (!doc.load_string(response.text.c_str())) {
-            this->logger.warn(std::format("{} returned {} status code", url,
-                                          response.status_code));
-            continue;
-          }
-
-          pugi::xml_node channel = doc.child("rss").child("channel");
-
-          // parsing RSS items
-          std::vector<RSSItem> items;
-          for (pugi::xml_node i : channel.children("item")) {
-            std::string title = i.child("title").text().as_string(),
-                        link = i.child("link").text().as_string(),
-                        author = i.child("author").text().as_string(),
-                        origin = e.get_name();
-            if (title.starts_with("Bridge returned error")) continue;
-
-            // parsing timestamp
-            long timestamp = 0;
-            std::string pubdate = i.child("pubDate").text().as_string();
-            pubdate = pubdate.substr(0, pubdate.size() - 6);
-            std::tm tm = {};
-            std::istringstream ss(pubdate);
-            ss >> std::get_time(&tm, "%a, %d %b %Y %H:%M:%S");
-            if (!ss.fail()) {
-              timestamp = timegm(&tm);
-            }
-
-            std::vector<std::string> categories;
-
-            for (pugi::xml_node i : i.children("category")) {
-              categories.push_back(i.text().as_string());
-            }
-
-            RSSItem item = {i.child("guid").text().as_string(),
-                            title,
-                            link,
-                            origin,
-                            author,
-                            categories,
-                            timestamp};
-            items.push_back(item);
-          }
-
-          std::vector<RSSItem> new_items = e.set_items(items);
+          this->logger.debug(std::format("Fetching {}...", e.get_url()));
+          std::vector<RSSItem> new_items = e.set_items(e.fetch_items());
           if (!new_items.empty()) {
             this->on_event_fn(e.get_type(), e.get_name(), new_items);
           }

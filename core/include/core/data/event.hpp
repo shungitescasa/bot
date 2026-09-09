@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "core/data/database.hpp"
-#include "core/event.hpp"
+#include "core/rss.hpp"
 
 namespace bot::data {
   enum class StreamerType { Twitch, Kick };

@@ -29,7 +29,7 @@ the Pastebin-like service.
     aliases = { "flist", "follows" },
     minimal_rights = "user",
     handle = function(request)
-        local username = request.sender.alias_name
+        local username = request.sender.name
 
         if request.message ~= nil then
             username = request.message

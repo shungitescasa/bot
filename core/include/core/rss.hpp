@@ -1,6 +1,8 @@
 #pragma once
 
 #include <functional>
+#include <memory>
+#include <sol/table.hpp>
 #include <string>
 #include <vector>
 
@@ -15,6 +17,8 @@ namespace bot {
 
       bool has_category(const std::string &) const;
       bool is_event_valid(RSSEvent *e) const;
+
+      sol::table as_lua_table(std::shared_ptr<sol::state> state) const;
   };
 
   class RSSEvent {
@@ -27,6 +31,8 @@ namespace bot {
       const std::string &get_url() const;
 
       std::vector<RSSItem> set_items(std::vector<RSSItem> items);
+
+      std::vector<RSSItem> fetch_items() const;
 
     private:
       std::string type, name, url;

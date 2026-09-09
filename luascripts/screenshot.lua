@@ -28,7 +28,7 @@ The bot then returns a link to the image.
         end
 
         local url = "https://ttours.alright.party/generate?output=base64&message_id=" ..
-            request.reply.id .. "&channel_login=" .. request.channel.alias_name
+            request.reply.id .. "&channel_login=" .. request.room.name
 
         local response = net_get(url)
 

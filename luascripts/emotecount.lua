@@ -36,7 +36,7 @@ The `!emotecount` command is designed to track the number of times an emote has 
 # Important notes
 
 + Emotes data may be temporarily unavailable if the bot has just joined a chat.
-+ Emote information is stored and retrieved from [the external API](https://stats.ilt.su).
++ Emote information is stored and retrieved from the external API.
 ]],
     delay_sec = 1,
     options = {},
@@ -46,7 +46,7 @@ The `!emotecount` command is designed to track the number of times an emote has 
     handle = function(request)
         local cfg = bot_config()
 
-        if cfg.url.stats == nil then
+        if cfg.thirdparty.stats == nil then
             return l10n_custom_formatted_line_request(request, lines, "not_configured", {})
         end
 
@@ -54,11 +54,11 @@ The `!emotecount` command is designed to track the number of times an emote has 
             return l10n_custom_formatted_line_request(request, lines, "no_message", {})
         end
 
-        local response = net_get_with_headers(cfg.url.stats .. "/channels/?alias_id=" .. request.channel.alias_id,
+        local response = net_get_with_headers(cfg.thirdparty.stats .. "/room/" .. request.room.name,
             { Accept = "application/json" })
 
         if response.code == 404 then
-            return l10n_custom_formatted_line_request(request, lines, "channel_not_found", { request.channel.alias_name })
+            return l10n_custom_formatted_line_request(request, lines, "channel_not_found", { request.room.name })
         elseif response.code ~= 200 then
             return l10n_custom_formatted_line_request(request, lines, "external_api_error", { response.code })
         end

@@ -52,4 +52,8 @@ namespace bot {
   void Logger::error(const std::string &message) const {
     this->log(LogLevel::ERROR, message);
   }
+
+  void Logger::exception(const std::exception &exception) const {
+    this->error(exception.what());
+  }
 }

@@ -1,6 +1,7 @@
 #include "core/config.hpp"
 
 #include <fstream>
+#include <ranges>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -24,8 +25,15 @@ namespace bot {
 
       if (key == "instance.name")
         instance.name = value;
+      else if (key == "instance.host")
+        instance.host = value;
       else if (key == "instance.user_agent")
         instance.user_agent = value;
+      else if (key == "instance.supernicks") {
+        for (const auto &x : std::ranges::views::split(value, ' ')) {
+          instance.supernicks.push_back(std::string(x.begin(), x.end()));
+        }
+      }
 
       else if (key == "irc.host")
         irc.host = value;
@@ -66,6 +74,11 @@ namespace bot {
       else if (key == "twitch.token")
         twitch.token = value;
 
+      else if (key == "join.allow_from_chat")
+        join.allow_from_chat = value == "true";
+      else if (key == "join.allow_other_origins")
+        join.allow_other_origins = value == "true";
+
       else if (key == "anonbin.url")
         anonbin.url = value;
       else if (key == "anonbin.contents")
@@ -80,10 +93,21 @@ namespace bot {
       else if (key == "anonupload.base64_contents")
         anonupload.base64_contents = value;
 
+      else if (key == "7tv.key")
+        seventv.key = value;
+
+      else if (key == "tinyemotes.url")
+        tinyemotes.url = value;
+
       else if (key == "rss.url")
         rss.url = value;
       else if (key == "rss.timeout")
         rss.timeout = std::stoi(value);
+
+      else if (key == "thirdparty.mogranks")
+        thirdparty.mogranks = value;
+      else if (key == "thirdparty.stats")
+        thirdparty.stats = value;
     }
   }
 
@@ -103,6 +127,75 @@ namespace bot {
   sol::table Configuration::as_lua_table(
       std::shared_ptr<sol::state> state) const {
     sol::table o = state->create_table();
+
+    // instance
+    {
+      sol::table t = state->create_table();
+      if (instance.name.has_value()) {
+        t["name"] = instance.name.value();
+      } else {
+        t["name"] = sol::lua_nil;
+      }
+      if (instance.host.has_value()) {
+        t["host"] = instance.host.value();
+      } else {
+        t["host"] = sol::lua_nil;
+      }
+
+      {
+        sol::table n = state->create_table();
+        for (const std::string &x : instance.supernicks) n.add(x);
+        t["supernicks"] = n;
+      }
+
+      o["instance"] = std::move(t);
+    }
+
+    // tinyemotes
+    {
+      sol::table t = state->create_table();
+      if (tinyemotes.url.has_value()) {
+        t["url"] = tinyemotes.url.value();
+      } else {
+        t["url"] = sol::lua_nil;
+      }
+      o["tinyemotes"] = std::move(t);
+    }
+
+    // join
+    {
+      sol::table t = state->create_table();
+      t["allow_from_chat"] = join.allow_from_chat;
+      t["allow_other_origins"] = join.allow_other_origins;
+      o["join"] = std::move(t);
+    }
+
+    // rss
+    {
+      sol::table t = state->create_table();
+      if (rss.url.has_value()) {
+        t["url"] = rss.url.value();
+      } else {
+        t["url"] = sol::lua_nil;
+      }
+      o["rss"] = std::move(t);
+    }
+
+    // thirdparty
+    {
+      sol::table t = state->create_table();
+      if (thirdparty.mogranks.has_value()) {
+        t["mogranks"] = thirdparty.mogranks.value();
+      } else {
+        t["mogranks"] = sol::lua_nil;
+      }
+      if (thirdparty.stats.has_value()) {
+        t["stats"] = thirdparty.stats.value();
+      } else {
+        t["stats"] = sol::lua_nil;
+      }
+      o["thirdparty"] = std::move(t);
+    }
 
     return o;
   }

@@ -8,7 +8,7 @@ return {
     aliases = {},
     minimal_rights = "moderator",
     handle = function(request)
-        local chatters = twitch_get_chatters(request.channel.alias_id)
+        local chatters = twitch_get_chatters(request.room.alias_id)
 
         local m = ""
 
@@ -23,6 +23,6 @@ return {
             table.insert(names, chatters[i].login)
         end
 
-        return str_make_parts(base, names, "@", " ", 500)
+        return str_make_parts(base, names, "", " ", 500)
     end
 }

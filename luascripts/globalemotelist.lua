@@ -41,10 +41,10 @@ Get global emote list.
 
 + `[a lot of emotes...]`
 ]],
-    delay_sec = 5,
+    delay_sec = 30,
     options = {},
     subcommands = { "7tv", "bttv", "ffz", "twitch", "tinyemotes" },
-    aliases = { "gelist" },
+    aliases = { "gelist", "gel" },
     minimal_rights = "user",
     handle = function(request)
         if request.subcommand_id == nil then
@@ -54,7 +54,7 @@ Get global emote list.
         local cfg = bot_config()
 
         local providers = { "7tv", "bttv", "ffz", "twitch" }
-        if cfg.url.tinyemotes ~= nil then
+        if cfg.tinyemotes.url ~= nil then
             table.insert(providers, "tinyemotes")
         end
 
@@ -111,7 +111,7 @@ Get global emote list.
             end
         elseif provider == "tinyemotes" then
             local response = net_get_with_headers(
-                cfg.url.tinyemotes .. "/emotesets.php?id=global",
+                cfg.tinyemotes.url .. "/emotesets/global",
                 { Accept = "application/json" })
 
             if response.code == 200 then

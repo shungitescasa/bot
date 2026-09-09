@@ -36,11 +36,11 @@ Get the Looksmaxxing ranking of the most influential chads in the world.
             return l10n_custom_formatted_line_request(request, lines, "command_unavailable", {})
         end
 
-        if cfg.url.mogchart == nil then
+        if cfg.thirdparty.mogranks == nil then
             return l10n_custom_formatted_line_request(request, lines, "command_unavailable", {})
         end
 
-        local response = net_get_with_headers(cfg.url.mogchart, { Accept = "application/json" })
+        local response = net_get_with_headers(cfg.thirdparty.mogranks, { Accept = "application/json" })
 
         if response.code ~= 200 then
             return l10n_custom_formatted_line_request(request, lines, "external_api_error", { response.code })

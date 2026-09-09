@@ -24,13 +24,13 @@ Get a random emote.
     delay_sec = 1,
     options = {},
     subcommands = {},
-    aliases = { "erand" },
+    aliases = { "erand", "rem" },
     minimal_rights = "user",
     handle = function(request)
         local cfg = bot_config()
 
         local providers = { "7tv", "bttv", "ffz", "twitch" }
-        if cfg.url.tinyemotes ~= nil then
+        if cfg.tinyemotes.url ~= nil then
             table.insert(providers, "tinyemotes")
         end
 
@@ -47,7 +47,7 @@ Get a random emote.
 
             if provider == "7tv" then
                 -- local emotes
-                local response = net_get("https://7tv.io/v3/users/twitch/" .. tostring(request.channel.alias_id))
+                local response = net_get("https://7tv.io/v3/users/twitch/" .. tostring(request.room.alias_id))
                 if response.code == 200 then
                     local json = json_parse(response.text)
                     if json.emote_set ~= nil and json.emote_set.emotes ~= nil and #json.emote_set.emotes > 0 then
@@ -70,7 +70,7 @@ Get a random emote.
             elseif provider == "bttv" then
                 -- local emotes
                 local response = net_get("https://api.betterttv.net/3/cached/users/twitch/" ..
-                    tostring(request.channel.alias_id))
+                    tostring(request.room.alias_id))
                 if response.code == 200 then
                     local json = json_parse(response.text)
 
@@ -101,7 +101,7 @@ Get a random emote.
             elseif provider == "ffz" then
                 -- local emotes
                 local response = net_get("https://api.frankerfacez.com/v1/room/id/" ..
-                    tostring(request.channel.alias_id))
+                    tostring(request.room.alias_id))
                 if response.code == 200 then
                     local json = json_parse(response.text)
                     if json.sets ~= nil and next(json.sets) ~= nil then
@@ -127,7 +127,7 @@ Get a random emote.
                 end
             elseif provider == "twitch" then
                 -- local emotes
-                local emotes_temp = twitch_get_channel_emotes(request.channel.alias_id)
+                local emotes_temp = twitch_get_channel_emotes(request.room.alias_id)
                 for i = 1, #emotes_temp, 1 do
                     table.insert(emotes, emotes_temp[i].name)
                 end
@@ -140,7 +140,7 @@ Get a random emote.
             elseif provider == "tinyemotes" then
                 -- local emotes
                 local response = net_get_with_headers(
-                    cfg.url.tinyemotes .. "/users.php?alias_id=" .. request.channel.alias_id,
+                    cfg.tinyemotes.url .. "/users/twitch/" .. request.room.alias_id,
                     { Accept = "application/json" })
 
                 if response.code == 200 then
@@ -160,7 +160,7 @@ Get a random emote.
 
                 -- global emotes
                 response = net_get_with_headers(
-                    cfg.url.tinyemotes .. "/emotesets.php?id=global",
+                    cfg.tinyemotes.url .. "/emotesets/global",
                     { Accept = "application/json" })
 
                 if response.code == 200 then

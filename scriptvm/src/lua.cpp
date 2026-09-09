@@ -3,20 +3,27 @@
 #include <cpr/cpr.h>
 #include <sys/resource.h>
 
+#include <exception>
 #include <filesystem>
 #include <format>
 #include <fstream>
 #include <memory>
 #include <nlohmann/json.hpp>
 #include <ranges>
+#include <sol/object.hpp>
+#include <sol/table.hpp>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 #include "core/bot.hpp"
 #include "core/builtin.hpp"
 #include "core/command.hpp"
 #include "core/config.hpp"
 #include "core/message.hpp"
+#include "core/rss.hpp"
+#include "core/utils.hpp"
+#include "emotespp/seventv.hpp"
 
 namespace scriptvm::lua {
   bot::Response parse_lua_response(const sol::table &r, sol::object &res,
@@ -54,7 +61,7 @@ namespace scriptvm::lua {
     this->lua = std::make_shared<sol::state>();
     this->lua->open_libraries(sol::lib::base, sol::lib::string, sol::lib::table,
                               sol::lib::math);
-    libraries::open_extended_libraries(this->lua);
+    libraries::open_extended_libraries(this->lua, this);
   }
 
   LuaCommand::LuaCommand(std::shared_ptr<sol::state> state,
@@ -99,7 +106,7 @@ namespace scriptvm::lua {
 
     state->open_libraries(sol::lib::base, sol::lib::table, sol::lib::string,
                           sol::lib::math);
-    libraries::open_base_libraries(state);
+    libraries::open_base_libraries(state, nullptr);
 
     if (!lua_id.empty()) {
       libraries::open_storage_library(state, request.requester, lua_id);
@@ -217,7 +224,8 @@ namespace scriptvm::lua {
       }
     }
 
-    void open_bot_library(std::shared_ptr<sol::state> state) {
+    void open_bot_library(std::shared_ptr<sol::state> state,
+                          LuaScriptLoader *loader) {
       state->set_function("bot_get_compiler_version", []() {
         std::string info;
 
@@ -284,9 +292,12 @@ namespace scriptvm::lua {
         return bot::Configuration::get_instance().instance.name;
       });
 
-      state->set_function("bot_get_loaded_command_names", [state]() {
+      state->set_function("bot_get_loaded_command_names", [state, loader]() {
         sol::table o = state->create_table();
-        // TODO:!!!
+        if (loader == nullptr) return o;
+
+        for (bot::CommandBox cmd : loader->get_commands())
+          o.add(cmd->data().name);
         return o;
       });
     }
@@ -419,7 +430,7 @@ namespace scriptvm::lua {
             // TODO: use Localization class instead!!!
 
             // TODO: convert the table to C++ struct for type safety later
-            std::string language = request["channel_preference"]["language"];
+            std::string language = request["room_preference"]["language"];
 
             if (!lines[language].valid() || !lines[language][line_id].valid()) {
             }
@@ -464,7 +475,10 @@ namespace scriptvm::lua {
           });
 
       state->set_function("l10n_get_localization_names", [state]() {
-        return std::vector{"russian", "english"};
+        sol::table o = state->create_table();
+        o.add("russian");
+        o.add("english");
+        return o;
       });
     }
 
@@ -726,17 +740,38 @@ namespace scriptvm::lua {
         return parse_json_object(state, o);
       });
 
-      state->set_function("image_upload_base64", [state](const std::string &base64) {
+      state->set_function(
+          "image_upload_base64", [state](const std::string &base64) {
+            bot::Configuration &cfg = bot::Configuration::get_instance();
+
+            cpr::Response response = cpr::Post(
+                cpr::Url{*cfg.anonupload.url},
+                cpr::Multipart{{cfg.anonupload.base64_contents, base64}},
+                cpr::Header{{"Accept", "application/json"},
+                            {"User-Agent", cfg.instance.user_agent}});
+
+            if (response.status_code >= 400) {
+              throw std::runtime_error("Failed to upload image: " +
+                                       std::to_string(response.status_code));
+            }
+
+            nlohmann::json o = nlohmann::json::parse(response.text);
+            for (const auto &part :
+                 std::ranges::views::split(cfg.anonbin.path, '.'))
+              o = o[std::string(part.begin(), part.end())];
+            return parse_json_object(state, o);
+          });
+
+      state->set_function("image_random", [state]() {
         bot::Configuration &cfg = bot::Configuration::get_instance();
 
         cpr::Response response =
-            cpr::Post(cpr::Url{*cfg.anonupload.url},
-                cpr::Multipart{{cfg.anonupload.base64_contents, base64}},
-                      cpr::Header{{"Accept", "application/json"},
-                                  {"User-Agent", cfg.instance.user_agent}});
+            cpr::Get(cpr::Url{*cfg.anonupload.url + "/?random"},
+                     cpr::Header{{"Accept", "application/json"},
+                                 {"User-Agent", cfg.instance.user_agent}});
 
         if (response.status_code >= 400) {
-          throw std::runtime_error("Failed to upload image: " +
+          throw std::runtime_error("Failed to get a random image: " +
                                    std::to_string(response.status_code));
         }
 
@@ -748,54 +783,134 @@ namespace scriptvm::lua {
       });
     }
 
-    void open_rss_library(std::shared_ptr<sol::state> state) {
-      state->set_function(
-          "rss_get", [state](const std::string &url) { return sol::lua_nil; });
+    void open_event_library(std::shared_ptr<sol::state> state) {
+      state->set_function("events_get", [state](const std::string &type,
+                                                const std::string &name) {
+        bot::RSSEvent event(type, name);
+        std::vector<bot::RSSItem> items = event.fetch_items();
+
+        sol::table o = state->create_table();
+        for (bot::RSSItem item : items) o.add(item.as_lua_table(state));
+        return o;
+      });
+
+      state->set_function("is_valid_event", [state](const std::string &type,
+                                                    const std::string &name) {
+        try {
+          bot::RSSEvent event(type, name);
+          return true;
+        } catch (std::exception &e) {
+          return false;
+        }
+      });
+
+      state->set_function("events_parse_target",
+                          [state](const std::string &input) {
+                            int pos = input.rfind(':');
+                            if (pos == std::string::npos) {
+                              return sol::make_object(*state, sol::lua_nil);
+                            }
+
+                            sol::table o = state->create_table();
+                            o["name"] = input.substr(0, pos);
+                            o["type"] = input.substr(pos + 1);
+                            return sol::make_object(*state, o);
+                          });
     }
 
     void open_emote_library(std::shared_ptr<sol::state> state) {
-      // FIX: user struct is used here
-      auto user_to_lua = [state](const std::string &user) {
-        return sol::lua_nil;
+      auto &cfg = bot::Configuration::get_instance();
+      if (!cfg.seventv.key.has_value()) {
+        return;
+      }
+
+      emotespp::SevenTVAPIClient client{cfg.seventv.key.value()};
+
+      auto user_to_lua = [state](const emotespp::User &user) {
+        auto o = state->create_table();
+        o["username"] = user.username;
+        o["alias_id"] = user.alias_id;
+        o["emote_set_id"] = user.emote_set_id;
+        o["id"] = user.id;
+        return o;
       };
 
-      // FIX: emote struct is used here
-      auto emotes_to_lua = [state](const std::vector<std::string> &emotes) {
-        return sol::lua_nil;
+      auto emotes_to_lua = [state](const std::vector<emotespp::Emote> &emotes) {
+        auto e = state->create_table();
+        for (int i = 0; i < emotes.size(); i++) {
+          auto emote = emotes[i];
+          auto em = state->create_table();
+          em["id"] = emote.id;
+          em["code"] = emote.code;
+          if (emote.original_code.has_value()) {
+            em["original_code"] = *emote.original_code;
+          } else {
+            em["original_code"] = sol::lua_nil;
+          }
+          e[i + 1] = em;
+        }
+        return e;
       };
 
       state->set_function(
           "stv_add_named_emote",
-          [](const std::string &emote_set_id, const std::string &emote_id,
-             const std::string &name) { return sol::lua_nil; });
-
-      state->set_function("stv_add_emote", [](const std::string &emote_set_id,
-                                              const std::string &emote_id) {
-        return sol::lua_nil;
-      });
-
-      state->set_function(
-          "stv_remove_emote",
-          [](const std::string &emote_set_id, const std::string &emote_id) {
-            return sol::lua_nil;
+          [client](const std::string &emote_set_id, const std::string &emote_id,
+                   const std::string &name) {
+            client.add_emote(emote_set_id, {emote_id, name});
           });
+
+      state->set_function("stv_add_emote",
+                          [client](const std::string &emote_set_id,
+                                   const std::string &emote_id) {
+                            client.add_emote(emote_set_id, {emote_id, ""});
+                          });
+
+      state->set_function("stv_remove_emote",
+                          [client](const std::string &emote_set_id,
+                                   const std::string &emote_id) {
+                            client.remove_emote(emote_set_id, {emote_id});
+                          });
 
       state->set_function(
           "stv_rename_emote",
-          [](const std::string &emote_set_id, const std::string &emote_id,
-             const std::string &new_name) { return sol::lua_nil; });
+          [client](const std::string &emote_set_id, const std::string &emote_id,
+                   const std::string &new_name) {
+            client.rename_emote(emote_set_id, {emote_id, new_name});
+          });
 
-      state->set_function(
-          "stv_get_user",
-          [state](const unsigned int &twitch_id) { return sol::lua_nil; });
+      state->set_function("stv_get_user", [state, client, user_to_lua](
+                                              const unsigned int &twitch_id) {
+        auto user = client.get_user_by_twitch_id(twitch_id);
 
-      state->set_function(
-          "stv_get_emoteset",
-          [state](const std::string &emote_set_id) { return sol::lua_nil; });
+        if (!user.has_value()) {
+          return sol::make_object(*state, sol::lua_nil);
+        }
 
-      state->set_function(
-          "stv_search_emotes",
-          [state](const std::string &name) { return sol::lua_nil; });
+        return sol::make_object(*state, user_to_lua(*user));
+      });
+
+      state->set_function("stv_get_emoteset",
+                          [state, client, user_to_lua,
+                           emotes_to_lua](const std::string &emote_set_id) {
+                            auto set = client.get_emote_set(emote_set_id);
+
+                            if (!set.has_value()) {
+                              return sol::make_object(*state, sol::lua_nil);
+                            }
+
+                            auto o = state->create_table();
+                            o["id"] = set->id;
+                            o["name"] = set->name;
+                            o["owner"] = user_to_lua(set->owner);
+                            o["emotes"] = emotes_to_lua(set->emotes);
+
+                            return sol::make_object(*state, o);
+                          });
+
+      state->set_function("stv_search_emotes", [state, client, emotes_to_lua](
+                                                   const std::string &name) {
+        return emotes_to_lua(client.search_emotes(name));
+      });
     }
 
     void open_irc_library(std::shared_ptr<sol::state> state) {
@@ -1024,8 +1139,9 @@ namespace scriptvm::lua {
       });
     }
 
-    void open_base_libraries(std::shared_ptr<sol::state> state) {
-      open_bot_library(state);
+    void open_base_libraries(std::shared_ptr<sol::state> state,
+                             LuaScriptLoader *loader) {
+      open_bot_library(state, loader);
       open_time_library(state);
       open_string_library(state);
       open_l10n_library(state);
@@ -1036,11 +1152,12 @@ namespace scriptvm::lua {
       open_emote_library(state);
     }
 
-    void open_extended_libraries(std::shared_ptr<sol::state> state) {
-      open_base_libraries(state);
+    void open_extended_libraries(std::shared_ptr<sol::state> state,
+                                 LuaScriptLoader *loader) {
+      open_base_libraries(state, loader);
       open_database_library(state);
       open_network_library(state);
-      open_rss_library(state);
+      open_event_library(state);
       open_irc_library(state);
     }
   }

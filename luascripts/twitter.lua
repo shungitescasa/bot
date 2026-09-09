@@ -39,7 +39,7 @@ Get the latest post from the specified Twitter account.
     minimal_rights = "user",
     handle = function(request)
         local cfg = bot_config()
-        if cfg.rss.bridge == nil then
+        if cfg.rss.url == nil then
             return l10n_custom_formatted_line_request(request, lines, "not_configured", {})
         end
 
@@ -47,24 +47,18 @@ Get the latest post from the specified Twitter account.
             return l10n_custom_formatted_line_request(request, lines, "no_value", {})
         end
 
-        local url = str_format(cfg.rss.bridge, { "FarsideNitterBridge", request.message })
-        local channel = rss_get(url)
-        if channel == nil then
-            return l10n_custom_formatted_line_request(request, lines, "not_found", { request.message })
-        end
-
-        local posts = channel.messages
-        if #posts == 0 then
+        local events = events_get("twitter.post", request.message)
+        if #events == 0 then
             return l10n_custom_formatted_line_request(request, lines, "no_messages", {})
         end
 
-        local latest_post = posts[1]
+        local event = events[1]
         local post_time = "N/A"
-        if latest_post.timestamp ~= 0 then
-            post_time = time_humanize(time_current() - latest_post.timestamp)
+        if event.timestamp ~= 0 then
+            post_time = time_humanize(time_current() - event.timestamp)
         end
 
         return l10n_custom_formatted_line_request(request, lines, "message",
-            { request.message, latest_post.message, post_time, latest_post.id })
+            { request.message, event.title, post_time, event.link })
     end,
 }

@@ -1,60 +1,10 @@
-local function parse_target(value)
-    local parts = str_split(value, ':')
-    if #parts < 2 then
-        return nil
-    end
-
-    local type = parts[#parts]
-    local target = ""
-    for i = 1, #parts - 1, 1 do
-        target = target .. parts[i]
-        if i + 1 < #parts then
-            target = target .. ":"
-        end
-    end
-
-    local data = {
-        target = target,
-        type = str_to_event_type(type)
-    }
-
-    if event_type_to_str(data.type) ~= type then
-        data.type = nil
-    end
-
-    if data.type == nil then
-        return data
-    end
-
-    if data.type < 40 then
-        local users = {}
-
-        -- kick
-        if data.type >= 4 and data.type <= 7 then
-            users = kick_get_channels({ data.target })
-        else
-            users = twitch_get_users({ logins = { data.target } })
-        end
-
-        if #users == 0 then
-            data.target = nil
-            return data
-        end
-
-        data.target = users[1]
-    end
-
-    return data
-end
-
 local lines = {
     english = {
         ["no_subcommand"] =
         "{sender.alias_name}: No subcommand provided. Use {channel.prefix}help notify for more information.",
         ["no_message"] = "{sender.alias_name}: No message provided.",
         ["not_parseable"] = "{sender.alias_name}: This value cannot be parsed. (%s)",
-        ["unknown_type"] = "{sender.alias_name}: Unknown event type. (%s)",
-        ["user_not_found"] = "{sender.alias_name}: User not found. (%s)",
+        ["invalid_event"] = "{sender.alias_name}: Unknown event type. (%s)",
         ["not_found"] = "{sender.alias_name}: Event %s not found.",
         ["namesake"] = "{sender.alias_name}: You have already subscribed to this event.",
         ["list"] =
@@ -71,11 +21,9 @@ local lines = {
         "{sender.alias_name}: Подкоманда не предоставлена. Используйте {channel.prefix}help event для большей информации.",
         ["no_message"] = "{sender.alias_name}: Сообщение не предоставлено.",
         ["not_parseable"] = "{sender.alias_name}: Это значение не может быть использовано. (%s)",
-        ["unknown_type"] = "{sender.alias_name}: Неизвестный тип события. (%s)",
-        ["user_not_found"] = "{sender.alias_name}: Пользователь не найден. (%s)",
+        ["invalid_event"] = "{sender.alias_name}: Неизвестный тип события. (%s)",
         ["not_found"] = "{sender.alias_name}: Событие %s не найдено.",
-        ["no_target"] = "{sender.alias_name}: Следующие значение события должно быть предоставлено.",
-        ["namesake"] = "{sender.alias_name}: Такое же событие уже существует.",
+        ["namesake"] = "{sender.alias_name}: Вы уже подписаны.",
         ["list"] =
         "{sender.alias_name}: Вы можете использовать '{channel.prefix}event list', чтобы узнать на какие события Вы можете подписаться.",
         ["subs"] = "{sender.alias_name}: Ваши подписки: %s",
@@ -135,42 +83,13 @@ The `!notify` command gives users the ability to manage event subscriptions.
             local events = db_query([[
 SELECT e.name, e.event_type FROM events e
 INNER JOIN event_subscriptions es ON es.event_id = e.id
-WHERE e.channel_id = $1 AND es.user_id = $2
+WHERE e.room_id = $1 AND es.sender_id = $2
 ]],
-                { request.channel.id, request.sender.id })
-            local user_ids = {}
+                { request.room.id, request.sender.id })
+            local n = {}
             for i = 1, #events, 1 do
                 local e = events[i]
-                local t = tonumber(e.event_type)
-                if t < 10 then
-                    local id = tonumber(e.name)
-                    table.insert(names, { name = id, type = t })
-                    table.insert(user_ids, id)
-                    print(id)
-                else
-                    table.insert(names, { name = e.name, type = event_type_to_str(t) })
-                end
-            end
-            if #user_ids > 0 then
-                local users = twitch_get_users({ ids = user_ids })
-                for i = 1, #users, 1 do
-                    local user = users[i]
-                    for j = 1, #names, 1 do
-                        if type(names[j].name) == "number" and
-                            type(names[j].type) == "number" and
-                            names[j].type < 10 and names[j].name == user.id
-                        then
-                            names[j].name = user.login
-                            names[j].type = event_type_to_str(names[j].type)
-                        end
-                    end
-                end
-            end
-
-            -- finalizing
-            local n = {}
-            for i = 1, #names, 1 do
-                table.insert(n, names[i].name .. ':' .. names[i].type)
+                table.insert(n, e.name .. ":" .. e.event_type)
             end
 
             local line_id = "subs"
@@ -187,53 +106,46 @@ WHERE e.channel_id = $1 AND es.user_id = $2
 
         local parts = str_split(request.message, ' ')
 
-        local data_original = parts[1]
-        local data = parse_target(data_original)
-        table.remove(parts, 1)
-        local data_name = nil
-
-        if data == nil then
-            return l10n_custom_formatted_line_request(request, lines, "not_parseable", { data_original })
-        elseif data.type == nil then
-            return l10n_custom_formatted_line_request(request, lines, "unknown_type", { data_original })
-        elseif type(data.target) == "nil" then
-            return l10n_custom_formatted_line_request(request, lines, "user_not_found", { data_original })
-        elseif type(data.target) == "string" then
-            data_name = data.target
-        elseif type(data.target) == "table" then
-            data_name = data.target.id
+        -- parsing target name & type
+        local data = parts[1]
+        local target = events_parse_target(data)
+        if target == nil then
+            return l10n_custom_formatted_line_request(request, lines, "not_parseable", { data })
+        elseif not is_valid_event(target.type, target.name) then
+            return l10n_custom_formatted_line_request(request, lines, "invalid_event", { data })
         end
+        table.remove(parts, 1)
 
         local events = db_query([[
 SELECT e.id, es.id AS sub_id
 FROM events e
-LEFT JOIN event_subscriptions es ON es.event_id = e.id AND es.user_id = $1
-WHERE e.name = $2 AND e.event_type = $3
+LEFT JOIN event_subscriptions es ON es.event_id = e.id AND es.sender_id = $1
+WHERE e.name = $2 AND e.event_type = $3 AND e.room_id = $4
 ]],
-            { request.sender.id, data_name, data.type })
+            { request.sender.id, target.name, target.type, request.room.id })
 
         if #events == 0 then
-            return l10n_custom_formatted_line_request(request, lines, "not_found", { data_original })
+            return l10n_custom_formatted_line_request(request, lines, "not_found", { data })
         end
 
         local event = events[1]
 
         if scid == "sub" then
             if event.sub_id ~= nil then
-                return l10n_custom_formatted_line_request(request, lines, "namesake", { data_original })
+                return l10n_custom_formatted_line_request(request, lines, "namesake", { data })
             end
 
-            db_execute('INSERT INTO event_subscriptions(event_id, user_id) VALUES ($1, $2)',
+            db_execute('INSERT INTO event_subscriptions(event_id, sender_id) VALUES ($1, $2)',
                 { event.id, request.sender.id })
 
-            return l10n_custom_formatted_line_request(request, lines, "sub", { data_original })
+            return l10n_custom_formatted_line_request(request, lines, "sub", { data })
         elseif scid == "unsub" then
             if event.sub_id == nil then
-                return l10n_custom_formatted_line_request(request, lines, "not_subbed", { data_original })
+                return l10n_custom_formatted_line_request(request, lines, "not_subbed", { data })
             end
 
             db_execute('DELETE FROM event_subscriptions WHERE id = $1', { event.sub_id })
-            return l10n_custom_formatted_line_request(request, lines, "unsub", { data_original })
+            return l10n_custom_formatted_line_request(request, lines, "unsub", { data })
         end
     end
 }

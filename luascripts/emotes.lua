@@ -134,10 +134,10 @@ The `!emotes` command gives the ability to manage 7TV emoteset.
         end
 
         if provider == "7tv" then
-            local user = stv_get_user(request.channel.alias_id)
+            local user = stv_get_user(request.room.alias_id)
             if user == nil then
                 return l10n_custom_formatted_line_request(request, lines, "user_not_found",
-                    { "7TV", request.channel.alias_name })
+                    { "7TV", request.room.name })
             end
             user_id = user.emote_set_id
 

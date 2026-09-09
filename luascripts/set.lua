@@ -88,13 +88,13 @@ Available languages at the moment: **english**, **russian**.
                 return l10n_custom_formatted_line_request(request, lines, "locale_not_exists", { value })
             end
 
-            db_execute('UPDATE channel_preferences SET locale = $1 WHERE id = $2', { value, request.channel.id })
-            request['channel_preference']['language'] = value
+            db_execute('UPDATE room_preferences SET locale = $1 WHERE id = $2', { value, request.room.id })
+            request['room_preference']['language'] = value
 
             return l10n_custom_formatted_line_request(request, lines, "set_locale", {})
         elseif request.subcommand_id == "prefix" then
             value = value:gsub("&nbsp;", " ")
-            db_execute('UPDATE channel_preferences SET prefix = $1 WHERE id = $2', { value, request.channel.id })
+            db_execute('UPDATE room_preferences SET prefix = $1 WHERE id = $2', { value, request.room.id })
             return l10n_custom_formatted_line_request(request, lines, "set_prefix", { value })
         end
     end,

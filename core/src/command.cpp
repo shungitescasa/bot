@@ -212,9 +212,7 @@ namespace bot {
     }
 
     o["sender"] = requester.sender.as_lua_table(state);
-    o["channel"] = requester.room.as_lua_table(state);
     o["room"] = requester.room.as_lua_table(state);
-    o["channel_preference"] = requester.room_preferences.as_lua_table(state);
     o["room_preference"] = requester.room_preferences.as_lua_table(state);
     o["rights"] = requester.sender_right.as_lua_table(state);
 

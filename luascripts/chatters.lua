@@ -24,7 +24,7 @@ After collecting the list of chatters, the bot returns a link to the paste from
     aliases = { "chatterlist", "clist", "ulist", "userlist" },
     minimal_rights = "user",
     handle = function(request)
-        local chatters = twitch_get_chatters(request.channel.alias_id)
+        local chatters = twitch_get_chatters(request.room.alias_id)
         local body = #chatters .. " chatters\r\n---------------------\r\n\r\n"
 
         for i = 1, #chatters, 1 do
@@ -33,7 +33,7 @@ After collecting the list of chatters, the bot returns a link to the paste from
         end
 
         local time = time_format(time_current(), "%d.%m.%Y %H:%M:%S %z")
-        local link = paste_upload(body, request.channel.alias_name .. "'s chatter list on " .. time)
+        local link = paste_upload(body, request.room.name .. "'s chatter list on " .. time)
 
         return l10n_custom_formatted_line_request(request, lines, "success", { link })
     end,

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 extern "C" {
 #include <lauxlib.h>
 #include <lua.h>
@@ -14,11 +15,12 @@ extern "C" {
 
 namespace bot {
   struct InstanceConfiguration {
-      std::optional<std::string> name = std::nullopt;
+      std::optional<std::string> name = std::nullopt, host = std::nullopt;
       std::string user_agent = std::format(
           "tinybot/{} (compatible; "
           "https://wiki.shungites.casa/doku.php?id=bot:tinybot)",
           BOT_VERSION);
+      std::vector<std::string> supernicks = {};
   };
 
   struct IRCConfiguration {
@@ -49,6 +51,10 @@ namespace bot {
       std::string token = "";
   };
 
+  struct JoinConfiguration {
+      bool allow_from_chat = true, allow_other_origins = false;
+  };
+
   struct AnonbinConfiguration {
       std::optional<std::string> url = std::nullopt;
       std::string contents = "contents", subject = "subject",
@@ -57,12 +63,24 @@ namespace bot {
 
   struct AnonuploadConfiguration {
       std::optional<std::string> url = std::nullopt;
-      std::string base64_contents = "base64";
+      std::string base64_contents = "base64", path = "data.urls.download_url";
+  };
+
+  struct SevenTVConfiguration {
+      std::optional<std::string> key = std::nullopt;
+  };
+
+  struct TinyEmotesConfiguration {
+      std::optional<std::string> url = std::nullopt;
   };
 
   struct RSSConfiguration {
       std::optional<std::string> url = std::nullopt;
       unsigned int timeout = 30;
+  };
+
+  struct ThirdPartyConfiguration {
+      std::optional<std::string> mogranks = std::nullopt, stats = std::nullopt;
   };
 
   struct Configuration {
@@ -72,9 +90,13 @@ namespace bot {
       ScriptConfiguration script;
       DatabaseConfiguration database;
       TwitchConfiguration twitch;
+      JoinConfiguration join;
       AnonbinConfiguration anonbin;
       AnonuploadConfiguration anonupload;
+      SevenTVConfiguration seventv;
+      TinyEmotesConfiguration tinyemotes;
       RSSConfiguration rss;
+      ThirdPartyConfiguration thirdparty;
 
       Configuration() = default;
       Configuration(const Configuration &) = delete;

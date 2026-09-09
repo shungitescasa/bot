@@ -40,17 +40,15 @@ return {
             return l10n_custom_formatted_line_request(request, lines, "command_unavailable", {})
         end
 
-        if not cfg.commands.join_allowed then
+        if not cfg.join.allow_from_chat then
             return l10n_custom_formatted_line_request(request, lines, "join_not_allowed", {})
         end
 
-        local channel_name = request.sender.alias_name
-        local channel_id = request.sender.alias_id
+        local room_name = request.sender.name
+        local room_id = request.sender.alias_id
         local silent_mode = false
 
-        if request.message ~= nil and
-            array_contains_int(cfg.twitch.superuser_ids, request.sender.alias_id)
-        then
+        if request.message ~= nil and array_contains(cfg.instance.supernicks, request.sender.name) then
             local users = twitch_get_users({ logins = { request.message } })
 
             if #users == 0 then
@@ -59,28 +57,28 @@ return {
 
             local user = users[1]
 
-            channel_name = user.login
-            channel_id = tonumber(user.id)
+            room_name = user.login
+            room_id = tonumber(user.id)
 
             silent_mode = request.subcommand_id ~= nil and request.subcommand_id == "silent"
         end
 
-        if not cfg.commands.join_allow_from_other_chats and request.channel.alias_name ~= bot_username() then
+        if not cfg.join.allow_other_origins and request.room.name ~= bot_username() then
             return l10n_custom_formatted_line_request(request, lines, "join_from_bot_channel", { bot_username() })
         end
 
-        local db_channels = db_query('SELECT id, alias_id, alias_name, opted_out_at FROM channels WHERE alias_id = $1',
-            { channel_id })
+        local db_channels = db_query('SELECT id, alias_id, name, parted_at FROM rooms WHERE name = $1',
+            { room_name })
 
         if #db_channels > 0 then
             local db_channel = db_channels[1]
 
-            if db_channel.opted_out_at ~= nil then
-                db_execute('UPDATE channels SET opted_out_at = NULL WHERE id = $1', { db_channel.id })
+            if db_channel.parted_at ~= nil then
+                db_execute('UPDATE rooms SET parted_at = NULL WHERE id = $1', { db_channel.id })
 
-                irc_join_channel({login = channel_name, id = channel_id})
+                irc_join_channel({ login = room_name, id = room_id })
                 irc_send_message(
-                    {login = channel_name, id = channel_id},
+                    { login = room_name, id = room_id },
                     l10n_custom_formatted_line_request(request, lines, "chat_response", { bot_username() })
                 )
                 return l10n_custom_formatted_line_request(request, lines, "rejoined", {})
@@ -89,20 +87,20 @@ return {
             return l10n_custom_formatted_line_request(request, lines, "already_in", {})
         end
 
-        db_execute('INSERT INTO channels(alias_id, alias_name) VALUES ($1, $2)',
-            { channel_id, channel_name })
+        db_execute('INSERT INTO rooms(alias_id, name) VALUES ($1, $2)',
+            { room_id, room_name })
 
-        irc_join_channel({login = channel_name, id = channel_id})
+        irc_join_channel({ login = room_name, id = room_id })
 
         if not silent_mode then
             irc_send_message(
-                {login = channel_name, id = channel_id},
+                { login = room_name, id = room_id },
                 l10n_custom_formatted_line_request(request, lines, "chat_response", { bot_username() })
             )
         else
-            local db_channel = db_query('SELECT id FROM channels WHERE alias_id = $1', { channel_id })[1]
-            db_execute('INSERT IGNORE INTO channel_preferences(id, silent_mode) VALUES ($1, $2)',
-                { db_channel.id, silent_mode })
+            local db_channel = db_query('SELECT id FROM rooms WHERE name = $1', { room_name })[1]
+            db_execute('UPDATE channel_preferences SET silent_mode = $1 WHERE id = $2',
+                { silent_mode, db_channel.id })
         end
 
         return l10n_custom_formatted_line_request(request, lines, "join", {})

@@ -58,7 +58,7 @@ a Pastebin-like service.
     handle = function(request)
         local rooturl = "https://logs.zonian.dev/namehistory"
 
-        local name = request.sender.alias_name
+        local name = request.sender.name
         if request.message ~= nil then
             name = request.message
         end

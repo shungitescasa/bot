@@ -1,53 +1,53 @@
 local lines = {
-	english = {
-		["no_subcommand"] = "{sender.alias_name}: No subcommand provided. Use '{channel.prefix}help cmd' for more info.",
-		["no_message"] = "{sender.alias_name}: No message provided.",
-		["not_enough_rights"] = "{sender.alias_name}: You do not have enough rights to perform this command.",
-		["command_list"] = "{sender.alias_name}: %s",
-		["namesake"] = "{sender.alias_name}: A command with the same name already exists.",
-		["new_cmd"] = "{sender.alias_name}: Created a new command! Use %s to run it.",
-		["not_found"] = "{sender.alias_name}: Command %s does not exist.",
-		["delete_command"] = "{sender.alias_name}: Successfully deleted %s command.",
-		["edit_command"] = "{sender.alias_name}: Edited the message for %s command.",
-		["no_new_name"] = "{sender.alias_name}: No new name provided.",
-		["rename_command"] = "{sender.alias_name}: Renamed command from %s to %s",
-		["no_alias"] = "{sender.alias_name}: No alias provided.",
-		["namesake_alias"] = "{sender.alias_name}: Same alias already exists for %s command.",
-		["alias_command"] = "{sender.alias_name}: Successfully created alias %s for %s command.",
-		["no_cmd_alias"] = "{sender.alias_name}: There is no command with alias %s",
-		["delalias_command"] = "{sender.alias_name}: Successfully removed alias %s from %s command.",
-		["setglobal_command"] = "{sender.alias_name}: Command %s is now available in all chats.",
-		["delglobal_command"] = "{sender.alias_name}: Command %s is now available only in this chat.",
-		["view_command"] = "{sender.alias_name}: ID %s | %s | Aliases: %s | %s",
-	},
-	russian = {
-		["no_subcommand"] =
-		"{sender.alias_name}: Нет подкоманды. Используйте '{channel.prefix}help cmd', чтобы получить больше информации.",
-		["no_message"] = "{sender.alias_name}: Сообщение не предоставлено.",
-		["not_enough_rights"] = "{sender.alias_name}: У вас недостаточно прав для выполнения этой команды.",
-		["command_list"] = "{sender.alias_name}: %s",
-		["namesake"] = "{sender.alias_name}: Команда с таким же именем уже существует.",
-		["new_cmd"] = "{sender.alias_name}: Создана новая команда! Используйте %s для её запуска.",
-		["not_found"] = "{sender.alias_name}: Команда %s не существует.",
-		["delete_command"] = "{sender.alias_name}: Команда %s успешно удалена.",
-		["edit_command"] = "{sender.alias_name}: Изменил сообщение для команды %s",
-		["no_new_name"] = "{sender.alias_name}: Новое имя для команды не предоставлено.",
-		["rename_command"] = "{sender.alias_name}: Переименовал команду %s в %s",
-		["no_alias"] = "{sender.alias_name}: Алиас не предоставлен.",
-		["namesake_alias"] = "{sender.alias_name}: Такой же алиас уже существует для команды %s",
-		["alias_command"] = "{sender.alias_name}: Успешно привязал алиас %s к команде %s",
-		["no_cmd_alias"] = "{sender.alias_name}: Нет команд с алиасом %s",
-		["delalias_command"] = "{sender.alias_name}: Успешно удалил алиас %s от команды %s",
-		["setglobal_command"] = "{sender.alias_name}: Команда %s доступна во всех чатах.",
-		["delglobal_command"] = "{sender.alias_name}: Команда %s доступна только в этом чате.",
-		["view_command"] = "{sender.alias_name}: ID %s | %s | Алиасы: %s | %s",
-	},
+    english = {
+        ["no_subcommand"] = "{sender.alias_name}: No subcommand provided. Use '{channel.prefix}help cmd' for more info.",
+        ["no_message"] = "{sender.alias_name}: No message provided.",
+        ["not_enough_rights"] = "{sender.alias_name}: You do not have enough rights to perform this command.",
+        ["command_list"] = "{sender.alias_name}: %s",
+        ["namesake"] = "{sender.alias_name}: A command with the same name already exists.",
+        ["new_cmd"] = "{sender.alias_name}: Created a new command! Use %s to run it.",
+        ["not_found"] = "{sender.alias_name}: Command %s does not exist.",
+        ["delete_command"] = "{sender.alias_name}: Successfully deleted %s command.",
+        ["edit_command"] = "{sender.alias_name}: Edited the message for %s command.",
+        ["no_new_name"] = "{sender.alias_name}: No new name provided.",
+        ["rename_command"] = "{sender.alias_name}: Renamed command from %s to %s",
+        ["no_alias"] = "{sender.alias_name}: No alias provided.",
+        ["namesake_alias"] = "{sender.alias_name}: Same alias already exists for %s command.",
+        ["alias_command"] = "{sender.alias_name}: Successfully created alias %s for %s command.",
+        ["no_cmd_alias"] = "{sender.alias_name}: There is no command with alias %s",
+        ["delalias_command"] = "{sender.alias_name}: Successfully removed alias %s from %s command.",
+        ["setglobal_command"] = "{sender.alias_name}: Command %s is now available in all chats.",
+        ["delglobal_command"] = "{sender.alias_name}: Command %s is now available only in this chat.",
+        ["view_command"] = "{sender.alias_name}: ID %s | %s | Aliases: %s | %s",
+    },
+    russian = {
+        ["no_subcommand"] =
+        "{sender.alias_name}: Нет подкоманды. Используйте '{channel.prefix}help cmd', чтобы получить больше информации.",
+        ["no_message"] = "{sender.alias_name}: Сообщение не предоставлено.",
+        ["not_enough_rights"] = "{sender.alias_name}: У вас недостаточно прав для выполнения этой команды.",
+        ["command_list"] = "{sender.alias_name}: %s",
+        ["namesake"] = "{sender.alias_name}: Команда с таким же именем уже существует.",
+        ["new_cmd"] = "{sender.alias_name}: Создана новая команда! Используйте %s для её запуска.",
+        ["not_found"] = "{sender.alias_name}: Команда %s не существует.",
+        ["delete_command"] = "{sender.alias_name}: Команда %s успешно удалена.",
+        ["edit_command"] = "{sender.alias_name}: Изменил сообщение для команды %s",
+        ["no_new_name"] = "{sender.alias_name}: Новое имя для команды не предоставлено.",
+        ["rename_command"] = "{sender.alias_name}: Переименовал команду %s в %s",
+        ["no_alias"] = "{sender.alias_name}: Алиас не предоставлен.",
+        ["namesake_alias"] = "{sender.alias_name}: Такой же алиас уже существует для команды %s",
+        ["alias_command"] = "{sender.alias_name}: Успешно привязал алиас %s к команде %s",
+        ["no_cmd_alias"] = "{sender.alias_name}: Нет команд с алиасом %s",
+        ["delalias_command"] = "{sender.alias_name}: Успешно удалил алиас %s от команды %s",
+        ["setglobal_command"] = "{sender.alias_name}: Команда %s доступна во всех чатах.",
+        ["delglobal_command"] = "{sender.alias_name}: Команда %s доступна только в этом чате.",
+        ["view_command"] = "{sender.alias_name}: ID %s | %s | Алиасы: %s | %s",
+    },
 }
 
 return {
-	name = "cmd",
-	summary = "Make custom command.",
-	description = [[
+    name = "cmd",
+    summary = "Make custom command.",
+    description = [[
 > This command is for broadcaster and moderators only
 
 
@@ -142,177 +142,177 @@ You can use `{prefix}` *(dynamic prefix)*, for example `{prefix}sub, {prefix}ser
 ## Checking the information about the custom command
 + `!cmd view !sub`
 ]],
-	delay_sec = 1,
-	options = {},
-	subcommands = { "new", "delete", "edit", "rename", "alias", "delalias", "view", "list", "setglobal" },
-	aliases = { "scmd" },
-	minimal_rights = "moderator",
-	handle = function(request)
-		if request.subcommand_id == nil then
-			return l10n_custom_formatted_line_request(request, lines, "no_subcommand", {})
-		end
+    delay_sec = 1,
+    options = {},
+    subcommands = { "add", "create", "new", "remove", "delete", "edit", "rename", "alias", "delalias", "view", "list", "global" },
+    aliases = { "scmd" },
+    minimal_rights = "moderator",
+    handle = function(request)
+        if request.subcommand_id == nil then
+            return l10n_custom_formatted_line_request(request, lines, "no_subcommand", {})
+        end
 
-		local scid = request.subcommand_id
+        local scid = request.subcommand_id
 
-		if scid == "list" then
-			local cmds = db_query('SELECT name FROM custom_commands WHERE channel_id = $1', { request.channel.id })
-			local names = {}
-			for i = 1, #cmds, 1 do
-				table.insert(names, cmds[i].name)
-			end
+        if scid == "list" then
+            local cmds = db_query('SELECT name FROM custom_commands WHERE room_id = $1', { request.room.id })
+            local names = {}
+            for i = 1, #cmds, 1 do
+                table.insert(names, cmds[i].name)
+            end
 
-			return l10n_custom_formatted_line_request(request, lines, "command_list", { table.concat(names, ', ') })
-		end
+            return l10n_custom_formatted_line_request(request, lines, "command_list", { table.concat(names, ', ') })
+        end
 
-		if request.message == nil then
-			return l10n_custom_formatted_line_request(request, lines, "no_message", {})
-		end
+        if request.message == nil then
+            return l10n_custom_formatted_line_request(request, lines, "no_message", {})
+        end
 
-		local parts = str_split(request.message, ' ')
+        local parts = str_split(request.message, ' ')
 
-		local name = parts[1]
-		table.remove(parts, 1)
+        local name = parts[1]
+        table.remove(parts, 1)
 
-		local cmds = db_query(
-			'SELECT id, name, message, is_global FROM custom_commands WHERE name = $1 AND channel_id = $2',
-			{ name, request.channel.id })
+        local cmds = db_query(
+            'SELECT id, name, message, is_global FROM custom_commands WHERE name = $1 AND room_id = $2',
+            { name, request.room.id })
 
-		if scid == "new" then
-			local internal_commands = bot_get_loaded_command_names()
+        if scid == "new" or scid == "add" or scid == "create" then
+            local internal_commands = bot_get_loaded_command_names()
 
-			if #cmds > 0 or array_contains(internal_commands, name) then
-				return l10n_custom_formatted_line_request(request, lines, "namesake", {})
-			end
+            if #cmds > 0 or array_contains(internal_commands, name) then
+                return l10n_custom_formatted_line_request(request, lines, "namesake", {})
+            end
 
-			if #parts == 0 then
-				return l10n_custom_formatted_line_request(request, lines, "no_message", {})
-			end
+            if #parts == 0 then
+                return l10n_custom_formatted_line_request(request, lines, "no_message", {})
+            end
 
-			local message = table.concat(parts, ' ')
+            local message = table.concat(parts, ' ')
 
-			db_execute('INSERT INTO custom_commands(channel_id, name, message) VALUES ($1, $2, $3)',
-				{ request.channel.id, name, message })
+            db_execute('INSERT INTO custom_commands(room_id, name, message) VALUES ($1, $2, $3)',
+                { request.room.id, name, message })
 
-			return l10n_custom_formatted_line_request(request, lines, "new_cmd", { name })
-		end
+            return l10n_custom_formatted_line_request(request, lines, "new_cmd", { name })
+        end
 
-		if #cmds == 0 then
-			return l10n_custom_formatted_line_request(request, lines, "not_found", { name })
-		end
+        if #cmds == 0 then
+            return l10n_custom_formatted_line_request(request, lines, "not_found", { name })
+        end
 
-		local cmd = cmds[1]
+        local cmd = cmds[1]
 
-		if scid == "delete" then
-			db_execute('DELETE FROM custom_commands WHERE id = $1', { cmd.id })
-			return l10n_custom_formatted_line_request(request, lines, "delete_command", { name })
-		elseif scid == "edit" then
-			if #parts == 0 then
-				return l10n_custom_formatted_line_request(request, lines, "no_message", {})
-			end
+        if scid == "delete" or scid == "remove" then
+            db_execute('DELETE FROM custom_commands WHERE id = $1', { cmd.id })
+            return l10n_custom_formatted_line_request(request, lines, "delete_command", { name })
+        elseif scid == "edit" then
+            if #parts == 0 then
+                return l10n_custom_formatted_line_request(request, lines, "no_message", {})
+            end
 
-			local message = table.concat(parts, ' ')
+            local message = table.concat(parts, ' ')
 
-			db_execute('UPDATE custom_commands SET message = $1 WHERE id = $2', { message, cmd.id })
+            db_execute('UPDATE custom_commands SET message = $1 WHERE id = $2', { message, cmd.id })
 
-			return l10n_custom_formatted_line_request(request, lines, "edit_command", { name })
-		elseif scid == "rename" then
-			if #parts == 0 then
-				return l10n_custom_formatted_line_request(request, lines, "no_new_name", {})
-			end
+            return l10n_custom_formatted_line_request(request, lines, "edit_command", { name })
+        elseif scid == "rename" then
+            if #parts == 0 then
+                return l10n_custom_formatted_line_request(request, lines, "no_new_name", {})
+            end
 
-			local new_name = parts[1]
+            local new_name = parts[1]
 
-			local new_cmds = db_query('SELECT id FROM custom_commands WHERE name = $1', { new_name })
-			if #new_cmds > 0 then
-				return l10n_custom_formatted_line_request(request, lines, "namesake", {})
-			end
+            local new_cmds = db_query('SELECT id FROM custom_commands WHERE name = $1', { new_name })
+            if #new_cmds > 0 then
+                return l10n_custom_formatted_line_request(request, lines, "namesake", {})
+            end
 
-			local internal_commands = bot_get_loaded_command_names()
-			if array_contains(internal_commands, new_name) then
-				return l10n_custom_formatted_line_request(request, lines, "namesake", {})
-			end
+            local internal_commands = bot_get_loaded_command_names()
+            if array_contains(internal_commands, new_name) then
+                return l10n_custom_formatted_line_request(request, lines, "namesake", {})
+            end
 
-			db_execute('UPDATE custom_commands SET name = $1 WHERE id = $2', { new_name, cmd.id })
+            db_execute('UPDATE custom_commands SET name = $1 WHERE id = $2', { new_name, cmd.id })
 
-			return l10n_custom_formatted_line_request(request, lines, "rename_command", { name, new_name })
-		elseif scid == "alias" then
-			if #parts == 0 then
-				return l10n_custom_formatted_line_request(request, lines, "no_alias", {})
-			end
+            return l10n_custom_formatted_line_request(request, lines, "rename_command", { name, new_name })
+        elseif scid == "alias" then
+            if #parts == 0 then
+                return l10n_custom_formatted_line_request(request, lines, "no_alias", {})
+            end
 
-			local new_alias = parts[1]
+            local new_alias = parts[1]
 
-			local cmd_alias = db_query('SELECT name FROM custom_command_aliases WHERE name = $1 AND command_id = $2',
-				{ new_alias, cmd.id })
+            local cmd_alias = db_query('SELECT name FROM custom_command_aliases WHERE name = $1 AND command_id = $2',
+                { new_alias, cmd.id })
 
-			if #cmd_alias > 0 then
-				return l10n_custom_formatted_line_request(request, lines, "namesake_alias", { new_alias })
-			end
+            if #cmd_alias > 0 then
+                return l10n_custom_formatted_line_request(request, lines, "namesake_alias", { cmd.name })
+            end
 
-			local internal_commands = bot_get_loaded_command_names()
-			if array_contains(internal_commands, new_alias) then
-				return l10n_custom_formatted_line_request(request, lines, "namesake", {})
-			end
+            local internal_commands = bot_get_loaded_command_names()
+            if array_contains(internal_commands, new_alias) then
+                return l10n_custom_formatted_line_request(request, lines, "namesake", {})
+            end
 
-			db_execute('INSERT INTO custom_command_aliases(name, command_id) VALUES ($1, $2)',
-				{ new_alias, cmd.id })
+            db_execute('INSERT INTO custom_command_aliases(name, command_id) VALUES ($1, $2)',
+                { new_alias, cmd.id })
 
-			return l10n_custom_formatted_line_request(request, lines, "alias_command", { new_alias, name })
-		elseif scid == "delalias" then
-			if #parts == 0 then
-				return l10n_custom_formatted_line_request(request, lines, "no_alias", {})
-			end
+            return l10n_custom_formatted_line_request(request, lines, "alias_command", { new_alias, name })
+        elseif scid == "delalias" then
+            if #parts == 0 then
+                return l10n_custom_formatted_line_request(request, lines, "no_alias", {})
+            end
 
-			local old_alias = parts[1]
+            local old_alias = parts[1]
 
-			local cmd_alias = db_query('SELECT id FROM custom_command_aliases WHERE name = $1 AND command_id = $2',
-				{ old_alias, cmd.id })
+            local cmd_alias = db_query('SELECT id FROM custom_command_aliases WHERE name = $1 AND command_id = $2',
+                { old_alias, cmd.id })
 
-			if #cmd_alias == 0 then
-				return l10n_custom_formatted_line_request(request, lines, "no_cmd_alias", { old_alias })
-			end
+            if #cmd_alias == 0 then
+                return l10n_custom_formatted_line_request(request, lines, "no_cmd_alias", { old_alias })
+            end
 
-			db_execute('DELETE FROM custom_command_aliases WHERE id = $1',
-				{ cmd_alias[1].id })
+            db_execute('DELETE FROM custom_command_aliases WHERE id = $1',
+                { cmd_alias[1].id })
 
-			return l10n_custom_formatted_line_request(request, lines, "delalias_command", { old_alias, name })
-		elseif scid == "setglobal" then
-			local cfg = bot_config()
-			if cfg == nil or not array_contains_int(cfg.twitch.superuser_ids, request.sender.alias_id) then
-				return l10n_custom_formatted_line_request(request, lines, "not_enough_rights", {})
-			end
+            return l10n_custom_formatted_line_request(request, lines, "delalias_command", { old_alias, name })
+        elseif scid == "global" then
+            local cfg = bot_config()
+            if cfg == nil or not array_contains(cfg.instance.supernicks, request.sender.name) then
+                return l10n_custom_formatted_line_request(request, lines, "not_enough_rights", {})
+            end
 
-			local line_id = ""
-			local query = ""
-			if cmd.is_global == "1" then
-				line_id = "delglobal_command"
-				query = "UPDATE custom_commands SET is_global = FALSE WHERE id = $1"
-			else
-				line_id = "setglobal_command"
-				query = "UPDATE custom_commands SET is_global = TRUE WHERE id = $1"
-			end
+            local line_id = ""
+            local query = ""
+            if cmd.is_global == "1" then
+                line_id = "delglobal_command"
+                query = "UPDATE custom_commands SET is_global = FALSE WHERE id = $1"
+            else
+                line_id = "setglobal_command"
+                query = "UPDATE custom_commands SET is_global = TRUE WHERE id = $1"
+            end
 
-			db_execute(query, { cmd.id })
+            db_execute(query, { cmd.id })
 
-			return l10n_custom_formatted_line_request(request, lines, line_id, { name })
-		elseif scid == "view" then
-			local aliases_db = db_query('SELECT name FROM custom_command_aliases WHERE command_id = $1',
-				{ cmd.id })
+            return l10n_custom_formatted_line_request(request, lines, line_id, { name })
+        elseif scid == "view" then
+            local aliases_db = db_query('SELECT name FROM custom_command_aliases WHERE command_id = $1',
+                { cmd.id })
 
-			local aliases = {}
+            local aliases = {}
 
-			for i = 1, #aliases_db, 1 do
-				table.insert(aliases, aliases_db[i].name)
-			end
+            for i = 1, #aliases_db, 1 do
+                table.insert(aliases, aliases_db[i].name)
+            end
 
-			local aliases_str = table.concat(aliases, ', ')
+            local aliases_str = table.concat(aliases, ', ')
 
-			if #aliases_str == 0 then
-				aliases_str = "-"
-			end
+            if #aliases_str == 0 then
+                aliases_str = "-"
+            end
 
-			return l10n_custom_formatted_line_request(request, lines, "view_command",
-				{ cmd.id, cmd.name, aliases_str, cmd.message })
-		end
-	end,
+            return l10n_custom_formatted_line_request(request, lines, "view_command",
+                { cmd.id, cmd.name, aliases_str, cmd.message })
+        end
+    end,
 }
