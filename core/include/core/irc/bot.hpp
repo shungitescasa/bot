@@ -44,6 +44,8 @@ namespace bot::irc {
 
       Logger logger;
 
+      const unsigned int message_text_limit = 450;
+
       // void parse_buffer(const boost::asio::streambuf &buffer);
   };
 }

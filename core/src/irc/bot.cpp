@@ -27,8 +27,16 @@ namespace bot::irc {
   void IRCChatBot::send_message(const MessageSource &source,
                                 const std::string &message) {
     std::string room = source.unnormalize();
-    this->logger.debug(std::format("Sending '{}' to {}...", message, room));
-    this->send_raw(std::format("PRIVMSG {} :{}", room, message));
+    std::string msg = message;
+    std::string out = std::format("PRIVMSG {} :{}", room, message);
+
+    if (out.size() > this->message_text_limit) {
+      out = out.substr(0, this->message_text_limit - 3);
+      out += "...";
+    }
+
+    this->logger.info(std::format("Sending '{}' to {}...", message, room));
+    this->send_raw(out);
   }
 
   void IRCChatBot::join(const MessageSource &source) {
