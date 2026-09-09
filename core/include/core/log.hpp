@@ -1,5 +1,6 @@
 #pragma once
 
+#include <exception>
 #include <string>
 
 namespace bot {
@@ -14,6 +15,7 @@ namespace bot {
       void debug(const std::string &message) const;
       void warn(const std::string &message) const;
       void error(const std::string &message) const;
+      void exception(const std::exception &exception) const;
 
     private:
       std::string name;

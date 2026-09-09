@@ -1,4 +1,5 @@
 #include <chrono>
+#include <exception>
 #include <format>
 #include <memory>
 #include <optional>
@@ -52,8 +53,16 @@ int main(int argc, char *argv[]) {
             .count());
   });
 
-  server.bind("exec",
-              [&](bot::Request request) { return loader->run(request); });
+  server.bind("exec", [&](bot::Request request) {
+    try {
+      return loader->run(request);
+    } catch (const std::exception &e) {
+      logger.exception(e);
+      return bot::Response{
+          "⁉️ An error occurred while executing this command. Please try again "
+          "later!"};
+    }
+  });
 
   server.bind("list", [&]() {
     bot::CommandDataVec list;
