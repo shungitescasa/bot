@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <format>
 #include <functional>
 #include <memory>
@@ -27,6 +28,19 @@ namespace bot {
       virtual void part(const MessageSource &source) = 0;
 
       virtual const MessageSource &get_me() const = 0;
+
+      bool has_already_joined(const MessageSource &source) {
+        return std::any_of(this->joined_rooms.begin(), this->joined_rooms.end(),
+                           [&source](const MessageSource &s) {
+                             return s.normalize() == source.normalize() ||
+                                    (s.id != -1 && s.id == source.id);
+                           });
+      }
+
+      int room_count() const { return this->joined_rooms.size(); }
+
+    protected:
+      std::vector<MessageSource> joined_rooms;
   };
 
   class EventChatBot {

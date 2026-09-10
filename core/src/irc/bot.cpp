@@ -40,10 +40,14 @@ namespace bot::irc {
   }
 
   void IRCChatBot::join(const MessageSource &source) {
+    if (this->has_already_joined(source)) return;
+    this->logger.info(std::format("Joining {}...", source.unnormalize()));
     this->send_raw("JOIN " + source.unnormalize());
   }
 
   void IRCChatBot::part(const MessageSource &source) {
+    if (!this->has_already_joined(source)) return;
+    this->logger.info(std::format("Leaving {}...", source.unnormalize()));
     this->send_raw("PART " + source.unnormalize());
   }
 
@@ -169,6 +173,11 @@ namespace bot::irc {
         logger.info(std::format("Renamed this bot from {} to {}",
                                 this->me.login, message->params.at(0)));
         this->me.login = message->params.at(0);
+      }
+      // adding already joined rooms
+      else if (message->command == "JOIN" && !message->nick.empty() &&
+               !message->params.empty() && message->nick == this->me.login) {
+        this->joined_rooms.push_back({message->params.at(0)});
       }
     }
 
