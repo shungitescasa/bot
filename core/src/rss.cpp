@@ -4,6 +4,7 @@
 #include <chrono>
 #include <exception>
 #include <format>
+#include <map>
 #include <sol/table.hpp>
 #include <sstream>
 #include <stdexcept>
@@ -294,10 +295,20 @@ namespace bot {
         this->logger.error(e.what());
       }
 
+      std::map<std::string, std::vector<RSSItem>> cached_items;
+
       for (RSSEvent &e : this->events) {
         try {
-          this->logger.debug(std::format("Fetching {}...", e.get_url()));
-          std::vector<RSSItem> new_items = e.set_items(e.fetch_items());
+          std::vector<RSSItem> new_items;
+
+          if (cached_items.contains(e.get_url())) {
+            new_items = cached_items.at(e.get_url());
+          } else {
+            this->logger.debug(std::format("Fetching {}...", e.get_url()));
+            new_items = e.set_items(e.fetch_items());
+            cached_items.insert({e.get_url(), new_items});
+          }
+
           if (!new_items.empty()) {
             this->on_event_fn(e.get_type(), e.get_name(), new_items);
           }
