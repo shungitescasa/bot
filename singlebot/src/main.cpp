@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <chrono>
 #include <exception>
 #include <format>
@@ -234,7 +235,7 @@ int main(int argc, char *argv[]) {
   bot::RPCChatBotServer rpc_server(chatbot, cfg.rpc.client_port);
 
   bot::CommandLoader command_loader;
-  ADD_COMMAND(command_loader, PingCommand)
+  command_loader.add(std::make_unique<bot::builtin::PingCommand>(chatbot));
   command_loader.add(
       std::make_unique<scriptvm::builtin::ScriptExecutionCommand>());
   command_loader.add(

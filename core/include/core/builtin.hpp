@@ -1,9 +1,11 @@
 #pragma once
 
 #include <format>
+#include <memory>
 #include <string>
 
 #include "core/command.hpp"
+#include "core/irc/bot.hpp"
 #include "core/utils.hpp"
 #include "scriptvm/client.hpp"
 
@@ -12,7 +14,8 @@ const auto START_TIME = std::chrono::steady_clock::now();
 namespace bot::builtin {
   class PingCommand : public Command {
     public:
-      PingCommand() : Command("ping") {}
+      PingCommand(std::shared_ptr<irc::IRCChatBot> chatbot)
+          : Command("ping"), chatbot(chatbot) {}
 
       const Response run(const Request &request) const override {
         std::string response = "🏓 Pong! Uptime: ";
@@ -38,7 +41,18 @@ namespace bot::builtin {
                           scriptvm.list().size());
         }
 
+        // room count
+        int room_count = chatbot->room_count();
+        if (room_count == 1) {
+          response += std::format(" · {} channel", room_count);
+        } else if (room_count > 1) {
+          response += std::format(" · {} channels", room_count);
+        }
+
         return response;
       }
+
+    private:
+      std::shared_ptr<irc::IRCChatBot> chatbot;
   };
 }
