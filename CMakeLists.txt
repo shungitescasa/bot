@@ -7,24 +7,24 @@ project(
 )
 
 function(create_symlink_if_exists source target)
-    if(EXISTS "${source}")
-        if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-            message(STATUS "Creating symlink ${source} -> ${target}")
-            execute_process(COMMAND ${CMAKE_COMMAND} -E remove -f "${target}")
-            execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink "${source}" "${target}")
-        else()
-            message(STATUS "Copying ${source} -> ${target}")
-            if(IS_DIRECTORY "${source}")
-                execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory "${target}")
-                execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory "${source}" "${target}")
-            else()
-                execute_process(COMMAND ${CMAKE_COMMAND} -E remove -f "${target}")
-                configure_file("${source}" "${target}" COPYONLY)
-            endif()
-        endif()
+  if(EXISTS "${source}")
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+      message(STATUS "Creating symlink ${source} -> ${target}")
+      execute_process(COMMAND ${CMAKE_COMMAND} -E remove -f "${target}")
+      execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink "${source}" "${target}")
     else()
-        message(WARNING "Source '${source}' does not exist. Skipping symlink creation.")
+      message(STATUS "Copying ${source} -> ${target}")
+      if(IS_DIRECTORY "${source}")
+        execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory "${target}")
+        execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory "${source}" "${target}")
+      else()
+        execute_process(COMMAND ${CMAKE_COMMAND} -E remove -f "${target}")
+        configure_file("${source}" "${target}" COPYONLY)
+      endif()
     endif()
+  else()
+    message(WARNING "Source '${source}' does not exist. Skipping symlink creation.")
+  endif()
 endfunction()
 
 set(CMAKE_CXX_STANDARD 23)
@@ -33,12 +33,13 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # getting Git information
 find_package(Git QUIET)
 if (GIT_FOUND)
-    # get git tag
-    execute_process(
+  # get git tag
+  execute_process(
         COMMAND ${GIT_EXECUTABLE} describe --tags --abbrev=0
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         OUTPUT_VARIABLE GIT_TAG
@@ -46,31 +47,31 @@ if (GIT_FOUND)
         OUTPUT_STRIP_TRAILING_WHITESPACE
     )
 
-    if(NOT GIT_TAG)
-        execute_process(
+  if(NOT GIT_TAG)
+    execute_process(
             COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
             OUTPUT_VARIABLE GIT_COMMIT_HASH
             OUTPUT_STRIP_TRAILING_WHITESPACE
         )
-        set(BOT_VERSION_STRING "commit ${GIT_COMMIT_HASH}")
-    else()
-        execute_process(
+    set(BOT_VERSION_STRING "commit ${GIT_COMMIT_HASH}")
+  else()
+    execute_process(
             COMMAND ${GIT_EXECUTABLE} describe --tags --long --dirty --always
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
             OUTPUT_VARIABLE GIT_DESCRIBE
             OUTPUT_STRIP_TRAILING_WHITESPACE
         )
-        set(BOT_VERSION_STRING "commit ${GIT_DESCRIBE}")
-    endif()
+    set(BOT_VERSION_STRING "commit ${GIT_DESCRIBE}")
+  endif()
 else()
-    set(BOT_VERSION_STRING "v${PROJECT_VERSION}")
+  set(BOT_VERSION_STRING "v${PROJECT_VERSION}")
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set(BOT_DEFAULT_PREFIX "~")
+  set(BOT_DEFAULT_PREFIX "~")
 else()
-    set(BOT_DEFAULT_PREFIX "!")
+  set(BOT_DEFAULT_PREFIX "!")
 endif()
 
 set(BOT_DEFAULT_LOCALE_ID "english")
@@ -80,10 +81,6 @@ set(LUA_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/lib/lua/src")
 add_subdirectory(lib/lua)
 
 add_subdirectory(core)
-
 add_subdirectory(scriptvm)
-
 add_subdirectory(singlebot)
-add_subdirectory(bot)
-
 add_subdirectory(www)

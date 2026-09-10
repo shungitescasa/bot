@@ -1,4 +1,5 @@
 .vscode
+.zed
 /.cache
 /build
 *.env
