@@ -9,11 +9,11 @@
 #include "rpc/client.h"
 
 namespace scriptvm {
-  std::optional<std::string> RPCClient::execute_untrusted_script(
-      const std::string &script) {
-    if (!this->is_alive()) return std::nullopt;
-    return this->client->call("execute_untrusted_script", script)
-        .as<std::optional<std::string>>();
+  bot::Response RPCClient::execute_untrusted_script(
+      const std::string &script, const bot::Request &request) {
+    if (!this->is_alive()) return {};
+    return this->client->call("untrusted_exec", script, request)
+        .as<bot::Response>();
   }
 
   bot::Response RPCClient::execute(const bot::Request &request) {

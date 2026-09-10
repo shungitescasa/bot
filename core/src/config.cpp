@@ -59,6 +59,13 @@ namespace bot {
         script.directory = value;
       else if (key == "script.timeout")
         script.timeout = std::stoi(value);
+      else if (key == "script.allow_arbitrary_scripts")
+        script.allow_arbitrary_scripts = value == "true";
+      else if (key == "script.url_whitelist") {
+        for (const auto &x : std::ranges::views::split(value, ' ')) {
+          script.url_whitelist.push_back(std::string(x.begin(), x.end()));
+        }
+      }
 
       else if (key == "database.host")
         database.host = value;

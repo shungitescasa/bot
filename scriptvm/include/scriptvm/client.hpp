@@ -29,8 +29,8 @@ namespace scriptvm {
       bool connect(std::string host, unsigned int port,
                    unsigned int timeout = 0);
 
-      std::optional<std::string> execute_untrusted_script(
-          const std::string &script);
+      bot::Response execute_untrusted_script(const std::string &script,
+                                             const bot::Request &request);
 
       bot::Response execute(const bot::Request &request);
 

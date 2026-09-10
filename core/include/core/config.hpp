@@ -35,6 +35,8 @@ namespace bot {
   struct ScriptConfiguration {
       std::string loader = "lua", directory = "luascripts";
       unsigned int timeout = 0;
+      bool allow_arbitrary_scripts = false;
+      std::vector<std::string> url_whitelist = {};
   };
 
   struct DatabaseConfiguration {

@@ -64,6 +64,45 @@ namespace scriptvm::lua {
     libraries::open_extended_libraries(this->lua, this);
   }
 
+  const bot::Response LuaScriptLoader::execute(const std::string &script,
+                                               const bot::Request &request) {
+    std::shared_ptr<sol::state> lua = std::make_shared<sol::state>();
+    lua->open_libraries(sol::lib::base, sol::lib::string, sol::lib::table,
+                        sol::lib::math);
+    libraries::open_base_libraries(lua, this);
+
+    if (request.meta.contains("lua-id")) {
+      libraries::open_storage_library(lua, request.requester,
+                                      request.meta.at("lua-id"));
+    }
+
+    sol::load_result s = lua->load("return " + script);
+    if (!s.valid()) {
+      s = lua->load(script);
+    }
+
+    if (!s.valid()) {
+      sol::error err = s;
+      return {std::runtime_error(std::string(err.what()))};
+    }
+
+    sol::protected_function_result res = s();
+
+    if (!res.valid()) {
+      sol::error err = s;
+      return {std::runtime_error(std::string(err.what()))};
+    }
+
+    bool moon_prefix = true;
+    if (request.meta.contains("trusted-script")) {
+      moon_prefix = request.meta.at("trusted-script") == "false";
+    }
+
+    sol::object o = res;
+
+    return parse_lua_response(request.as_lua_table(lua), o, moon_prefix);
+  }
+
   LuaCommand::LuaCommand(std::shared_ptr<sol::state> state,
                          const std::string &contents)
       : bot::Command("temp") {

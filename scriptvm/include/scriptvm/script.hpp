@@ -14,6 +14,8 @@ namespace scriptvm {
       void load_directory(const std::string &path);
       void load_from_file(const std::string &path);
       virtual void add_from_string(const std::string &script) = 0;
+      virtual const bot::Response execute(const std::string &script,
+                                          const bot::Request &request) = 0;
 
     private:
       bot::Logger logger;

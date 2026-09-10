@@ -21,6 +21,7 @@
 #include "core/message.hpp"
 #include "core/rss.hpp"
 #include "core/utils.hpp"
+#include "scriptvm/builtin.hpp"
 #include "scriptvm/client.hpp"
 
 bot::Response run_command(
@@ -234,6 +235,10 @@ int main(int argc, char *argv[]) {
 
   bot::CommandLoader command_loader;
   ADD_COMMAND(command_loader, PingCommand)
+  command_loader.add(
+      std::make_unique<scriptvm::builtin::ScriptExecutionCommand>());
+  command_loader.add(
+      std::make_unique<scriptvm::builtin::ScriptRemoteCommand>());
 
   scriptvm::RPCClient &script_vm = scriptvm::RPCClient::get_instance();
   script_vm.connect(cfg.rpc.host, cfg.rpc.port);

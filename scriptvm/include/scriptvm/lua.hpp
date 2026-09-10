@@ -44,6 +44,9 @@ namespace scriptvm::lua {
         this->add(std::make_shared<LuaCommand>(this->lua, script));
       }
 
+      const bot::Response execute(const std::string &script,
+                                  const bot::Request &request) override;
+
     private:
       std::shared_ptr<sol::state> lua;
   };

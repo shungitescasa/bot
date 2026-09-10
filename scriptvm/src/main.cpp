@@ -64,6 +64,15 @@ int main(int argc, char *argv[]) {
     }
   });
 
+  server.bind("untrusted_exec", [&](std::string script, bot::Request request) {
+    try {
+      return loader->execute(script, request);
+    } catch (const std::exception &e) {
+      logger.exception(e);
+      return bot::Response{"⁉️ An error occurred while executing this command."};
+    }
+  });
+
   server.bind("list", [&]() {
     bot::CommandDataVec list;
     list.reserve(loader->get_commands().size());

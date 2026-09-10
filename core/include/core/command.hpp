@@ -3,6 +3,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -39,9 +40,11 @@ namespace bot {
       std::optional<std::string> subcommand_id = std::nullopt,
                                  contents = std::nullopt;
       std::optional<MessageReply> reply = std::nullopt;
+      std::unordered_map<std::string, std::string> meta = {};
       Requester requester;
 
-      MSGPACK_DEFINE(command_id, subcommand_id, contents, requester, reply);
+      MSGPACK_DEFINE(command_id, subcommand_id, contents, requester, reply,
+                     meta);
 
       static std::optional<Request> create(
           const CommandDataVec &commands,
