@@ -1,5 +1,5 @@
 -- Your SQL goes here
-CREATE TABLE IF NOT EXISTS lua_channel_storage(
+CREATE TABLE IF NOT EXISTS lua_room_storage(
     id BIGSERIAL PRIMARY KEY,
     room_id BIGINT NOT NULL REFERENCES rooms(id) ON DELETE CASCADE,
     lua_id TEXT NOT NULL,
@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS lua_channel_storage(
     UNIQUE (room_id, lua_id)
 );
 
-CREATE TABLE IF NOT EXISTS lua_user_storage(
+CREATE TABLE IF NOT EXISTS lua_sender_storage(
     id BIGSERIAL PRIMARY KEY,
     sender_id BIGINT NOT NULL REFERENCES senders(id) ON DELETE CASCADE,
     lua_id TEXT NOT NULL,
