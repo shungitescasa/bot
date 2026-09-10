@@ -252,7 +252,49 @@ int main(int argc, char *argv[]) {
     chatbot->join(chatbot->get_me());
 
     bot::data::DatabaseConnection conn = bot::data::create_connection();
-    bot::data::DatabaseRows rows =
+
+    // updating room names
+    bot::data::DatabaseRows rows = conn->exec(
+        "SELECT id, name, alias_id FROM rooms WHERE alias_id IS NOT NULL AND "
+        "parted_at IS NULL");
+
+    std::vector<int> ids;
+
+    for (bot::data::DatabaseRow row : rows) {
+      ids.push_back(std::stoi(row.at("alias_id")));
+    }
+
+    if (!ids.empty()) {
+      std::vector<bot::externalapi::twitch::User> users =
+          twitch_api.get_users(ids);
+
+      for (bot::data::DatabaseRow row : rows) {
+        std::string id = row.at("id");
+        int alias_id = std::stoi(row.at("alias_id"));
+        auto u = std::find_if(
+            users.begin(), users.end(),
+            [&row, &alias_id](const auto &x) { return x.id == alias_id; });
+
+        if (u == users.end()) {
+          log.info(
+              std::format("External room {} (ID {}) is not found! Parting...",
+                          alias_id, id));
+          conn->exec(
+              "UPDATE rooms SET parted_at = CURRENT_TIMESTAMP WHERE id = $1",
+              {id});
+          continue;
+        } else if (u->login == row.at("name")) {
+          continue;
+        }
+
+        log.info(std::format("External room {} is now named as {} (ID {})",
+                             alias_id, u->login, id));
+        conn->exec("UPDATE rooms SET name = $1 WHERE id = $2", {u->login, id});
+      }
+    }
+
+    // joining rooms
+    rows =
         conn->exec("SELECT name, alias_id FROM rooms WHERE parted_at IS NULL");
 
     int i = 0;
@@ -265,8 +307,8 @@ int main(int argc, char *argv[]) {
       }
 
       std::string name = row.at("name");
-      log.info(std::format("Joining #{}...", name));
-      chatbot->join({name});
+      int id = row.contains("alias_id") ? std::stoi(row.at("alias_id")) : -1;
+      chatbot->join({name, id});
 
       std::this_thread::sleep_for(std::chrono::milliseconds(500));
       i++;

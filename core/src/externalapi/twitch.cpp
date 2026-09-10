@@ -39,7 +39,18 @@ namespace bot::externalapi::twitch {
   }
 
   std::vector<User> HelixClient::get_users(const std::vector<int> &ids) const {
-    return this->get_users(ids, {});
+    std::vector<int> i = ids;
+    std::vector<User> o;
+
+    while (!i.empty()) {
+      int count = std::min<size_t>(50, i.size());
+      std::vector<int> ids(i.begin(), i.begin() + count);
+      i.erase(i.begin(), i.begin() + count);
+      auto tmp = this->get_users(ids, {});
+      o.insert(o.end(), tmp.begin(), tmp.end());
+    }
+
+    return o;
   }
 
   std::vector<User> HelixClient::get_users(
