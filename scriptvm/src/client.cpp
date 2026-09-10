@@ -2,7 +2,6 @@
 
 #include <format>
 #include <memory>
-#include <optional>
 #include <string>
 
 #include "core/command.hpp"

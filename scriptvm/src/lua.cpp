@@ -469,9 +469,10 @@ namespace scriptvm::lua {
             // TODO: use Localization class instead!!!
 
             // TODO: convert the table to C++ struct for type safety later
-            std::string language = request["room_preference"]["language"];
+            std::string language = request["room_preferences"]["language"];
 
             if (!lines[language].valid() || !lines[language][line_id].valid()) {
+              return std::string("Missing line or language.");
             }
 
             std::string line = lines[language][line_id];
@@ -496,10 +497,10 @@ namespace scriptvm::lua {
             }
 
             std::map<std::string, std::string> token_map = {
-                {"{sender.alias_name}", request["sender"]["alias_name"]},
-                {"{source.alias_name}", request["channel"]["alias_name"]},
+                {"{sender.alias_name}", request["sender"]["name"]},
+                {"{source.alias_name}", request["room"]["name"]},
                 {"{default.prefix}", DEFAULT_PREFIX},
-                {"{channel.prefix}", request["channel_preference"]["prefix"]}};
+                {"{channel.prefix}", request["room_preferences"]["prefix"]}};
 
             for (const auto &pair : token_map) {
               int pos = line.find(pair.first);
