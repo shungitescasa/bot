@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <optional>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -60,6 +61,7 @@ namespace bot {
       Response(std::string single) : single(single), multiple(std::nullopt) {}
       Response(std::vector<std::string> multiple)
           : single(std::nullopt), multiple(multiple) {}
+      Response(std::runtime_error e) : single(std::format("⁉️ {}", e.what())) {}
 
       const std::string get_single() const;
       const std::vector<std::string> get_multiple() const;
