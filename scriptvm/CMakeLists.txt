@@ -44,5 +44,11 @@ target_compile_definitions(ScriptVM PRIVATE
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_compile_definitions(ScriptVM PRIVATE DEBUG_MODE)
+  target_compile_definitions(ScriptVM PRIVATE DEBUG_MODE)
+endif()
+
+# Creating symbolic links
+create_symlink_if_exists("${CMAKE_SOURCE_DIR}/luascripts" "${CMAKE_CURRENT_BINARY_DIR}/bin/luascripts")
+if (EXISTS "${CMAKE_SOURCE_DIR}/tinybot.properties")
+  create_symlink_if_exists("${CMAKE_SOURCE_DIR}/tinybot.properties" "${CMAKE_CURRENT_BINARY_DIR}/bin/tinybot.properties")
 endif()

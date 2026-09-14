@@ -119,7 +119,7 @@ namespace bot {
   }
 
   void Configuration::load_from_args(int argc, char *argv[]) {
-    std::string config_path = ".env";
+    std::string config_path = "tinybot.properties";
 
     for (int i = 0; i < argc; i++) {
       if (i + 1 <= argc - 1) {

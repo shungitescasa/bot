@@ -9,7 +9,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_compile_definitions(SingleBot PRIVATE DEBUG_MODE)
+  target_compile_definitions(SingleBot PRIVATE DEBUG_MODE)
 endif()
 
 target_compile_definitions(SingleBot PRIVATE
@@ -45,9 +45,6 @@ if (NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/bin")
 endif()
 
 # Creating symbolic links
-create_symlink_if_exists("${CMAKE_SOURCE_DIR}/localization" "${CMAKE_CURRENT_BINARY_DIR}/bin/localization")
-create_symlink_if_exists("${CMAKE_SOURCE_DIR}/luascripts" "${CMAKE_CURRENT_BINARY_DIR}/bin/luascripts")
-
-if (EXISTS "${CMAKE_SOURCE_DIR}/.env")
-  create_symlink_if_exists("${CMAKE_SOURCE_DIR}/.env" "${CMAKE_CURRENT_BINARY_DIR}/bin/.env")
+if (EXISTS "${CMAKE_SOURCE_DIR}/tinybot.properties")
+  create_symlink_if_exists("${CMAKE_SOURCE_DIR}/tinybot.properties" "${CMAKE_CURRENT_BINARY_DIR}/bin/tinybot.properties")
 endif()

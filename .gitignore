@@ -3,5 +3,6 @@
 /.cache
 /build
 *.env
+tinybot.properties
 .DS_Store
 www/commands/
