@@ -5,8 +5,11 @@
 #include <string>
 
 #include "core/command.hpp"
+#include "core/config.hpp"
 #include "core/irc/bot.hpp"
 #include "core/utils.hpp"
+#include "cpr/api.h"
+#include "cpr/response.h"
 #include "scriptvm/client.hpp"
 
 const auto START_TIME = std::chrono::steady_clock::now();
@@ -18,6 +21,8 @@ namespace bot::builtin {
           : Command("ping"), chatbot(chatbot) {}
 
       const Response run(const Request &request) const override {
+        auto &cfg = Configuration::get_instance();
+
         std::string response = "🏓 Pong! Uptime: ";
 
         // calculating uptime
@@ -39,6 +44,28 @@ namespace bot::builtin {
               std::format("{} ({} commands)",
                           utils::chrono::humanize_timestamp(scriptvm_uptime),
                           scriptvm.list().size());
+        }
+
+        // eventpoller health check
+        if (cfg.rss.url.has_value()) {
+          response += " · Events: ";
+
+          try {
+            cpr::Response http_response =
+                cpr::Get(cpr::Url{*cfg.rss.url + "/health"});
+
+            if (http_response.status_code > 399) {
+              response += std::format("ERR ({})", http_response.status_code);
+            } else {
+              auto success = std::chrono::steady_clock::now();
+              elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+                            success - now)
+                            .count();
+              response += std::format("{}ms", static_cast<long long>(elapsed));
+            }
+          } catch (std::exception &e) {
+            response += "N/A";
+          }
         }
 
         // room count
