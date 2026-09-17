@@ -32,6 +32,10 @@ namespace bot::irc {
 
       const MessageSource &get_me() const override;
 
+      void ping_server() override;
+      const long long &get_latency() const;
+      const bool &is_connected() const;
+
     private:
       const std::string host, port, nick, pass;
 
@@ -45,6 +49,8 @@ namespace bot::irc {
       Logger logger;
 
       const unsigned int message_text_limit = 450;
+      long long last_ping_time = 0, latency = 0;
+      bool connected = false;
 
       // void parse_buffer(const boost::asio::streambuf &buffer);
   };

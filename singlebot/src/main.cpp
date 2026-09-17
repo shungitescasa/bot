@@ -415,6 +415,7 @@ int main(int argc, char *argv[]) {
   std::vector<std::thread> threads;
   threads.push_back(std::thread(&bot::RPCChatBotServer::run, &rpc_server));
   threads.push_back(std::thread(&bot::ChatBot::connect, chatbot));
+  threads.push_back(std::thread(&bot::ChatBot::ping_server, chatbot));
   threads.push_back(
       std::thread(&bot::RSSEventRepository::poll, event_repository));
   threads.push_back(std::thread(&check_timers, chatbot));

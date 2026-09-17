@@ -6,6 +6,7 @@
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
 #include <boost/beast/core/detail/base64.hpp>
+#include <chrono>
 #include <format>
 #include <istream>
 #include <optional>
@@ -51,6 +52,20 @@ namespace bot::irc {
     this->send_raw("PART " + source.unnormalize());
   }
 
+  void IRCChatBot::ping_server() {
+    while (true) {
+      std::this_thread::sleep_for(std::chrono::minutes(1));
+      if (!this->is_connected()) continue;
+
+      this->last_ping_time =
+          std::chrono::duration_cast<std::chrono::milliseconds>(
+              std::chrono::system_clock::now().time_since_epoch())
+              .count();
+
+      this->send_raw("PING :" + std::to_string(this->last_ping_time));
+    }
+  }
+
   void IRCChatBot::connect() {
     this->logger.info(
         std::format("Connecting to {}:{}...", this->host, this->port));
@@ -87,6 +102,7 @@ namespace bot::irc {
 
       if (line.empty()) continue;
       logger.debug(">>> " + line);
+      this->connected = true;
 
       std::optional<IRCMessage> message = IRCMessage::from(line);
       if (!message.has_value()) continue;
@@ -105,6 +121,13 @@ namespace bot::irc {
         this->send_raw("PONG" + (message->params.empty()
                                      ? ""
                                      : (" :" + message->params.front())));
+      } else if (message->command == "PONG") {
+        this->latency = std::chrono::duration_cast<std::chrono::milliseconds>(
+                            std::chrono::system_clock::now().time_since_epoch())
+                            .count() -
+                        this->last_ping_time;
+        this->logger.info(std::format("IRC latency is {}ms!", this->latency));
+        this->last_ping_time = 0;
       }
       // -- connected
       else if (onConnect && message->command == "001") {
@@ -181,10 +204,16 @@ namespace bot::irc {
       }
     }
 
+    this->connected = false;
+
     if (ec) {
       logger.error("Error reading from socket: " + ec.message());
     }
   }
+
+  const long long &IRCChatBot::get_latency() const { return this->latency; }
+
+  const bool &IRCChatBot::is_connected() const { return this->connected; }
 
   const MessageSource &IRCChatBot::get_me() const { return this->me; }
 }

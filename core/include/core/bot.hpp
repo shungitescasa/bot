@@ -29,6 +29,8 @@ namespace bot {
 
       virtual const MessageSource &get_me() const = 0;
 
+      virtual void ping_server() = 0;
+
       bool has_already_joined(const MessageSource &source) {
         return std::any_of(this->joined_rooms.begin(), this->joined_rooms.end(),
                            [&source](const MessageSource &s) {

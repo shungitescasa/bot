@@ -68,6 +68,11 @@ namespace bot::builtin {
           }
         }
 
+        // IRC latency
+        if (chatbot->get_latency() > 0) {
+          response += std::format(" · Latency: {}ms", chatbot->get_latency());
+        }
+
         // room count
         int room_count = chatbot->room_count();
         if (room_count == 1) {
