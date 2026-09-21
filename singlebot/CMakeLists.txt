@@ -22,7 +22,7 @@ target_compile_definitions(SingleBot PRIVATE
 set_target_properties(
   SingleBot PROPERTIES
   DESCRIPTION ${PROJECT_DESCRIPTION}
-  OUTPUT_NAME "${PROJECT_NAME}-single"
+  OUTPUT_NAME "singlebot"
   RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin
 )
 

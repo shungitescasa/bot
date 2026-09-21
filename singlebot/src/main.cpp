@@ -318,7 +318,7 @@ int main(int argc, char *argv[]) {
 
   chatbot->on_chat_message(
       [&](bot::Message<bot::MessageType::ChatMessage> message) {
-        log.debug(std::format("{} <{}>: {}", message.source.login,
+        log.debug(std::format("{} <{}>: {}", message.source.unnormalize(),
                               message.sender.login, message.contents));
 
         try {
