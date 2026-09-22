@@ -4,106 +4,103 @@ on:
   push:
 
 jobs:
-  build-linux-amd64-mariadb:
+  # -------------
+  # amd64 + glibc
+  # -------------
+  build-linux-amd64-glibc:
     runs-on: ubuntu-latest
 
     outputs:
       bot-artifact: ${{ steps.upload.outputs.bot }}
-      web-artifact: ${{ steps.upload.outputs.web }}
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-      with:
-        submodules: recursive
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          build-essential cmake tar pkg-config \
-          libboost-all-dev libmariadb-dev libmariadb-dev-compat zlib1g-dev
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential cmake meson ninja-build tar pkg-config \
+            libboost-all-dev libpq-dev zlib1g-dev
 
-    - name: Configure project
-      run: |
-        mkdir -p build
-        cd build
-        cmake -DUSE_TLS=1 -DCMAKE_BUILD_TYPE=Release ..
+      - name: Configure project
+        run: |
+          cmake -G Ninja -DUSE_POSTGRES=1 -DUSE_TLS=1 -DCMAKE_BUILD_TYPE=Release -S . -B build
 
-    - name: Build project
-      run: |
-        cd build
-        make
+      - name: Build project
+        run: |
+          ninja -C build
 
-    - name: Generate Lua pages
-      run: |
-        cd build
-        cmake --build . --target generate_lua_pages
+      - name: Archive project
+        run: |
+          mkdir -p artifacts archive/singlebot archive/scriptvm
 
-    - name: Archive bot
-      run: |
-        mkdir -p artifacts
-        tar -czf artifacts/bot-amd64-mariadb.tar.gz -C build/bot/bin .
+          cp -a build/singlebot/bin/. archive/singlebot/
+          cp -a build/scriptvm/bin/. archive/scriptvm/
 
-    - name: Archive web
-      run: |
-        tar -czf artifacts/web-amd64-mariadb.tar.gz -C www .
+          tar -czf artifacts/singlebot-amd64-glibc.tar.gz \
+            -C archive .
 
-    - name: Upload artifacts
-      id: upload
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-artifacts-amd64-mariadb
-        path: artifacts/
+      - name: Upload artifacts
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-amd64-glibc
+          path: artifacts/
 
-  build-linux-arm64-mariadb:
-    runs-on: ubuntu-24.04-arm
+  # -------------
+  # amd64 + musl
+  # -------------
+  build-linux-amd64-musl:
+    runs-on: ubuntu-latest
 
     outputs:
       bot-artifact: ${{ steps.upload.outputs.bot }}
-      web-artifact: ${{ steps.upload.outputs.web }}
+
+    container:
+      image: alpine/git:latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-      with:
-        submodules: recursive
-  
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          build-essential cmake tar pkg-config \
-          libboost-all-dev libmariadb-dev libmariadb-dev-compat zlib1g-dev
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-    - name: Configure project
-      run: |
-        mkdir -p build
-        cd build
-        cmake -DUSE_TLS=1 -DCMAKE_BUILD_TYPE=Release ..
+      - name: Install dependencies
+        run: |
+          apk add --no-cache \
+            build-base cmake meson ninja tar \
+            pkgconf boost-dev postgresql-dev zlib-dev
 
-    - name: Build project
-      run: |
-        cd build
-        make
+      - name: Configure project
+        run: |
+          cmake -G Ninja \
+            -DUSE_POSTGRES=1 \
+            -DUSE_TLS=1 \
+            -DCMAKE_BUILD_TYPE=Release \
+            -S . \
+            -B build
 
-    - name: Generate Lua pages
-      run: |
-        cd build
-        cmake --build . --target generate_lua_pages
+      - name: Build project
+        run: |
+          ninja -C build
 
-    - name: Archive bot
-      run: |
-        mkdir -p artifacts
-        tar -czf artifacts/bot-arm64-mariadb.tar.gz -C build/bot/bin .
+      - name: Archive project
+        run: |
+          mkdir -p artifacts archive/singlebot archive/scriptvm
 
-    - name: Archive web
-      run: |
-        tar -czf artifacts/web-arm64-mariadb.tar.gz -C www .
+          cp -a build/singlebot/bin/. archive/singlebot/
+          cp -a build/scriptvm/bin/. archive/scriptvm/
 
-    - name: Upload artifacts
-      id: upload
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-artifacts-arm64-mariadb
-        path: artifacts/
+          tar -czf artifacts/singlebot-amd64-musl.tar.gz \
+            -C archive .
+
+      - name: Upload artifacts
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-amd64-musl
+          path: artifacts/

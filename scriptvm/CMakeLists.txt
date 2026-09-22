@@ -4,7 +4,11 @@ include(FetchContent)
 file(GLOB_RECURSE SOURCE_FILES "src/*.cpp" "src/*.c" "src/*.h" "src/*.hpp")
 list(REMOVE_ITEM SOURCE_FILES "src/main.cpp")
 
-add_library(ScriptLib ${SOURCE_FILES})
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  add_library(ScriptLib ${SOURCE_FILES})
+else()
+  add_library(ScriptLib STATIC ${SOURCE_FILES})
+endif()
 
 target_include_directories(ScriptLib
     PUBLIC
@@ -28,6 +32,11 @@ target_link_libraries(ScriptLib PUBLIC Core)
 
 # Script VM (executable)
 add_executable(ScriptVM src/main.cpp)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+  target_link_options(ScriptVM PRIVATE -static-libgcc -static-libstdc++)
+endif()
+
 set_target_properties(
   ScriptVM PROPERTIES
   DESCRIPTION ${PROJECT_DESCRIPTION}

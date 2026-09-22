@@ -69,9 +69,12 @@ else()
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  message("-- Linking libraries: Dynamic")
   set(BOT_DEFAULT_PREFIX "~")
 else()
+  message("-- Linking libraries: Static")
   set(BOT_DEFAULT_PREFIX "!")
+  set(BUILD_SHARED_LIBS OFF)
 endif()
 
 set(BOT_DEFAULT_LOCALE_ID "english")

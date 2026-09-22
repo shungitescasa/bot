@@ -4,11 +4,8 @@ include(FetchContent)
 add_executable(SingleBot)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
-  set(BUILD_SHARED_LIBS OFF)
   target_link_options(SingleBot PRIVATE -static-libgcc -static-libstdc++)
-endif()
-
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
   target_compile_definitions(SingleBot PRIVATE DEBUG_MODE)
 endif()
 

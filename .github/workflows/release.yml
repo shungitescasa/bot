@@ -17,34 +17,32 @@ jobs:
       actions: read
 
     steps:
-    - name: Download amd64 artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: build-artifacts-amd64-mariadb
-        path: artifacts/amd64-mariadb
-        run-id: ${{ github.event.workflow_run.id }}
-        github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download amd64-glibc artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts-amd64-glibc
+          path: artifacts/amd64-glibc
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Download arm64 artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: build-artifacts-arm64-mariadb
-        path: artifacts/arm64-mariadb
-        run-id: ${{ github.event.workflow_run.id }}
-        github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download amd64-musl artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts-amd64-musl
+          path: artifacts/amd64-musl
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Set release tag
-      run: echo "TAG=$(date +'%d%H%M')" >> $GITHUB_ENV
+      - name: Set release tag
+        run: echo "TAG=$(date +'%d%H%M')" >> $GITHUB_ENV
 
-    - name: Create GitHub Release
-      uses: softprops/action-gh-release@v2
-      with:
-        tag_name: ${{ env.TAG }}
-        name: Build ${{ env.TAG }}
-        files: |
-          artifacts/amd64-mariadb/bot-amd64-mariadb.tar.gz
-          artifacts/amd64-mariadb/web-amd64-mariadb.tar.gz
-          artifacts/arm64-mariadb/bot-arm64-mariadb.tar.gz
-          artifacts/arm64-mariadb/web-arm64-mariadb.tar.gz
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG }}
+          name: Build ${{ env.TAG }}
+          files: |
+            artifacts/amd64-glibc/singlebot-amd64-glibc.tar.gz
+            artifacts/amd64-musl/singlebot-amd64-musl.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

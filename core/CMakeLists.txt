@@ -3,7 +3,11 @@ include(FetchContent)
 
 file(GLOB_RECURSE SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
-add_library(Core)
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  add_library(Core)
+else()
+  add_library(Core STATIC)
+endif()
 
 target_sources(Core PUBLIC "${SOURCE_FILES}")
 
@@ -105,7 +109,7 @@ FetchContent_MakeAvailable(cpr)
 # emotespp
 FetchContent_Declare(
   emotespp
-  GIT_REPOSITORY https://git.shungites.casa/lib/emotespp.git
+  GIT_REPOSITORY https://github.com/shungitescasa/emotespp.git
   GIT_TAG master
 )
 FetchContent_MakeAvailable(emotespp)

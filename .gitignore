@@ -2,6 +2,7 @@
 .zed
 /.cache
 /build
+/release
 *.env
 tinybot.properties
 .DS_Store
