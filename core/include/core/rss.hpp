@@ -7,6 +7,8 @@
 #include <vector>
 
 #include "core/log.hpp"
+#include "pugixml.hpp"
+
 namespace bot {
   class RSSEvent;
 
@@ -35,6 +37,9 @@ namespace bot {
       std::vector<RSSItem> fetch_items() const;
 
     private:
+      std::vector<RSSItem> parse_rss_feed(const pugi::xml_node &feed) const;
+      std::vector<RSSItem> parse_atom_feed(const pugi::xml_node &feed) const;
+
       std::string type, name, url;
       std::vector<RSSItem> items;
   };

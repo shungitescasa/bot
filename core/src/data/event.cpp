@@ -78,26 +78,14 @@ namespace bot::data {
         }
       }
     }
-    // GitHub
-    else if (type.starts_with("github.")) {
-      ss << "👨🏻‍💻";
-
-      int sha_value = msg.find("{sha}");
-      if (sha_value != std::string::npos) {
-        msg.replace(sha_value, 5, t.substr(t.size() - 9, t.size() - 1));
-      }
-
-      int message_value = msg.find("{message}");
-      if (message_value != std::string::npos) {
-        msg.replace(message_value, 9, t.substr(t.find(": "), t.size() - 10));
-      }
-    }
     // Other cases
     else {
       if (type.starts_with("telegram.")) {
         ss << "⌲";
       } else if (type.starts_with("twitter.")) {
         ss << "𝕏";
+      } else if (type.starts_with("github.")) {
+        ss << "👨🏻‍💻";
       } else {
         ss << "🛜";
       }

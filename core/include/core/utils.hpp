@@ -9,6 +9,8 @@
 namespace bot {
   namespace utils {
     namespace string {
+      std::string trim(const std::string &input);
+
       void replace(std::string &str, const std::string &from,
                    const std::string &to);
 

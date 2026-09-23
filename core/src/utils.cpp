@@ -10,6 +10,26 @@
 namespace bot::utils {
 
   namespace string {
+    std::string trim(const std::string &input) {
+      std::string result;
+      result.reserve(input.size());
+
+      bool lastWasSpace = false;
+      for (unsigned char c : input) {
+        if (std::isspace(c)) {
+          lastWasSpace = true;
+        } else {
+          if (lastWasSpace && !result.empty()) {
+            result += ' ';
+          }
+          result += c;
+          lastWasSpace = false;
+        }
+      }
+
+      return result;
+    }
+
     void replace(std::string &str, const std::string &from,
                  const std::string &to) {
       if (from.empty()) return;

@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <chrono>
-#include <exception>
 #include <format>
 #include <map>
 #include <sol/table.hpp>
@@ -15,6 +14,7 @@
 
 #include "core/config.hpp"
 #include "core/data/database.hpp"
+#include "core/utils.hpp"
 #include "cpr/cpr.h"
 #include "pugixml.hpp"
 
@@ -64,8 +64,7 @@ namespace bot {
          has_category("Renamed")) ||
 
         // GitHub
-        (type == "github.commit" && has_category("github") &&
-         has_category("commit")) ||
+        (type == "github.commit" && id.starts_with("tag:github.com")) ||
 
         // Twitter
         (type == "twitter.post" &&
@@ -106,6 +105,32 @@ namespace bot {
 
     if (this->type == "rss") {
       url << name;
+    } else if (this->type == "github.commit") {
+      url << "https://github.com/";
+
+      int pos = name.find("/");
+      if (pos == std::string::npos) {
+        throw std::runtime_error(
+            "Invalid GitHub target (not username/repository format)");
+      }
+
+      url << name.substr(0, pos);
+      url << "/";
+
+      std::string rest = name.substr(pos + 1);
+      std::string branch = "master";
+
+      pos = rest.find("/");
+      if (pos != std::string::npos) {
+        url << rest.substr(0, pos);
+        branch = rest.substr(pos + 1);
+      } else {
+        url << rest;
+      }
+
+      url << "/commits/";
+      url << branch;
+      url << ".atom";
     } else {
       url << *cfg.rss.url;
       url << "/?action=display&format=Mrss&bridge=";
@@ -123,10 +148,6 @@ namespace bot {
     } else if (this->type.starts_with("bttv.")) {
       url << "TwitchEmoteUpdatesBridge&provider=bttv";
       url << "&channel=" << this->name;
-    } else if (this->type.starts_with("github.")) {
-      url << "GithubCommitBridge";
-      url << "&u=" << this->name.substr(0, this->name.find("/"));
-      url << "&p=" << this->name.substr(this->name.find("/") + 1);
     } else if (this->type.starts_with("twitter.")) {
       url << "FarsideNitterBridge";
       url << "&noreply=on&noretweet=on&linkbacktotwitter=on";
@@ -136,7 +157,7 @@ namespace bot {
       url << "&username=%40" << this->name;
     }
 
-    else if (this->type != "rss") {
+    else if (this->type != "rss" && this->type != "github.commit") {
       throw std::runtime_error("Unsupported event type");
     }
 
@@ -163,12 +184,27 @@ namespace bot {
       throw std::runtime_error("Not valid XML format");
     }
 
-    pugi::xml_node channel = doc.child("rss").child("channel");
+    pugi::xml_node rss = doc.child("rss");
+    pugi::xml_node feed = doc.child("feed");
+
+    if (rss) {
+      return this->parse_rss_feed(rss);
+    } else if (feed) {
+      return this->parse_atom_feed(feed);
+    }
+
+    throw std::runtime_error("Unrecognized feed type");
+  }
+
+  std::vector<RSSItem> RSSEvent::parse_rss_feed(
+      const pugi::xml_node &feed) const {
+    pugi::xml_node channel = feed.child("channel");
 
     // parsing RSS items
     std::vector<RSSItem> items;
     for (pugi::xml_node i : channel.children("item")) {
-      std::string title = i.child("title").text().as_string(),
+      std::string title =
+                      utils::string::trim(i.child("title").text().as_string()),
                   link = i.child("link").text().as_string(),
                   author = i.child("author").text().as_string(),
                   origin = this->get_name();
@@ -192,6 +228,77 @@ namespace bot {
       }
 
       RSSItem item = {i.child("guid").text().as_string(),
+                      title,
+                      link,
+                      origin,
+                      author,
+                      categories,
+                      timestamp};
+      items.push_back(item);
+    }
+
+    return items;
+  }
+
+  std::vector<RSSItem> RSSEvent::parse_atom_feed(
+      const pugi::xml_node &feed) const {
+    std::vector<RSSItem> items;
+
+    for (pugi::xml_node i : feed.children("entry")) {
+      std::string title =
+                      utils::string::trim(i.child("title").text().as_string()),
+                  origin = this->get_name();
+      if (title.starts_with("Bridge returned error")) continue;
+
+      std::string link;
+      for (pugi::xml_node l : i.children("link")) {
+        std::string rel = l.attribute("rel").as_string("alternate");
+        if (rel == "alternate") {
+          link = l.attribute("href").as_string();
+          break;
+        }
+        if (link.empty()) link = l.attribute("href").as_string();
+      }
+
+      std::string author;
+      pugi::xml_node authorNode = i.child("author");
+      if (authorNode) {
+        pugi::xml_node nameNode = authorNode.child("name");
+        if (nameNode) {
+          author = nameNode.text().as_string();
+        } else {
+          author = authorNode.text().as_string();
+        }
+      }
+
+      long timestamp = 0;
+      std::string date = i.child("published").text().as_string();
+      if (date.empty()) {
+        date = i.child("updated").text().as_string();
+      }
+      if (!date.empty()) {
+        if (!date.empty() && (date.back() == 'Z')) {
+          date.pop_back();
+        } else if (date.size() > 6 && (date[date.size() - 6] == '+' ||
+                                       date[date.size() - 6] == '-')) {
+          date = date.substr(0, date.size() - 6);
+        }
+
+        std::tm tm = {};
+        std::istringstream ss(date);
+        ss >> std::get_time(&tm, "%Y-%m-%dT%H:%M:%S");
+        if (!ss.fail()) {
+          timestamp = timegm(&tm);
+        }
+      }
+
+      std::vector<std::string> categories;
+      for (pugi::xml_node c : i.children("category")) {
+        std::string term = c.attribute("term").as_string();
+        if (!term.empty()) categories.push_back(term);
+      }
+
+      RSSItem item = {i.child("id").text().as_string(),
                       title,
                       link,
                       origin,
@@ -291,7 +398,7 @@ namespace bot {
     while (true) {
       try {
         this->update_events();
-      } catch (std::exception e) {
+      } catch (std::runtime_error e) {
         this->logger.error(e.what());
       }
 
@@ -312,7 +419,7 @@ namespace bot {
           if (!new_items.empty()) {
             this->on_event_fn(e.get_type(), e.get_name(), new_items);
           }
-        } catch (std::exception &e) {
+        } catch (std::runtime_error &e) {
           this->logger.error(e.what());
         }
       }
