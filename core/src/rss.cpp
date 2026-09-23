@@ -103,7 +103,11 @@ namespace bot {
 
     std::stringstream url;
 
-    if (this->type == "rss") {
+    if (this->type == "twitch.message" ||
+        this->type == "twitch.first-message") {
+      this->url = "[skip]";
+      return;
+    } else if (this->type == "rss") {
       url << name;
     } else if (this->type == "github.commit") {
       url << "https://github.com/";
@@ -165,9 +169,11 @@ namespace bot {
   }
 
   std::vector<RSSItem> RSSEvent::fetch_items() const {
+    std::string url = this->get_url();
+    if (url == "[skip]") return {};
+
     auto &cfg = Configuration::get_instance();
 
-    std::string url = this->get_url();
     cpr::Response response = cpr::Get(
         cpr::Url{url}, cpr::Header{{"Accept", "application/xml"},
                                    {"User-Agent", cfg.instance.user_agent},
@@ -405,6 +411,8 @@ namespace bot {
       std::map<std::string, std::vector<RSSItem>> cached_items;
 
       for (RSSEvent &e : this->events) {
+        if (e.get_url() == "[skip]") continue;
+
         try {
           std::vector<RSSItem> new_items;
 

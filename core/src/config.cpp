@@ -44,6 +44,15 @@ namespace bot {
       else if (key == "irc.pass")
         irc.pass = value;
 
+      else if (key == "anonirc.host")
+        anonirc.host = value;
+      else if (key == "anonirc.port")
+        anonirc.port = value;
+      else if (key == "anonirc.nick")
+        anonirc.nick = value;
+      else if (key == "anonirc.pass")
+        anonirc.pass = value;
+
       else if (key == "rpc.host")
         rpc.host = value;
       else if (key == "rpc.port")

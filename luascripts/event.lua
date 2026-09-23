@@ -64,9 +64,15 @@ The `!event` command gives the ability to manage events.
 + + Placeholders: `{new}` - new game
 + + Message example: This streamer is now playing {new}
 + twitch.first-message
-+ + Placeholders: `{message}` - user's first message, `{author}` - username
-+ + Message example: {author} has just said their first words in #forsen: {message}
++ + Placeholders: `{message}` - user's first message, `{author}` - username, `{origin}` - room name
++ + Message example: {author} has just said their first words in #{origin}: {message}
 + + Target example: `forsen:twitch.first-message`
++ + **Note: To receive the first messages, the bot will join the target channel.**
++ twitch.message
++ + Placeholders: `{message}` - target's message, `{author}` - username, `{origin}` - room name
++ + Message example: {author} has just said in #{origin}: {message}
++ + Target example: `forsen:twitch.message`
++ + **Note: To receive the messages, the bot will join the target channel.**
 
 ## Kick
 + kick.live

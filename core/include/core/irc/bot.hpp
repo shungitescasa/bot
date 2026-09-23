@@ -20,7 +20,7 @@ namespace bot::irc {
             me(nick),
             ssl(boost::asio::ssl::context::tls_client),
             socket(this->io, this->ssl),
-            logger("IRCChatBot:" + host) {}
+            logger("IRCChatBot:" + host + ":" + nick) {}
 
       void send_message(const MessageSource &source,
                         const std::string &message) override;

@@ -121,8 +121,9 @@ namespace bot::irc {
           std::optional<IRCMessage> message = IRCMessage::from(line);
           if (!message.has_value()) continue;
 
-          // ignore system nicknames
-          if (!message->nick.empty() && message->nick.starts_with("*"))
+          // ignore system nicknames and bot messages
+          if (!message->nick.empty() && (message->nick.starts_with("*") ||
+                                         message->nick == this->me.login))
             continue;
 
           // -- chat message

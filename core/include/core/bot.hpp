@@ -35,7 +35,7 @@ namespace bot {
         return std::any_of(this->joined_rooms.begin(), this->joined_rooms.end(),
                            [&source](const MessageSource &s) {
                              return s.normalize() == source.normalize() ||
-                                    (s.id != -1 && s.id == source.id);
+                                    (s.id != 0 && s.id == source.id);
                            });
       }
 

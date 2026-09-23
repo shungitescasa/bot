@@ -138,37 +138,6 @@ std::optional<std::string> handle_custom_commands(
   return output;
 }
 
-void broadcaster_first_message(std::shared_ptr<bot::irc::IRCChatBot> chatbot,
-                               const bot::Requester &requester,
-                               const std::string &message) {
-  std::vector<bot::data::Event> events =
-      bot::data::get_events("twitch.first-message", requester.room.name);
-
-  for (bot::data::Event event : events) {
-    std::string base = "🙋 " + event.message;
-    if (!event.subs.empty()) {
-      base.append(" · ");
-    }
-
-    int pos = base.find("{origin}");
-    if (pos != std::string::npos) base.replace(pos, 8, requester.room.name);
-
-    pos = base.find("{message}");
-    if (pos != std::string::npos) base.replace(pos, 9, message);
-
-    pos = base.find("{author}");
-    if (pos != std::string::npos) base.replace(pos, 8, requester.sender.name);
-
-    std::vector<std::string> lines =
-        bot::utils::string::separate_by_length(base, event.subs, "", " ", 500);
-
-    for (const std::string &line : lines) {
-      chatbot->send_message({event.room_name, event.room_alias_id},
-                            base + line);
-    }
-  }
-}
-
 void check_timers(std::shared_ptr<bot::irc::IRCChatBot> chatbot) {
   bot::Logger logger("Timer-thread");
 
@@ -207,6 +176,43 @@ void check_timers(std::shared_ptr<bot::irc::IRCChatBot> chatbot) {
       }
     } catch (std::exception &e) {
       logger.exception(e);
+    }
+  }
+}
+
+void join_anonymous_rooms(std::shared_ptr<bot::irc::IRCChatBot> bot) {
+  bot::Logger log("join_anonymous_rooms");
+
+  while (true) {
+    std::this_thread::sleep_for(std::chrono::seconds(5));
+
+    try {
+      bot::data::DatabaseConnection conn = bot::data::create_connection();
+
+      bot::data::DatabaseRows rows = conn->exec(
+          "SELECT r.name FROM rooms r "
+          "UNION "
+          "SELECT e.name FROM events e "
+          "WHERE e.event_type IN ('twitch.first-message', 'twitch.message')");
+
+      int i = 0;
+
+      for (bot::data::DatabaseRow row : rows) {
+        std::string name = row.at("name");
+        if (bot->has_already_joined({name})) continue;
+
+        if (i >= 5) {
+          std::this_thread::sleep_for(std::chrono::seconds(30));
+          i = 0;
+        }
+
+        bot->join({name});
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        i++;
+      }
+    } catch (std::exception &e) {
+      log.exception(e);
     }
   }
 }
@@ -329,11 +335,6 @@ int main(int argc, char *argv[]) {
               requester.room_preferences.silent_mode)
             return;
 
-          // handling first messages
-          if (message.sender.is_first_message) {
-            broadcaster_first_message(chatbot, requester, message.contents);
-          }
-
           if (!script_vm.is_alive()) {
             log.info("scriptVM RPC server is not alive! Reconnecting...");
             script_vm.connect();
@@ -386,7 +387,6 @@ int main(int argc, char *argv[]) {
                                 const std::vector<bot::RSSItem> &items) {
     std::vector<bot::data::Event> events = bot::data::get_events(type, name);
     constexpr int max_events_per_announce = 5;
-    int events_exceed = items.size() - max_events_per_announce;
 
     for (bot::data::Event event : events) {
       int announcement_counter = 0;
@@ -404,15 +404,84 @@ int main(int argc, char *argv[]) {
         }
       }
 
-      if (events_exceed >= max_events_per_announce) {
+      if (items.size() >= max_events_per_announce) {
         chatbot->send_message(
             event.room_name,
-            std::format("...and {} more announcements", events_exceed));
+            std::format("...and {} more announcements",
+                        items.size() - max_events_per_announce));
       }
     }
   });
 
   std::vector<std::thread> threads;
+  std::shared_ptr<bot::irc::IRCChatBot> anon;
+
+  // anonymous chatbot
+  if (!cfg.anonirc.host.empty()) {
+    anon = std::make_shared<bot::irc::IRCChatBot>(
+        cfg.anonirc.host, cfg.anonirc.port, cfg.anonirc.nick, cfg.anonirc.pass);
+
+    anon->on_connect([&]() { log.info("[[ANONYMOUS]] Connected!"); });
+
+    anon->on_chat_message(
+        [&](bot::Message<bot::MessageType::ChatMessage> message) {
+          log.debug(std::format("[[ANONYMOUS]] {} <{}>: {}",
+                                message.source.unnormalize(),
+                                message.sender.login, message.contents));
+
+          try {
+            bot::data::DatabaseConnection conn = bot::data::create_connection();
+            bot::Requester requester{message, conn};
+            std::vector<bot::data::Event> events;
+            std::string prefix = "";
+
+            // handling first messages
+            if (message.sender.is_first_message) {
+              events = bot::data::get_events("twitch.first-message",
+                                             requester.room.name);
+              prefix = "🙋";
+            } else if (message.sender.login == message.source.login) {
+              events =
+                  bot::data::get_events("twitch.message", message.sender.login);
+              prefix = "🗨️";
+            }
+
+            for (bot::data::Event event : events) {
+              std::string base = prefix + " " + event.message;
+              if (!event.subs.empty()) {
+                base.append(" · ");
+              }
+
+              int pos = base.find("{origin}");
+              if (pos != std::string::npos)
+                base.replace(pos, 8, requester.room.name);
+
+              pos = base.find("{message}");
+              if (pos != std::string::npos)
+                base.replace(pos, 9, message.contents);
+
+              pos = base.find("{author}");
+              if (pos != std::string::npos)
+                base.replace(pos, 8, requester.sender.name);
+
+              std::vector<std::string> lines =
+                  bot::utils::string::separate_by_length(base, event.subs, "",
+                                                         " ", 500);
+
+              for (const std::string &line : lines) {
+                chatbot->send_message({event.room_name, event.room_alias_id},
+                                      base + line);
+              }
+            }
+          } catch (std::runtime_error &e) {
+            log.exception(e);
+          }
+        });
+
+    threads.push_back(std::thread(&bot::ChatBot::connect, anon));
+    threads.push_back(std::thread(&join_anonymous_rooms, anon));
+  }
+
   threads.push_back(std::thread(&bot::RPCChatBotServer::run, &rpc_server));
   threads.push_back(std::thread(&bot::ChatBot::connect, chatbot));
   threads.push_back(std::thread(&bot::ChatBot::ping_server, chatbot));

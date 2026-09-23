@@ -24,7 +24,7 @@ namespace bot {
   };
 
   struct IRCConfiguration {
-      std::string host, port, nick, pass;
+      std::string host = "", port = "", nick = "", pass = "";
   };
 
   struct RPCConfiguration {
@@ -87,7 +87,7 @@ namespace bot {
 
   struct Configuration {
       InstanceConfiguration instance;
-      IRCConfiguration irc;
+      IRCConfiguration irc, anonirc;
       RPCConfiguration rpc;
       ScriptConfiguration script;
       DatabaseConfiguration database;
