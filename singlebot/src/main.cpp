@@ -430,15 +430,12 @@ int main(int argc, char *argv[]) {
                                 message.sender.login, message.contents));
 
           try {
-            bot::data::DatabaseConnection conn = bot::data::create_connection();
-            bot::Requester requester{message, conn};
             std::vector<bot::data::Event> events;
-            std::string prefix = "";
+            std::string prefix = "", room = message.source.normalize();
 
             // handling first messages
             if (message.sender.is_first_message) {
-              events = bot::data::get_events("twitch.first-message",
-                                             requester.room.name);
+              events = bot::data::get_events("twitch.first-message", room);
               prefix = "🙋";
             } else if (message.sender.login == message.source.login) {
               events =
@@ -453,8 +450,7 @@ int main(int argc, char *argv[]) {
               }
 
               int pos = base.find("{origin}");
-              if (pos != std::string::npos)
-                base.replace(pos, 8, requester.room.name);
+              if (pos != std::string::npos) base.replace(pos, 8, room);
 
               pos = base.find("{message}");
               if (pos != std::string::npos)
@@ -462,7 +458,7 @@ int main(int argc, char *argv[]) {
 
               pos = base.find("{author}");
               if (pos != std::string::npos)
-                base.replace(pos, 8, requester.sender.name);
+                base.replace(pos, 8, message.sender.login);
 
               std::vector<std::string> lines =
                   bot::utils::string::separate_by_length(base, event.subs, "",
