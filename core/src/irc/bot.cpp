@@ -134,6 +134,16 @@ namespace bot::irc {
               std::thread(this->onChatMessage, chat_message.value()).detach();
             }
           }
+          // -- notification
+          if (message->command == "NOTICE") {
+            std::optional<Message<MessageType::Notification>> notice_message =
+                message->as_message<MessageType::Notification>();
+
+            if (notice_message && this->onNotification) {
+              std::thread(this->onNotification, notice_message.value())
+                  .detach();
+            }
+          }
           // -- keep connection alive
           else if (message->command == "PING") {
             this->send_raw("PONG" + (message->params.empty()

@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <boost/asio/buffer.hpp>
 #include <chrono>
 #include <exception>
 #include <format>
@@ -249,9 +250,9 @@ int main(int argc, char *argv[]) {
         "irc.host, irc.port, irc.nick, irc.pass must be set for IRC chatbot");
   }
 
-  std::shared_ptr<bot::irc::IRCChatBot> chatbot =
-      std::make_shared<bot::irc::IRCChatBot>(cfg.irc.host, cfg.irc.port,
-                                             cfg.irc.nick, cfg.irc.pass);
+  std::shared_ptr<bot::irc::IRCChatBot> anon,
+      chatbot = std::make_shared<bot::irc::IRCChatBot>(
+          cfg.irc.host, cfg.irc.port, cfg.irc.nick, cfg.irc.pass);
 
   bot::externalapi::twitch::HelixClient &twitch_api =
       bot::externalapi::twitch::HelixClient::get_instance();
@@ -399,6 +400,35 @@ int main(int argc, char *argv[]) {
         }
       });
 
+  const std::vector<std::string> optout_msgids = {
+      "msg_banned", "msg_banned_phone_number_alias", "msg_channel_blocked",
+      "msg_channel_suspended", "tos_ban"};
+
+  chatbot->on_notification([&](bot::Message<bot::MessageType::Notification>
+                                   message) {
+    if (!message.reason_id.has_value()) return;
+
+    std::string reason = message.reason_id.value(), room = message.room_name;
+    if (room.starts_with("#")) room = room.substr(1);
+
+    try {
+      bot::data::DatabaseConnection conn = bot::data::create_connection();
+
+      if (std::any_of(optout_msgids.begin(), optout_msgids.end(),
+                      [&](const std::string &x) { return x == reason; })) {
+        log.info(std::format("Parting from #{}... Reason: {}", room, reason));
+        conn->exec(
+            "UPDATE rooms SET parted_at = CURRENT_TIMESTAMP WHERE name = $1",
+            {room});
+        chatbot->part({room});
+
+        if (anon) anon->join({room});
+      }
+    } catch (std::runtime_error &e) {
+      log.exception(e);
+    }
+  });
+
   bot::RSSEventRepository event_repository;
   event_repository.on_event([log, chatbot](
                                 const std::string &type,
@@ -433,7 +463,6 @@ int main(int argc, char *argv[]) {
   });
 
   std::vector<std::thread> threads;
-  std::shared_ptr<bot::irc::IRCChatBot> anon;
 
   // anonymous chatbot
   if (!cfg.anonirc.host.empty()) {
