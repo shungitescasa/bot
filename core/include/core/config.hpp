@@ -18,7 +18,7 @@ namespace bot {
       std::optional<std::string> name = std::nullopt, host = std::nullopt;
       std::string user_agent = std::format(
           "tinybot/{} (compatible; "
-          "https://wiki.shungites.casa/doku.php?id=bot:tinybot)",
+          "https://shungites.casa/bot:start)",
           BOT_VERSION);
       std::vector<std::string> supernicks = {};
   };
