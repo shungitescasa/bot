@@ -122,26 +122,36 @@ namespace bot::utils {
     }
 
     std::string humanize_timestamp(long long seconds) {
-      int d = std::round(seconds / (60 * 60 * 24));
-      int h = std::round(seconds / (60 * 60) % 24);
-      int m = std::round(seconds % (60 * 60) / 60);
-      int s = std::round(seconds % 60);
+      long long y = seconds / (60LL * 60 * 24 * 365);
+      long long mo = seconds / (60LL * 60 * 24 * 30) % 12;
+      long long d = seconds / (60LL * 60 * 24) % 30;
+      long long h = seconds / (60LL * 60) % 24;
+      long long m = seconds / 60 % 60;
+      long long s = seconds % 60;
 
       // Only seconds:
-      if (d == 0 && h == 0 && m == 0) {
+      if (y == 0 && mo == 0 && d == 0 && h == 0 && m == 0) {
         return std::format("{}s", s);
       }
       // Minutes and seconds:
-      else if (d == 0 && h == 0) {
+      else if (y == 0 && mo == 0 && d == 0 && h == 0) {
         return std::format("{}m{}s", m, s);
       }
       // Hours and minutes:
-      else if (d == 0) {
+      else if (y == 0 && mo == 0 && d == 0) {
         return std::format("{}h{}m", h, m);
       }
       // Days and hours:
-      else {
+      else if (y == 0 && mo == 0) {
         return std::format("{}d{}h", d, h);
+      }
+      // Months and days:
+      else if (y == 0) {
+        return std::format("{}mo{}d", mo, d);
+      }
+      // Years and months:
+      else {
+        return std::format("{}y{}mo", y, mo);
       }
     }
   }
