@@ -15,6 +15,7 @@
 #include "core/builtin.hpp"
 #include "core/command.hpp"
 #include "core/config.hpp"
+#include "core/data/chat.hpp"
 #include "core/data/database.hpp"
 #include "core/data/event.hpp"
 #include "core/externalapi/twitch.hpp"
@@ -356,7 +357,9 @@ int main(int argc, char *argv[]) {
           bot::Requester requester{message, conn};
           if (requester.room.parted_at.has_value() ||
               requester.sender.parted_at.has_value() ||
-              requester.room_preferences.silent_mode)
+              requester.room_preferences.silent_mode ||
+              requester.sender_right.level <
+                  static_cast<int>(bot::data::PermissionLevel::User))
             return;
 
           if (!script_vm.is_alive()) {

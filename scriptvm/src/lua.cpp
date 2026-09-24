@@ -20,6 +20,7 @@
 #include "core/builtin.hpp"
 #include "core/command.hpp"
 #include "core/config.hpp"
+#include "core/data/chat.hpp"
 #include "core/message.hpp"
 #include "core/rss.hpp"
 #include "core/utils.hpp"
@@ -131,6 +132,23 @@ namespace scriptvm::lua {
       if (value.is<std::string>()) {
         this->aliases.push_back(value.as<std::string>());
       }
+    }
+
+    std::string minimal_rights = data["minimal_rights"];
+    if (minimal_rights == "superuser") {
+      this->level = bot::data::PermissionLevel::Superuser;
+    } else if (minimal_rights == "trusted") {
+      this->level = bot::data::PermissionLevel::Trusted;
+    } else if (minimal_rights == "broadcaster") {
+      this->level = bot::data::PermissionLevel::Broadcaster;
+    } else if (minimal_rights == "moderator") {
+      this->level = bot::data::PermissionLevel::Moderator;
+    } else if (minimal_rights == "vip") {
+      this->level = bot::data::PermissionLevel::VIP;
+    } else if (minimal_rights == "suspended") {
+      this->level = bot::data::PermissionLevel::Suspended;
+    } else {
+      this->level = bot::data::PermissionLevel::User;
     }
 
     this->handle = data["handle"];

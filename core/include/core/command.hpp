@@ -82,18 +82,23 @@ namespace bot {
       int delay_seconds;
       std::vector<std::string> aliases, subcommands;
 
+      data::PermissionLevel level = data::PermissionLevel::User;
+
       MSGPACK_DEFINE(name, delay_seconds, aliases, subcommands);
   };
 
   class Command {
     public:
-      explicit Command(std::string name, int delay_seconds = 5,
-                       std::vector<std::string> aliases = {},
-                       std::vector<std::string> subcommands = {})
+      explicit Command(
+          std::string name, int delay_seconds = 5,
+          std::vector<std::string> aliases = {},
+          std::vector<std::string> subcommands = {},
+          data::PermissionLevel level = data::PermissionLevel::User)
           : name(std::move(name)),
             delay_seconds(delay_seconds),
             aliases(std::move(aliases)),
-            subcommands(std::move(subcommands)) {};
+            subcommands(std::move(subcommands)),
+            level(std::move(level)) {};
 
       ~Command() = default;
 
@@ -105,6 +110,7 @@ namespace bot {
       std::string name;
       int delay_seconds;
       std::vector<std::string> aliases, subcommands;
+      data::PermissionLevel level;
   };
 
   class CommandLoader {

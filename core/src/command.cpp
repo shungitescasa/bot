@@ -29,7 +29,8 @@ namespace bot {
   }
 
   const CommandData Command::data() const {
-    return {this->name, this->delay_seconds, this->aliases, this->subcommands};
+    return {this->name, this->delay_seconds, this->aliases, this->subcommands,
+            this->level};
   }
 
   void CommandLoader::add(CommandBox command) {
@@ -59,7 +60,10 @@ namespace bot {
                              });
         });
 
-    if (command == this->commands.end()) return Response{};
+    if (command == this->commands.end() ||
+        static_cast<int>(command->get()->data().level) >
+            request.requester.sender_right.level)
+      return Response{};
 
     return command->get()->run(request);
   }
@@ -142,16 +146,6 @@ namespace bot {
 
     // -- setting permissions
     data::PermissionLevel level = data::PermissionLevel::User;
-    const auto &badges = message.sender.badges;
-
-    if (sender.name == room.name) {
-      level = data::PermissionLevel::Broadcaster;
-    } else if (badges.contains("moderator") ||
-               badges.contains("lead_moderator")) {
-      level = data::PermissionLevel::Moderator;
-    } else if (badges.contains("vip")) {
-      level = data::PermissionLevel::VIP;
-    }
 
     std::vector<data::SenderRights> sender_rights =
         conn->query_all<data::SenderRights>(
@@ -173,6 +167,24 @@ namespace bot {
     }
 
     sender_right = sender_rights.front();
+
+    const auto &badges = message.sender.badges;
+
+    if (sender_right.level >
+        static_cast<int>(data::PermissionLevel::Suspended)) {
+      if (std::any_of(cfg.instance.supernicks.begin(),
+                      cfg.instance.supernicks.end(),
+                      [&](const auto &x) { return x == sender.name; })) {
+        level = data::PermissionLevel::Superuser;
+      } else if (sender.name == room.name) {
+        level = data::PermissionLevel::Broadcaster;
+      } else if (badges.contains("moderator") ||
+                 badges.contains("lead_moderator")) {
+        level = data::PermissionLevel::Moderator;
+      } else if (badges.contains("vip")) {
+        level = data::PermissionLevel::VIP;
+      }
+    }
 
     if (sender_right.level != static_cast<int>(level)) {
       conn->exec("UPDATE sender_rights SET level = $1 WHERE id = $2",
