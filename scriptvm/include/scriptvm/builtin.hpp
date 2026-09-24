@@ -16,7 +16,7 @@
 namespace scriptvm::builtin {
   class ScriptExecutionCommand : public bot::Command {
     public:
-      ScriptExecutionCommand() : Command("execute", 5, {"lua"}) {}
+      ScriptExecutionCommand() : Command("lua", 5, {"execute"}) {}
       const bot::Response run(const bot::Request &request) const override {
         bot::Configuration &cfg = bot::Configuration::get_instance();
         if (!cfg.script.allow_arbitrary_scripts &&
@@ -38,7 +38,7 @@ namespace scriptvm::builtin {
 
   class ScriptRemoteCommand : public bot::Command {
     public:
-      ScriptRemoteCommand() : Command("import", 0, {"luaimport"}) {}
+      ScriptRemoteCommand() : Command("luaimport", 0, {"import"}) {}
       const bot::Response run(const bot::Request &request) const override {
         if (!request.contents.has_value()) {
           return {std::runtime_error("No URL provided.")};
