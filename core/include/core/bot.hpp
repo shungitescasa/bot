@@ -32,6 +32,11 @@ namespace bot {
       virtual void ping_server() = 0;
 
       bool has_already_joined(const MessageSource &source) {
+        auto it = this->attempted_joins.find(source.normalize());
+        if (it != this->attempted_joins.end() && it->second >= 3) {
+          return true;
+        }
+
         return std::any_of(this->joined_rooms.begin(), this->joined_rooms.end(),
                            [&source](const MessageSource &s) {
                              return s.normalize() == source.normalize() ||
@@ -45,6 +50,7 @@ namespace bot {
 
     protected:
       std::vector<MessageSource> joined_rooms;
+      std::unordered_map<std::string, unsigned int> attempted_joins;
   };
 
   class EventChatBot {

@@ -206,8 +206,8 @@ void join_anonymous_rooms(std::shared_ptr<bot::irc::IRCChatBot> bot) {
       for (const std::string &name : wanted) {
         if (bot->has_already_joined({name})) continue;
 
-        if (i >= 5) {
-          std::this_thread::sleep_for(std::chrono::seconds(30));
+        if (i >= 15) {
+          std::this_thread::sleep_for(std::chrono::seconds(15));
           i = 0;
         }
 
@@ -221,8 +221,8 @@ void join_anonymous_rooms(std::shared_ptr<bot::irc::IRCChatBot> bot) {
       for (const bot::MessageSource &name : bot->get_joined_rooms()) {
         if (wanted.contains(name.normalize())) continue;
 
-        if (i >= 5) {
-          std::this_thread::sleep_for(std::chrono::seconds(30));
+        if (i >= 15) {
+          std::this_thread::sleep_for(std::chrono::seconds(15));
           i = 0;
         }
 
@@ -331,9 +331,9 @@ int main(int argc, char *argv[]) {
     int i = 0;
 
     for (bot::data::DatabaseRow row : rows) {
-      if (i >= 5) {
-        log.info("Initial JOIN cooldown... (30 seconds)");
-        std::this_thread::sleep_for(std::chrono::seconds(30));
+      if (i >= 15) {
+        log.info("Initial JOIN cooldown... (15 seconds)");
+        std::this_thread::sleep_for(std::chrono::seconds(15));
         i = 0;
       }
 

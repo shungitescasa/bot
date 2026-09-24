@@ -44,6 +44,10 @@ namespace bot::irc {
     if (this->has_already_joined(source)) return;
     this->logger.info(std::format("Joining {}...", source.unnormalize()));
     this->send_raw("JOIN " + source.unnormalize());
+
+    auto [it, inserted] =
+        this->attempted_joins.try_emplace(source.normalize(), 0);
+    it->second++;
   }
 
   void IRCChatBot::part(const MessageSource &source) {
@@ -70,6 +74,7 @@ namespace bot::irc {
     while (true) {
       try {
         this->joined_rooms.clear();
+        this->attempted_joins.clear();
 
         this->logger.info(
             std::format("Connecting to {}:{}...", this->host, this->port));
@@ -232,6 +237,7 @@ namespace bot::irc {
                    !message->params.empty() &&
                    message->nick == this->me.login) {
             this->joined_rooms.push_back({message->params.at(0)});
+            this->attempted_joins.erase(message->params.at(0));
           }
           // removing parted rooms
           else if (message->command == "PART" && !message->nick.empty() &&
