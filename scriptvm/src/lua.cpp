@@ -281,7 +281,7 @@ namespace scriptvm::lua {
       });
 
       state->set_function("bot_get_uptime", []() {
-        auto now = std::chrono::steady_clock::now();
+        auto now = std::chrono::system_clock::now();
         auto duration = now - START_TIME;
         auto seconds =
             std::chrono::duration_cast<std::chrono::seconds>(duration).count();

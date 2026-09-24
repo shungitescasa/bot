@@ -12,7 +12,7 @@
 #include "cpr/response.h"
 #include "scriptvm/client.hpp"
 
-const auto START_TIME = std::chrono::steady_clock::now();
+const auto START_TIME = std::chrono::system_clock::now();
 
 namespace bot::builtin {
   class PingCommand : public Command {
@@ -26,7 +26,7 @@ namespace bot::builtin {
         std::string response = "🏓 Pong! Uptime: ";
 
         // calculating uptime
-        auto now = std::chrono::steady_clock::now();
+        auto now = std::chrono::system_clock::now();
         auto elapsed =
             std::chrono::duration_cast<std::chrono::seconds>(now - START_TIME)
                 .count();
@@ -57,7 +57,7 @@ namespace bot::builtin {
             if (http_response.status_code > 399) {
               response += std::format("ERR ({})", http_response.status_code);
             } else {
-              auto success = std::chrono::steady_clock::now();
+              auto success = std::chrono::system_clock::now();
               elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
                             success - now)
                             .count();
@@ -80,6 +80,16 @@ namespace bot::builtin {
         } else if (room_count > 1) {
           response += std::format(" · {} channels", room_count);
         }
+
+        // version
+        response += std::format(
+            " ·  Running on {} (last updated {} ago)", BOT_VERSION,
+            utils::chrono::humanize_timestamp(
+                static_cast<long long>(
+                    std::chrono::duration_cast<std::chrono::seconds>(
+                        now.time_since_epoch())
+                        .count()) -
+                BOT_COMPILED_TIMESTAMP));
 
         return response;
       }
