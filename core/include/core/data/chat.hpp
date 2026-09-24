@@ -99,7 +99,7 @@ namespace bot::data {
       }
 
       int room_id = -1;
-      std::string prefix = "", locale = "";
+      std::string prefix = DEFAULT_PREFIX, locale = DEFAULT_LOCALE_ID;
       bool silent_mode = false;
 
       MSGPACK_DEFINE(room_id, prefix, locale, silent_mode);

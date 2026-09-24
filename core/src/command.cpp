@@ -72,8 +72,8 @@ namespace bot {
 
     // fetching room
     std::vector<data::Room> rooms = conn->query_all<data::Room>(
-        "SELECT * FROM rooms WHERE (name != '' AND name = $1) OR (alias_id != "
-        "-1 AND alias_id = $2) LIMIT 1",
+        "SELECT * FROM rooms WHERE (name != '' AND name = $1) OR (alias_id IS "
+        "NOT NULL AND alias_id = $2) LIMIT 1",
         {message.source.normalize(), std::to_string(message.source.id)});
 
     if (rooms.empty()) {
@@ -83,8 +83,7 @@ namespace bot {
 
       rooms = conn->query_all<data::Room>(
           "SELECT * FROM rooms WHERE (name != '' AND name = $1) OR (alias_id "
-          "!= "
-          "-1 AND alias_id = $2) LIMIT 1",
+          "IS NOT NULL AND alias_id = $2) LIMIT 1",
           {message.source.normalize(), std::to_string(message.source.id)});
     }
 
@@ -119,7 +118,7 @@ namespace bot {
     // fetching sender
     std::vector<data::Sender> senders = conn->query_all<data::Sender>(
         "SELECT * FROM senders WHERE (name != '' AND name = $1) OR (alias_id "
-        "!= -1 AND alias_id = $2) LIMIT 1",
+        "IS NOT NULL AND alias_id = $2) LIMIT 1",
         {message.sender.login, std::to_string(message.sender.id)});
 
     if (senders.empty()) {
@@ -128,7 +127,7 @@ namespace bot {
 
       senders = conn->query_all<data::Sender>(
           "SELECT * FROM senders WHERE (name != '' AND name = $1) OR (alias_id "
-          "!= -1 AND alias_id = $2) LIMIT 1",
+          "IS NOT NULL AND alias_id = $2) LIMIT 1",
           {message.sender.login, std::to_string(message.sender.id)});
     }
 
