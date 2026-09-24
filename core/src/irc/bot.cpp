@@ -121,9 +121,8 @@ namespace bot::irc {
           std::optional<IRCMessage> message = IRCMessage::from(line);
           if (!message.has_value()) continue;
 
-          // ignore system nicknames and bot messages
-          if (!message->nick.empty() && (message->nick.starts_with("*") ||
-                                         message->nick == this->me.login))
+          // ignore system nicknames
+          if (!message->nick.empty() && message->nick.starts_with("*"))
             continue;
 
           // -- chat message
@@ -223,6 +222,17 @@ namespace bot::irc {
                    !message->params.empty() &&
                    message->nick == this->me.login) {
             this->joined_rooms.push_back({message->params.at(0)});
+          }
+          // removing parted rooms
+          else if (message->command == "PART" && !message->nick.empty() &&
+                   !message->params.empty() &&
+                   message->nick == this->me.login) {
+            std::string room = message->params.at(0);
+            this->joined_rooms.erase(
+                std::remove_if(
+                    this->joined_rooms.begin(), this->joined_rooms.end(),
+                    [room](const MessageSource &s) { return s.login == room; }),
+                this->joined_rooms.end());
           }
           // reconnect
           else if (message->command == "RECONNECT") {

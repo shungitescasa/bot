@@ -41,6 +41,8 @@ namespace bot {
 
       int room_count() const { return this->joined_rooms.size(); }
 
+      const std::vector<MessageSource> &get_joined_rooms() const;
+
     protected:
       std::vector<MessageSource> joined_rooms;
   };

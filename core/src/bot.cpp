@@ -7,6 +7,10 @@
 #include "core/message.hpp"
 
 namespace bot {
+  const std::vector<MessageSource> &ChatBot::get_joined_rooms() const {
+    return this->joined_rooms;
+  }
+
   void RPCChatBotServer::run() {
     this->server.bind("alive", [&]() {
       this->log.debug("Alive!");

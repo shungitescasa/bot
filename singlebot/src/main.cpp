@@ -184,7 +184,7 @@ void join_anonymous_rooms(std::shared_ptr<bot::irc::IRCChatBot> bot) {
   bot::Logger log("join_anonymous_rooms");
 
   while (true) {
-    std::this_thread::sleep_for(std::chrono::seconds(5));
+    std::this_thread::sleep_for(std::chrono::seconds(15));
 
     try {
       bot::data::DatabaseConnection conn = bot::data::create_connection();
@@ -195,10 +195,14 @@ void join_anonymous_rooms(std::shared_ptr<bot::irc::IRCChatBot> bot) {
           "SELECT e.name FROM events e "
           "WHERE e.event_type IN ('twitch.first-message', 'twitch.message')");
 
+      std::unordered_set<std::string> wanted;
+      for (bot::data::DatabaseRow row : rows) {
+        wanted.insert(row.at("name"));
+      }
+
       int i = 0;
 
-      for (bot::data::DatabaseRow row : rows) {
-        std::string name = row.at("name");
+      for (const std::string &name : wanted) {
         if (bot->has_already_joined({name})) continue;
 
         if (i >= 5) {
@@ -207,6 +211,21 @@ void join_anonymous_rooms(std::shared_ptr<bot::irc::IRCChatBot> bot) {
         }
 
         bot->join({name});
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        i++;
+      }
+
+      i = 0;
+      for (const bot::MessageSource &name : bot->get_joined_rooms()) {
+        if (wanted.contains(name.normalize())) continue;
+
+        if (i >= 5) {
+          std::this_thread::sleep_for(std::chrono::seconds(30));
+          i = 0;
+        }
+
+        bot->part({name});
 
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
         i++;
