@@ -56,6 +56,8 @@ namespace bot {
                              const std::vector<RSSItem> &items)>
               fn);
 
+      int event_count() const;
+
     private:
       std::vector<RSSEvent> events;
       std::function<void(const std::string &type, const std::string &name,

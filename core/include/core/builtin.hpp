@@ -7,6 +7,7 @@
 #include "core/command.hpp"
 #include "core/config.hpp"
 #include "core/irc/bot.hpp"
+#include "core/rss.hpp"
 #include "core/utils.hpp"
 #include "cpr/api.h"
 #include "cpr/response.h"
@@ -17,8 +18,11 @@ const auto START_TIME = std::chrono::system_clock::now();
 namespace bot::builtin {
   class PingCommand : public Command {
     public:
-      PingCommand(std::shared_ptr<irc::IRCChatBot> chatbot)
-          : Command("ping"), chatbot(chatbot) {}
+      PingCommand(std::shared_ptr<irc::IRCChatBot> chatbot,
+                  std::shared_ptr<RSSEventRepository> event_repository)
+          : Command("ping"),
+            chatbot(chatbot),
+            event_repository(event_repository) {}
 
       const Response run(const Request &request) const override {
         auto &cfg = Configuration::get_instance();
@@ -48,23 +52,25 @@ namespace bot::builtin {
 
         // eventpoller health check
         if (cfg.rss.url.has_value()) {
-          response += " · Events: ";
+          response +=
+              std::format(" · {} events ", event_repository->event_count());
 
           try {
             cpr::Response http_response =
                 cpr::Get(cpr::Url{*cfg.rss.url + "/health"});
 
             if (http_response.status_code > 399) {
-              response += std::format("ERR ({})", http_response.status_code);
+              response += std::format("(ERR {})", http_response.status_code);
             } else {
               auto success = std::chrono::system_clock::now();
               elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
                             success - now)
                             .count();
-              response += std::format("{}ms", static_cast<long long>(elapsed));
+              response +=
+                  std::format("({}ms)", static_cast<long long>(elapsed));
             }
           } catch (std::exception &e) {
-            response += "N/A";
+            response += "(N/A)";
           }
         }
 
@@ -96,5 +102,6 @@ namespace bot::builtin {
 
     private:
       std::shared_ptr<irc::IRCChatBot> chatbot;
+      std::shared_ptr<RSSEventRepository> event_repository;
   };
 }

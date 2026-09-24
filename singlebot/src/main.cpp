@@ -250,6 +250,9 @@ int main(int argc, char *argv[]) {
         "irc.host, irc.port, irc.nick, irc.pass must be set for IRC chatbot");
   }
 
+  std::shared_ptr<bot::RSSEventRepository> event_repository =
+      std::make_shared<bot::RSSEventRepository>();
+
   std::shared_ptr<bot::irc::IRCChatBot> anon,
       chatbot = std::make_shared<bot::irc::IRCChatBot>(
           cfg.irc.host, cfg.irc.port, cfg.irc.nick, cfg.irc.pass);
@@ -261,7 +264,8 @@ int main(int argc, char *argv[]) {
   bot::RPCChatBotServer rpc_server(chatbot, cfg.rpc.client_port);
 
   bot::CommandLoader command_loader;
-  command_loader.add(std::make_unique<bot::builtin::PingCommand>(chatbot));
+  command_loader.add(
+      std::make_unique<bot::builtin::PingCommand>(chatbot, event_repository));
   command_loader.add(
       std::make_unique<scriptvm::builtin::ScriptExecutionCommand>());
   command_loader.add(
@@ -429,11 +433,10 @@ int main(int argc, char *argv[]) {
     }
   });
 
-  bot::RSSEventRepository event_repository;
-  event_repository.on_event([log, chatbot](
-                                const std::string &type,
-                                const std::string &name,
-                                const std::vector<bot::RSSItem> &items) {
+  event_repository->on_event([log, chatbot](
+                                 const std::string &type,
+                                 const std::string &name,
+                                 const std::vector<bot::RSSItem> &items) {
     std::vector<bot::data::Event> events = bot::data::get_events(type, name);
     constexpr int max_events_per_announce = 5;
 

@@ -442,4 +442,6 @@ namespace bot {
           fn) {
     this->on_event_fn = fn;
   }
+
+  int RSSEventRepository::event_count() const { return this->events.size(); }
 }
