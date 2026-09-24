@@ -23,7 +23,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            build-essential cmake meson ninja-build tar pkg-config \
+            build-essential cmake git meson ninja-build tar pkg-config \
             libboost-all-dev libpq-dev zlib1g-dev
 
       - name: Configure project
@@ -72,7 +72,7 @@ jobs:
       - name: Install dependencies
         run: |
           apk add --no-cache \
-            build-base cmake meson ninja tar \
+            build-base cmake git meson ninja tar \
             pkgconf boost-dev postgresql-dev zlib-dev
 
       - name: Configure project
