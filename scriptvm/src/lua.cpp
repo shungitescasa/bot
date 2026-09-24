@@ -61,7 +61,7 @@ namespace scriptvm::lua {
     this->lua = std::make_shared<sol::state>();
     this->lua->open_libraries(sol::lib::base, sol::lib::string, sol::lib::table,
                               sol::lib::math);
-    libraries::open_extended_libraries(this->lua, this);
+    libraries::open_all_libraries(this->lua, this);
   }
 
   const bot::Response LuaScriptLoader::execute(const std::string &script,
@@ -69,7 +69,17 @@ namespace scriptvm::lua {
     std::shared_ptr<sol::state> lua = std::make_shared<sol::state>();
     lua->open_libraries(sol::lib::base, sol::lib::string, sol::lib::table,
                         sol::lib::math);
-    libraries::open_base_libraries(lua, this);
+
+    bool moon_prefix = true;
+    if (request.meta.contains("trusted-script")) {
+      moon_prefix = request.meta.at("trusted-script") == "false";
+    }
+
+    if (moon_prefix) {
+      libraries::open_base_libraries(lua, this);
+    } else {
+      libraries::open_trusted_libraries(lua, this);
+    }
 
     if (request.meta.contains("lua-id")) {
       libraries::open_storage_library(lua, request.requester,
@@ -91,11 +101,6 @@ namespace scriptvm::lua {
     if (!res.valid()) {
       sol::error err = s;
       return {std::runtime_error(std::string(err.what()))};
-    }
-
-    bool moon_prefix = true;
-    if (request.meta.contains("trusted-script")) {
-      moon_prefix = request.meta.at("trusted-script") == "false";
     }
 
     sol::object o = res;
@@ -725,6 +730,25 @@ namespace scriptvm::lua {
             return t;
           });
 
+      state->set_function("net_post_json", [state](const std::string &url,
+                                                   const sol::table &body) {
+        sol::table t = state->create_table();
+
+        nlohmann::json json_body = lua_to_json(body);
+
+        bot::Configuration &cfg = bot::Configuration::get_instance();
+
+        cpr::Response response =
+            cpr::Post(cpr::Url{url}, cpr::Body{json_body.dump()},
+                      cpr::Header{{"Content-Type", "application/json"},
+                                  {"User-Agent", cfg.instance.user_agent}});
+
+        t["code"] = response.status_code;
+        t["text"] = response.text;
+
+        return t;
+      });
+
       state->set_function(
           "net_post_multipart_with_headers",
           [state](const std::string &url, const sol::table &body,
@@ -1192,12 +1216,17 @@ namespace scriptvm::lua {
       open_emote_library(state);
     }
 
-    void open_extended_libraries(std::shared_ptr<sol::state> state,
-                                 LuaScriptLoader *loader) {
+    void open_trusted_libraries(std::shared_ptr<sol::state> state,
+                                LuaScriptLoader *loader) {
       open_base_libraries(state, loader);
-      open_database_library(state);
       open_network_library(state);
       open_event_library(state);
+    }
+
+    void open_all_libraries(std::shared_ptr<sol::state> state,
+                            LuaScriptLoader *loader) {
+      open_trusted_libraries(state, loader);
+      open_database_library(state);
       open_irc_library(state);
     }
   }

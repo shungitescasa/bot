@@ -54,8 +54,10 @@ namespace scriptvm::lua {
   namespace libraries {
     void open_base_libraries(std::shared_ptr<sol::state> state,
                              LuaScriptLoader *loader);
-    void open_extended_libraries(std::shared_ptr<sol::state> state,
-                                 LuaScriptLoader *loader);
+    void open_trusted_libraries(std::shared_ptr<sol::state> state,
+                                LuaScriptLoader *loader);
+    void open_all_libraries(std::shared_ptr<sol::state> state,
+                            LuaScriptLoader *loader);
 
     void open_storage_library(std::shared_ptr<sol::state> state,
                               const bot::Requester &request,
