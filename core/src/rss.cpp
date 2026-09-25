@@ -417,11 +417,12 @@ namespace bot {
           std::vector<RSSItem> new_items;
 
           if (cached_items.contains(e.get_url())) {
-            new_items = cached_items.at(e.get_url());
+            new_items = e.set_items(cached_items.at(e.get_url()));
           } else {
             this->logger.debug(std::format("Fetching {}...", e.get_url()));
-            new_items = e.set_items(e.fetch_items());
-            cached_items.insert({e.get_url(), new_items});
+            std::vector<RSSItem> items = e.fetch_items();
+            new_items = e.set_items(items);
+            cached_items.insert({e.get_url(), items});
           }
 
           if (!new_items.empty()) {
