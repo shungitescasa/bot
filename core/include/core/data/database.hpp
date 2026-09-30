@@ -62,16 +62,7 @@ namespace bot::data {
         pqxx::work work(conn);
         pqxx::result r = work.exec(sql);
         work.commit();
-
-        std::vector<std::map<std::string, std::string>> rows;
-        for (auto const &row : r) {
-          std::map<std::string, std::string> m;
-          for (auto const &f : row) {
-            m[f.name()] = f.c_str() ? f.c_str() : "";
-          }
-          rows.push_back(m);
-        }
-        return rows;
+        return this->parse_rows(r);
       }
 
       DatabaseRows exec(const std::string &sql,
@@ -81,7 +72,10 @@ namespace bot::data {
         for (const auto &x : parameters) p.append(x);
         pqxx::result r = work.exec(sql, p);
         work.commit();
+        return this->parse_rows(r);
+      }
 
+      DatabaseRows parse_rows(pqxx::result r) {
         std::vector<std::map<std::string, std::string>> rows;
         for (auto const &row : r) {
           std::map<std::string, std::string> m;
