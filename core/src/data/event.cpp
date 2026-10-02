@@ -129,9 +129,9 @@ namespace bot::data {
     for (const DatabaseRow &row : rows) {
       Event event(row);
 
-      if (event.is_massping) {
+      if (event.is_massping && event.room_alias_id > 0) {
         auto &api = externalapi::twitch::HelixClient::get_instance();
-        auto chatters = api.get_chatters(std::stoi(name));
+        auto chatters = api.get_chatters(event.room_alias_id);
         std::for_each(
             chatters.begin(), chatters.end(),
             [&event](const auto &x) { event.subs.push_back(x.login); });
